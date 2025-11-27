@@ -1,220 +1,276 @@
-\documentclass[a4paper]{report}
-\usepackage[fontsize=13pt]{scrextend}
-\usepackage[style=ieee,sorting=none]{biblatex} %Imports biblatex package
-\AtEveryBibitem{%
-  \clearfield{issn} % Remove issn
-  \clearfield{doi} % Remove doi
+\documentclass[a4paper,12pt]{report}
 
-  \ifentrytype{online}{}{% Remove url except for @online
-    \clearfield{url}
-  }
-}
-\addbibresource{refs.bib}
-\usepackage{longtable}
-\usepackage{amsmath}
-%new packet added
-\usepackage{indentfirst}
-\usepackage{ragged2e}
-\usepackage{blindtext}
-\usepackage{titlesec}
-%new packet added
-\usepackage{a4wide,amssymb,epsfig,latexsym,multicol,array,hhline,fancyhdr}
-\usepackage{vntex}
+%=====================================================
+% DOCUMENT CLASS & FONT SETTINGS
+%=====================================================
+\usepackage[fontsize=13pt]{scrextend}
+\usepackage[T1]{fontenc}
+\usepackage{mathptmx} % Times font
+\usepackage{lmodern}
+\usepackage{adjustbox}
+%=====================================================
+% LANGUAGE & ENCODING
+%=====================================================
+\usepackage[utf8]{vietnam}
 \usepackage[english]{babel}
-\usepackage{mathptmx}[ptm]
-\usepackage[normalem]{ulem}
-\usepackage{amsmath}
-\usepackage{lastpage}
-\usepackage[lined,boxed,commentsnumbered]{algorithm2e}
-\usepackage{enumerate}
-\usepackage{color}
-\usepackage{graphicx}							% Standard graphics package
-\usepackage{array}
-\usepackage{tabularx}
-\usepackage{caption}
-\usepackage{multirow}
-\usepackage{multicol}
-\usepackage{rotating}
-\usepackage{graphics}
+% \usepackage{vntex}
+
+%=====================================================
+% PAGE LAYOUT & GEOMETRY
+%=====================================================
 \usepackage{geometry}
 \usepackage{setspace}
+\usepackage{indentfirst}
+\usepackage{ragged2e}
+
+% Page layout definitions
+\def\thesislayout{
+    \newgeometry{
+        a4paper,
+        left=35mm,
+        right=30mm,
+        top=25mm,
+        bottom=30mm
+    }
+}
+
+\def\thesisheadlayout{
+    \geometry{
+        a4paper,
+        left=40mm,
+        right=30mm,
+        top=30mm,
+        bottom=30mm
+    }
+}
+
+\thesisheadlayout
+\renewcommand{\baselinestretch}{1.5}
+\setlength\parindent{0pt}
+
+%=====================================================
+% MATHEMATICS PACKAGES
+%=====================================================
+\usepackage{amsmath,amssymb,amsfonts,amsthm}
+\usepackage{latexsym}
+\usepackage{commath}
+
+% Math font declaration
+\DeclareMathAlphabet{\mathcal}{OMS}{cmsy}{m}{n}
+
+% Theorem environments
+\newtheorem{theorem}{\textbf{Theorem}}
+\newtheorem{property}{\textbf{Property}}
+\newtheorem{proposition}{\textbf{Proposition}}
+\newtheorem{corollary}[proposition]{\textbf{Corollary}}
+\newtheorem{lemma}[proposition]{\textbf{Lemma}}
+
+%=====================================================
+% TABLES & ARRAYS
+%=====================================================
+\usepackage{array,tabularx,longtable}
+\usepackage{multirow,multicol}
+\usepackage{hhline}
+\usepackage{booktabs}
+\usepackage{diagbox}
+
+%=====================================================
+% GRAPHICS & FIGURES
+%=====================================================
+\usepackage{graphicx}
 \usepackage{epsfig}
-\usepackage{tikz}
-\usepackage{subcaption}
-\usepackage{longfbox}
 \usepackage{float}
+\usepackage{subcaption}
+\usepackage{caption}
+\usepackage{rotating}
+\usepackage{tikz}
 \usepackage{pdfpages}
 
 \usetikzlibrary{arrows,snakes,backgrounds,calc}
-\usepackage{hyperref}
-\hypersetup{urlcolor=blue,linkcolor=black,citecolor=black,colorlinks=true} 
-\usepackage{comment}
-\usepackage{tocloft}
-\usepackage{appendix}
-% \usepackage{algorithm2e}
-% \usepackage{algorithm}
-\usepackage{algorithmic}
-\renewcommand{\algorithmicrequire}{\textbf{Input:}}
-\renewcommand{\algorithmicensure}{\textbf{Output:}}
 
-\RestyleAlgo{ruled}
-
-\SetKwComment{Comment}{/* }{ */}
-
-\DeclareMathAlphabet{\mathcal}{OMS}{cmsy}{m}{n}
-
-% \renewcommand{\cftfigindent}{pt}
-\renewcommand{\cftfigpresnum}{\figurename~}
-\renewcommand{\cftfignumwidth}{5em}
-
-% \renewcommand{\cfttabindent}{0.5pt}
-\renewcommand{\cfttabpresnum}{\tablename~}
-\renewcommand{\cfttabnumwidth}{5em}
-\newtheorem{theorem}{{\bf Theorem}}
-\newtheorem{property}{{\bf Property}}
-\newtheorem{proposition}{{\bf Proposition}}
-\newtheorem{corollary}[proposition]{{\bf Corollary}}
-\newtheorem{lemma}[proposition]{{\bf Lemma}}
-
-%%%Setting document
-\renewcommand{\baselinestretch}{1.5} 
-
-\def\thesislayout{	% A4: 210 × 297
-	\newgeometry{
-		a4paper,
-		total={210mm,297mm},  % fix over page
-		left=35mm,
-		top=25mm,
-            bottom=30mm,
-            right=30mm
-	}
-}
-\def\thesisheadlayout{	% A4: 210 × 297
-	\geometry{
-		a4paper,
-		total={210mm,297mm},  % fix over page
-		left=40mm,
-		top=30mm,
-            bottom=30mm,
-            right=30mm
-	}
-}
-\AtBeginDocument{\renewcommand*\contentsname{Contents}}
-\AtBeginDocument{\renewcommand*\refname{References}}
-
-\thesisheadlayout
-%\usepackage{fancyhdr}
-\setlength{\headheight}{40pt}
-% \pagestyle{fancy}
-% \fancyhead{} % clear all header fields
-% \fancyhead[L]{
-%  \begin{tabular}{rl}
-%     \begin{picture}(25,15)(0,0)
-%     \put(0,-8){\includegraphics[width=8mm, height=8mm]{image/hcmut.png}}
-%     %\put(0,-8){\epsfig{width=10mm,figure=hcmut.eps}}
-%    \end{picture}&
-% 	%\includegraphics[width=8mm, height=8mm]{hcmut.png} & %
-% 	\begin{tabular}{l}
-% 		\textbf{\bf Ho Chi Minh City University of Technology}\\
-% 		\textbf{\bf  Faculty of Computer Science and Engineering}
-% 	\end{tabular} 	
-%  \end{tabular}
-% }
-% \fancyhead[R]{
-% 	\begin{tabular}{l}
-% 		\tiny \bf \\
-% 		\tiny \bf 
-% 	\end{tabular}  }
-\fancyfoot{} % clear all footer fields
-% \fancyfoot[L]{\scriptsize  Specialized Project Report (CO3335) - Semester-231 2023 - 2024}
-\fancyfoot[R]{\scriptsize Page {\thepage}/\pageref{LastPage}}
-\renewcommand{\headrulewidth}{0.3pt}
-\renewcommand{\footrulewidth}{0.3pt}
-
-\setlength\parindent{0pt}
-%%%
-\setcounter{secnumdepth}{4}
-\setcounter{tocdepth}{3}
-\makeatletter
-\newcounter {subsubsubsection}[subsubsection]
-\renewcommand\thesubsubsubsection{\thesubsubsection .\@alph\c@subsubsubsection}
-\newcommand\subsubsubsection{\@startsection{subsubsubsection}{4}{\z@}%
-                                     {-3.25ex\@plus -1ex \@minus -.2ex}%
-                                     {1.5ex \@plus .2ex}%
-                                     {\normalfont\normalsize\bfseries}}
-\newcommand*\l@subsubsubsection{\@dottedtocline{3}{10.0em}{4.1em}}
-\newcommand*{\subsubsubsectionmark}[1]{}
-\newcommand\tab[1][1cm]{\hspace*{#1}}
-\newcommand\blank[1]{\rule[-.2ex]{#1}{.4pt}}
-\makeatother
-% \input{utils/utils.tex}
+% Float spacing
 \setlength{\floatsep}{5pt plus 2pt minus 2pt}
 \setlength{\textfloatsep}{5pt plus 2pt minus 2pt}
 \setlength{\intextsep}{10pt plus 2pt minus 2pt}
 
+%=====================================================
+% ALGORITHMS & CODE
+%=====================================================
+\usepackage[lined,boxed,commentsnumbered]{algorithm2e}
+\usepackage{algorithmic}
+\usepackage{listings}
+
+\RestyleAlgo{ruled}
+\SetKwComment{Comment}{/* }{ */}
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\renewcommand{\algorithmicensure}{\textbf{Output:}}
+
+%=====================================================
+% BIBLIOGRAPHY
+%=====================================================
+\usepackage[style=ieee,sorting=none]{biblatex}
+\addbibresource{refs.bib}
+
+\AtEveryBibitem{%
+  \clearfield{issn}
+  \clearfield{doi}
+  \ifentrytype{online}{}{%
+    \clearfield{url}
+  }
+}
+
+%=====================================================
+% HYPERLINKS & COLORS
+%=====================================================
+\usepackage{xcolor}
+\usepackage{hyperref}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    urlcolor=blue,
+    citecolor=black,
+    anchorcolor=blue
+}
+
+%=====================================================
+% TABLE OF CONTENTS
+%=====================================================
+\usepackage{tocloft}
+
+\renewcommand{\cftfigpresnum}{\figurename~}
+\renewcommand{\cftfignumwidth}{5em}
+\renewcommand{\cfttabpresnum}{\tablename~}
+\renewcommand{\cfttabnumwidth}{5em}
+
+\AtBeginDocument{
+    \renewcommand*\contentsname{Contents}
+    \renewcommand*\refname{References}
+}
+
+%=====================================================
+% HEADERS & FOOTERS
+%=====================================================
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+
+\setlength{\headheight}{40pt}
+\renewcommand{\headrulewidth}{0.3pt}
+\renewcommand{\footrulewidth}{0.3pt}
+
+\fancyfoot{}
+\fancyfoot[R]{\scriptsize Page \thepage/\pageref{LastPage}}
+
+%=====================================================
+% SECTION FORMATTING
+%=====================================================
+\usepackage{titlesec}
+
 \titleformat{\chapter}[display]
-{\normalfont\huge\bfseries}{\chaptertitlename{} \thechapter}{15pt}{\Huge}
+    {\normalfont\huge\bfseries}
+    {\chaptertitlename{} \thechapter}
+    {15pt}
+    {\Huge}
+
+\setcounter{secnumdepth}{4}
+\setcounter{tocdepth}{3}
+
+% Subsubsubsection definition
+\makeatletter
+\newcounter{subsubsubsection}[subsubsection]
+\renewcommand\thesubsubsubsection{\thesubsubsection.\@alph\c@subsubsubsection}
+\newcommand\subsubsubsection{\@startsection{subsubsubsection}{4}{\z@}%
+    {-3.25ex\@plus -1ex \@minus -.2ex}%
+    {1.5ex \@plus .2ex}%
+    {\normalfont\normalsize\bfseries}}
+\newcommand*\l@subsubsubsection{\@dottedtocline{3}{10.0em}{4.1em}}
+\newcommand*{\subsubsubsectionmark}[1]{}
+\makeatother
+
+%=====================================================
+% CUSTOM COMMANDS
+%=====================================================
+\newcommand\tab[1][1cm]{\hspace*{#1}}
+\newcommand\blank[1]{\rule[-.2ex]{#1}{.4pt}}
+
+%=====================================================
+% MISCELLANEOUS PACKAGES
+%=====================================================
+\usepackage{blindtext}
+\usepackage{comment}
+\usepackage{appendix}
+\usepackage{enumerate}
+\usepackage[normalem]{ulem}
+\usepackage{longfbox}
+
+%=====================================================
+% FIGURE & TABLE NAMING
+%=====================================================
+\renewcommand{\figurename}{\textbf{Figure}}
+\renewcommand{\tablename}{\textbf{Table}}
+
+%=====================================================
+% DOCUMENT BEGIN
+%=====================================================
 \begin{document}
 
 \begin{titlepage}
-\begin{tikzpicture}[remember picture, overlay]
-  \draw[line width = 4pt] ($(current page.north west) + (30mm,-0.5in)$) rectangle ($(current page.south east) + (-20mm,0.5in)$);
-  \draw[line width=1.5pt]
-    ($ (current page.north west) + (30mm+0.05in,-0.55in) $)
-    rectangle
-    ($ (current page.south east) + (-20mm-0.05in,0.55in) $);
-\end{tikzpicture}
-\vspace{-2.cm}
-\begin{center}
-\large \textbf{\fontsize{14pt}{0pt}\selectfont VIETNAM NATIONAL UNIVERSITY, HO CHI MINH CITY} \\
-\Large \textbf{\fontsize{14pt}{0pt}\selectfont HO CHI MINH CITY UNIVERSITY OF TECHNOLOGY} \\
-\Large \textbf{\fontsize{14pt}{0pt}\selectfont FACULTY OF COMPUTER SCIENCE AND ENGINEERING}
-\end{center}
+    \begin{tikzpicture}[remember picture,overlay,inner sep=0,outer sep=0]
+         \draw[blue!70!black,line width=4pt] ([xshift=-1.5cm,yshift=-2cm]current page.north east) coordinate (A)--([xshift=1.5cm,yshift=-2cm]current page.north west) coordinate(B)--([xshift=1.5cm,yshift=2cm]current page.south west) coordinate (C)--([xshift=-1.5cm,yshift=2cm]current page.south east) coordinate(D)--cycle;
+    
+         \draw ([yshift=0.5cm,xshift=-0.5cm]A)-- ([yshift=0.5cm,xshift=0.5cm]B)--
+         ([yshift=-0.5cm,xshift=0.5cm]B) --([yshift=-0.5cm,xshift=-0.5cm]B)--([yshift=0.5cm,xshift=-0.5cm]C)--([yshift=0.5cm,xshift=0.5cm]C)--([yshift=-0.5cm,xshift=0.5cm]C)-- ([yshift=-0.5cm,xshift=-0.5cm]D)--([yshift=0.5cm,xshift=-0.5cm]D)--([yshift=0.5cm,xshift=0.5cm]D)--([yshift=-0.5cm,xshift=0.5cm]A)--([yshift=-0.5cm,xshift=-0.5cm]A)--([yshift=0.5cm,xshift=-0.5cm]A);
+    
+    
+         \draw ([yshift=-0.3cm,xshift=0.3cm]A)-- ([yshift=-0.3cm,xshift=-0.3cm]B)--
+         ([yshift=0.3cm,xshift=-0.3cm]B) --([yshift=0.3cm,xshift=0.3cm]B)--([yshift=-0.3cm,xshift=0.3cm]C)--([yshift=-0.3cm,xshift=-0.3cm]C)--([yshift=0.3cm,xshift=-0.3cm]C)-- ([yshift=0.3cm,xshift=0.3cm]D)--([yshift=-0.3cm,xshift=0.3cm]D)--([yshift=-0.3cm,xshift=-0.3cm]D)--([yshift=0.3cm,xshift=-0.3cm]A)--([yshift=0.3cm,xshift=0.3cm]A)--([yshift=-0.3cm,xshift=0.3cm]A);
+    \end{tikzpicture}
+    
+    \begin{center}
+        \vspace{-20pt}
+        \textbf{HO CHI MINH CITY UNIVERSITY OF TECHNOLOGY}\\
+        \textbf{FALTY OF COMPUTER SCIENCE AND ENGINEERING}\\
+        \vspace{10pt}
+        \includegraphics[width=0.25\linewidth]{image/hcmut.png}\\
+        \vspace{8pt}
+        \textbf{\Large CAPSTONE PROJECT}\\
+        \vspace{8pt}
+        \textbf{\Large COMPUTER ENGINEERING}\\
+        \vspace{15pt}
+        \hrule
+        \vspace{20pt}
+        \textcolor{blue}{\Large{\textbf{Motion Planning around Obstacles}}}\\
+        \vspace{20pt}
+        \hrule
+    \end{center}
 
-\vspace{0.3cm}
+    \vspace{5pt}
+    \begin{center}
+       \large{\textbf{Semester 251}}\\
+       \vspace{10pt}
+        \textbf{Instructor:} Assoc. Prof. Le Hong Trang 
+    \end{center}
 
-\begin{figure}[h!]
-\begin{center}
-\includegraphics[width=8cm]{image/hcmut.png}
-\end{center}
-\end{figure}
-\vspace{-1cm}
-\begin{center}
-\begin{tabular}{c}
-\multicolumn{1}{c}{\textbf{{\Large REPORT}}}
-\\{\textbf{{\Large \MakeUppercase{CAPSTONE PROJECT}}}}
-\\
-
-\end{tabular}
-\end{center}
-% Title
-\rule[0.4cm]{\linewidth}{0.3mm} 
-\centering
-{\Large \bfseries \MakeUppercase{Motion Planning around Obstacles}}\\     
-
-\rule{\linewidth}{0.2mm} \\[0.1cm]
-\begin{center}
-    \MakeUppercase{\textbf{\Large Major: \Large Computer Science}}
-\end{center}
-
-\vspace{0.01cm}
-
-\begin{center}
-\begin{tabular}[H]{r l l}
-     \large \textbf{THESIS COMMITTEE} &: \large COMPUTER ENGINEERING\\
-     \large \textbf{SUPERVISOR(s)} & : \large LE HONG TRANG, Assoc. Prof \\
-                                    & : \large \\
-    %  \large \textbf{REVIEWER} & : \large VO THANH HUNG, M.Eng.\\
-     \multicolumn{2}{c}{\textbf{\large ————o0o———–}}\\
-     \large \textbf{STUDENT}& : NGUYEN TRAN DANG KHOA - 2211635\\
-                            & : HO DANG KHOA - 2211 \\ 
-   
-\end{tabular}    
-\end{center}
-\vspace{1.cm}
-\begin{center}
-{\fontsize{12pt}{0pt} HO CHI MINH CITY, November 2025}
-\end{center}
+    \vspace{1cm}
+    
+    \begin{adjustbox}{width=0.94\textwidth,center=\textwidth}
+        \small
+        \begin{tabular}{|>{\centering\arraybackslash}m{1cm}|>{\centering\arraybackslash}m{5.3cm}|>{\centering\arraybackslash}m{1.7cm}|>{\centering\arraybackslash}m{4cm}|}
+            \hline
+            \textbf{STT} & \textbf{Full name} & \textbf{ID} & \textbf{Note}\\
+            \hline
+                1 & Nguyen Tran Dang Khoa & 2211635 &\\
+                2 & Ho Dang Khoa & 2211xxxx &\\
+            \hline
+        \end{tabular}
+    \end{adjustbox}
+    
+    \begin{center}
+        ~\\
+        ~\\        ~\\
+        ~\\
+        \textit{Ho Chi Minh City, December 2025}
+    \end{center}
 \end{titlepage}
 
 % \thesislayout
@@ -231,9 +287,9 @@
 % \includepdf[pages=-]{instructor-signature/task.pdf}
 % \includepdf[pages=-]{instructor-signature/Dong.pdf}
 \setcounter{page}{1}
-\include{authenticity-declaration/main.tex}
+% \include{authenticity-declaration/main.tex}
 
-\include{acknowledgement/main.tex}
+% \include{acknowledgement/main.tex}
 
 \include{abstraction/main.tex}
 

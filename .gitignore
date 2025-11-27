@@ -14,5 +14,8 @@
 *.snm
 *.vrb
 *.bbl-SAVE-ERROR
+*.bcf-SAVE-ERROR
+*.run.xml-SAVE-ERROR
+*.blg-SAVE-ERROR
 *.bcf
 *.run.xml
