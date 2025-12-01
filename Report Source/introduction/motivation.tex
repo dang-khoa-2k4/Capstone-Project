@@ -7,6 +7,18 @@ Making optimal decisions in real-time is a cornerstone of modern engineering. Th
     
     \item \textbf{Industrial Manipulators (e.g., Amazon's Robin):} Sorting efficiency depends on jointly optimizing the sequence of bins (discrete) and the arm's trajectory (continuous) \cite{amazonrobotics2023}. A mere \textbf{1\% increase} in operating speed through superior optimization translates to millions of additional packages processed annually.
 \end{itemize}
+ 
+%  2 cols image
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.475\textwidth]{introduction/image/atlas-robot.png}
+    % \hfill
+    \includegraphics[width=0.5\textwidth]{introduction/image/aws-robin.png}
+    \caption[Boston Dynamics' Atlas and Amazon's Robin]{\textsl{\textbf{Left:} Boston Dynamics' Atlas robot performing parkour, requiring discrete footstep planning and continuous trajectory optimization. \textbf{Right:} Amazon's Robin robotic arm sorting packages, where discrete bin selection and continuous arm trajectory must be optimized jointly.}}
+    \label{fig:robotics_examples}
+\end{figure}
+
+\hspace{2cm}
 
 However, solving these coupled problems simultaneously remains an open challenge, typically necessitating manual engineering interventions or settling for suboptimal solutions.
 

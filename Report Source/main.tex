@@ -85,6 +85,18 @@
 \usepackage{rotating}
 \usepackage{tikz}
 \usepackage{pdfpages}
+% In main.tex preamble, update the tocloft section:
+\usepackage{tocloft}
+
+\renewcommand{\cftfigpresnum}{\figurename~}
+\renewcommand{\cftfignumwidth}{5em}
+\renewcommand{\cfttabpresnum}{\tablename~}
+\renewcommand{\cfttabnumwidth}{5em}
+
+% Better LOF formatting
+\setlength{\cftbeforefigskip}{8pt}
+\renewcommand{\cftfigfont}{\small}
+\renewcommand{\cftfigpagefont}{\small}
 
 \usetikzlibrary{arrows,snakes,backgrounds,calc}
 
