@@ -1,1 +1,70 @@
-\section{Mixed-integer optimization}
+% filepath: /home/dang-khoa/university/Capstone Project/Report Source/theoretical-background/convex-optimization.tex
+
+\section{Mixed-Integer Optimization}
+
+Mixed-integer optimization is the computational backbone of the techniques introduced in this thesis. Generally speaking, a \textbf{Mixed-Integer Program (MIP)} can be very hard to solve and the runtimes of a mixed-integer solver can grow very quickly (exponentially) with the problem size. However, this is the worst-case scenario, and a lot can be done to construct highly effective MIPs that can be solved quickly for most of (if not all) the instances that we encounter in practice. The goal of this section is twofold. First, we introduce the essential background on mixed-integer optimization: what an MIP is, how MIPs are classified, and what algorithms can be used to solve these problems. Secondly, we introduce the notions and the tools necessary to distinguish between efficient and inefficient MIPs.
+
+Two great sources for all the details about mixed-integer optimization are the classical book~\cite{wolsey1999} and the more recent book~\cite{conforti2014}.
+
+\subsection{Mixed-Integer Programs}
+
+An MIP is an optimization problem with continuous variables $x \in \mathbb{R}^n$ and discrete (integer) variables $y \in \mathbb{Z}^m$. Given an objective function $f : \mathbb{R}^{n+m} \to \mathbb{R}$ and a constraint set $\mathcal{S} \subseteq \mathbb{R}^{n+m}$, we can state a generic MIP as
+\begin{subequations}
+\label{eq:mip}
+\begin{align}
+\text{minimize} \quad & f(x, y) \label{eq:mip_objective}\\
+\text{subject to} \quad & (x, y) \in \mathcal{S}, \label{eq:mip_constraint}\\
+& y \in \mathbb{Z}^m. \label{eq:mip_integer}
+\end{align}
+\end{subequations}
+(We explicitly state the constraint $y \in \mathbb{Z}^m$ since, if not specified otherwise, variables of optimization problems will always be assumed to be real valued.) We call the set
+\[
+\mathcal{T} := \mathcal{S} \cap \mathbb{R}^n \times \mathbb{Z}^m
+\]
+the \textit{feasible set} of the MIP~\eqref{eq:mip} and its elements $(x, y) \in \mathcal{T}$ \textit{feasible solutions}. The MIP is \textit{feasible} if a feasible solution exists and \textit{infeasible} otherwise. A feasible solution $(x^{\text{opt}}, y^{\text{opt}})$ is \textit{optimal} if $f(x^{\text{opt}}, y^{\text{opt}}) \leq f(x, y)$ for all $(x, y) \in \mathcal{T}$. If an optimal solution exists, we denote with $f^{\text{opt}} := f(x^{\text{opt}}, y^{\text{opt}})$ the MIP optimal value.
+
+If we discard constraint~\eqref{eq:mip_integer} from our MIP, we obtain the following optimization problem:
+\begin{subequations}
+\label{eq:mip_relaxation}
+\begin{align}
+\text{minimize} \quad & f(x, y) \\
+\text{subject to} \quad & (x, y) \in \mathcal{S}.
+\end{align}
+\end{subequations}
+This problem is called the \textbf{relaxation} of the MIP. We denote an optimal solution of the relaxation as $(x^{\text{relax}}, y^{\text{relax}})$, and we let $f^{\text{relax}} := f(x^{\text{relax}}, y^{\text{relax}})$ be its optimal value. Observe that
+\[
+f^{\text{relax}} \leq f^{\text{opt}},
+\]
+since by discarding a constraint from an optimization (minimization) problem the optimal value can only decrease. As discussed below, the tightness of this inequality plays a central role in the efficiency of an MIP. Loosely speaking, an MIP is efficiently solvable if its relaxation can be solved quickly and the gap $f^{\text{opt}} - f^{\text{relax}} \geq 0$ is small.
+
+MIPs are classified according to the properties of the function $f$ and the set $\mathcal{S}$, which can significantly affect our ability of solving an MIP efficiently. Below we define the classes of MIPs that are most relevant for this thesis.
+
+\subsection{Mixed-Boolean Programs}
+
+A \textbf{Mixed-Boolean Program (MBP)} is an MIP where the discrete variables can only take binary value: $y \in \{0, 1\}^m$. Equivalently, an MBP is a problem of the form of~\eqref{eq:mip} where
+\[
+\mathcal{S} \subset \mathbb{R}^n \times [0, 1]^m.
+\]
+All the MIPs that we will encounter in this thesis are, in fact, MBPs. However, the term MBP is unusual and, although technically our problems will be MBPs, we will still call them as MIPs.
+
+\subsection{Mixed-Integer Convex Programs}
+
+If the objective function $f$ and the constraint set $\mathcal{S}$ are convex, we call problem~\eqref{eq:mip} a \textbf{Mixed-Integer Convex Program (MICP)}. MICPs are a fundamental class of MIPs since their relaxations are convex optimization problems, which (in most of the cases) can be solved very quickly. To emphasize the convexity assumption, we call the relaxation of an MICP \textit{convex relaxation}. Using the Branch-and-Bound (BB) algorithm, most MICPs can be reliably solved to global optimality, although the algorithm might take a long time.
+
+In contrast to the class of MICPs, we will occasionally call \textbf{Mixed-Integer Non-Convex Program (MINCP)} an MIP where the objective function $f$ and/or the constraint set $\mathcal{S}$ are nonconvex. Most MINCPs are intractable; the main exceptions are very small MINCPs where the feasible set $\mathcal{T}$ can be finely discretized and searched exhaustively.
+
+\subsection{Mixed-Integer Conic Programs}
+
+If the objective function $f$ is linear and the constraint set $\mathcal{S}$ is a closed convex set in conic form, then problem~\eqref{eq:mip} is called \textbf{Mixed-Integer Conic Program (MIKP)}. The subclasses of this family of problems are classified as follows:
+
+\begin{itemize}
+    \item \textbf{Mixed-Integer Linear Program (MILP)} when the set $\mathcal{S}$ is a polyhedron,
+    \item \textbf{Mixed-Integer Second-Order Cone Program (MISOCP)} when $\mathcal{S}$ is convex quadratic,
+    \item \textbf{Mixed-Integer Semidefinite Program (MISDP)} when $\mathcal{S}$ is a spectrahedron.
+\end{itemize}
+
+The relaxations of these problems are named in the natural way. For example, we call \textit{linear relaxation} the relaxation of an MILP.
+
+We could say that MILPs play a more important role in mixed-integer optimization than LPs play in convex optimization. The first reason for this is geometric. Polyhedra are the simplest shape that can enclose finite sets of points. Therefore, as we will also see in the next chapter, they are a natural candidate to model the discrete side of an MIP. The second reason is algorithmic. The simplex algorithm for linear optimization can be integrated in the BB procedure more efficiently than the interior-point algorithm used for more general conic programs.
+
+A \textbf{Mixed-Integer Quadratic Program (MIQP)} is an MIP of the form~\eqref{eq:mip} with $f$ quadratic and $\mathcal{S}$ polyhedral. These problems are representable as MISOCPs but, similar to MILPs, they can be solved more efficiently using specialized BB methods that leverage the polyhedral constraint set. Having said this, nowadays also MISOCPs and MISDPs can be solved quite effectively even with freely available solvers (see, e.g., Pajarito~\cite{lubin2018}).

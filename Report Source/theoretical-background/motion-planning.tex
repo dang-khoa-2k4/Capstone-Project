@@ -1,0 +1,89 @@
+\section{Kinodynamic Trajectory Generation}
+\label{sec:kinodynamic_theory}
+
+This section outlines the mathematical formulation for generating kinodynamically feasible trajectories. Unlike geometric path planning, which solely considers collision-free configurations in the workspace, motion planning (kinodynamic) accounts for the system's differential constraints, such as velocity, acceleration, and jerk limits. We leverage Bézier curves as the trajectory parameterization scheme, which is particularly advantageous for the Graph of Convex Sets (GCS) framework due to its convexity properties.
+
+\subsection{Kinodynamic Formulation}
+Consider a robotic system whose state evolution is governed by a set of ordinary differential equations (ODEs):
+\begin{equation}
+    \dot{\mathbf{x}}(t) = f(\mathbf{x}(t), \mathbf{u}(t)), \quad \mathbf{x}(t) \in \mathcal{X}, \mathbf{u}(t) \in \mathcal{U}
+\end{equation}
+where $\mathbf{x}(t) \in \mathbb{R}^n$ represents the state vector (typically comprising position, velocity, and acceleration), and $\mathbf{u}(t) \in \mathbb{R}^m$ denotes the control inputs. The goal is to compute a trajectory $\sigma(t): [0, T] \to \mathcal{X}$ that minimizes a specific cost functional while satisfying:
+\begin{enumerate}
+    \item \textbf{Boundary Conditions:} The start and goal states $\mathbf{x}(0) = \mathbf{x}_{start}$ and $\mathbf{x}(T) = \mathbf{x}_{goal}$.
+    \item \textbf{Safety Constraints:} $\sigma(t) \in \mathcal{X}_{free}$ for all $t$, ensuring collision avoidance.
+    \item \textbf{Dynamic Limits:} Inequality constraints on higher-order derivatives to ensure physical feasibility:
+    \begin{equation}
+        |\dot{\sigma}(t)| \leq v_{max}, \quad |\ddot{\sigma}(t)| \leq a_{max}, \quad |\dddot{\sigma}(t)| \leq j_{max}
+    \end{equation}
+\end{enumerate}
+
+\subsection{Smoothness and Continuity Constraints}
+In the GCS framework, a full trajectory is composed of multiple piecewise Bézier segments. To ensure smooth motion across the boundaries of adjacent convex sets, continuity constraints must be enforced at the transition points. Let $r_A(t)$ defined by control points $\{a_0, \dots, a_n\}$ and $r_B(t)$ defined by $\{b_0, \dots, b_n\}$ be two consecutive segments.
+
+\begin{itemize}
+    \item \textbf{$C^0$ Continuity (Position):} Ensures the path is connected.
+    \begin{equation}
+        a_n = b_0
+    \end{equation}
+    
+    \item \textbf{$C^1$ Continuity (Velocity):} Ensures continuous velocity, preventing infinite acceleration spikes.
+    \begin{equation}
+        a_n - a_{n-1} = b_1 - b_0
+    \end{equation}
+    
+    \item \textbf{$C^2$ Continuity (Acceleration):} Ensures continuous force/torque application, which is crucial for minimizing mechanical wear and jerk.
+    \begin{equation}
+        (a_n - 2a_{n-1} + a_{n-2}) = (b_2 - 2b_1 + b_0)
+    \end{equation}
+\end{itemize}
+
+By enforcing these equality constraints at the edges of the graph, we generate a globally smooth trajectory that respects the underlying physics of the robot.
+
+\subsection{Background on Bézier Curves}
+\label{sec:bezier_background}
+
+In order to tackle the kinodynamic planning problem numerically, it is necessary to parameterize the trajectory functions through a finite number of decision variables. To this end, we employ Bézier curves. This section recalls the definition and the basic properties of this family of curves.
+
+A Bézier curve is constructed using Bernstein polynomials. The $k$-th Bernstein polynomial of degree $d$, with $k = 0, \dots, d$, is defined as:
+\begin{equation}
+    \beta_{k,d}(s) := \binom{d}{k} s^k(1-s)^{d-k}, \quad s \in [0, 1]
+\end{equation}
+Note that the Bernstein polynomials of degree $d$ are nonnegative and, by the binomial theorem, they sum up to one. Therefore, for each fixed $s \in [0, 1]$, the scalars $\{\beta_{k,d}(s)\}_{k=0}^d$ can be thought of as the coefficients of a convex combination. Bézier curves are obtained using these coefficients to combine a given set of $d+1$ control points $\gamma_k \in \mathbb{R}^n$:
+\begin{equation}
+    \gamma(s) := \sum_{k=0}^d \beta_{k,d}(s)\gamma_k
+\end{equation}
+
+It is easily verified that Bézier curves enjoy the following properties, which are instrumental for the GCS framework:
+
+\begin{itemize}
+    \item \textbf{Endpoint values:} The curve $\gamma$ starts at the first control point and ends at the last control point:
+    \begin{equation}
+        \gamma(0) = \gamma_0 \quad \text{and} \quad \gamma(1) = \gamma_d
+    \end{equation}
+    This property is essential for enforcing continuity constraints ($C^0$) when stitching multiple Bézier segments together in the graph.
+
+    \item \textbf{Convex hull property:} The curve $\gamma$ is entirely contained in the convex hull of its control points:
+    \begin{equation}
+        \gamma(s) \in \text{conv}(\{\gamma_k\}_{k=0}^d), \quad \forall s \in [0, 1]
+    \end{equation}
+    In the context of GCS, if a convex region $X_v$ represents a safe set, guaranteeing collision avoidance is reduced to constraining all control points to lie within that set:
+    \begin{equation}
+         \gamma_k \in X_v, \quad \forall k \in \{0, \dots, d\} \implies \gamma(s) \in X_v
+    \end{equation}
+    This allows us to enforce continuous safety constraints through a finite set of linear inclusion constraints.
+
+    \item \textbf{Derivative (Hodograph):} The derivative $\dot{\gamma}$ of the curve $\gamma$ is also a Bézier curve, but of degree $d-1$, with control points defined by the difference of adjacent points:
+    \begin{equation}
+        \dot{\gamma}(s) = \sum_{k=0}^{d-1} \beta_{k,d-1}(s) \dot{\gamma}_k
+    \end{equation}
+    where $\dot{\gamma}_k = d(\gamma_{k+1} - \gamma_k)$ for $k = 0, \dots, d-1$. Similarly, higher-order derivatives (acceleration, jerk) can be expressed as linear combinations of the control points. Consequently, kinodynamic constraints (e.g., velocity limits $|\dot{\gamma}(s)| \le v_{max}$) can be imposed as linear constraints on the differences between adjacent control points, preserving the convexity of the optimization problem.
+
+    \item \textbf{Integral of convex function:} For a convex function $f : \mathbb{R}^n \to \mathbb{R}$ (often representing the cost function in motion planning, such as energy or path length), the integral along the curve is bounded by the convex combination of the function values at the control points:
+    \begin{equation}
+        \int_0^1 f(\gamma(s))ds \le \frac{1}{d+1} \sum_{k=0}^d f(\gamma_k)
+        \label{eq:integral_property}
+    \end{equation}
+    This inequality provides a convex upper bound on the integral cost, facilitating efficient optimization within the GCS mixed-integer convex programming formulation.
+\end{itemize}
+

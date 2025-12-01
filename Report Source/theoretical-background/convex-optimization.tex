@@ -1,1 +1,99 @@
-\section{Convex analysis and optimization}
+% filepath: /home/dang-khoa/university/Capstone Project/Report Source/theoretical-background/convex-optimization.tex
+\section{Convex Analysis and Optimization}
+
+\subsection{Convex Sets}
+Before discussing optimization problems, we briefly define the fundamental geometric objects used in this work. A set $\mathcal{C} \subseteq \mathbb{R}^n$ is \textit{convex} if the line segment between any two points in the set lies entirely within the set.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\textwidth]{theoretical-background/image/convex_sets.png}
+    \caption{Examples of simple convex and nonconvex sets. Left: The hexagon, including its boundary, is convex. Middle: The kidney-shaped set is nonconvex, as the line segment connecting the two points lies outside the set. Right: The square contains some boundary points but not others, and is therefore not convex.\cite{boyd2004}}
+    \label{fig:convex_set}
+\end{figure}
+
+\textbf{Convex hulls} are the smallest convex sets containing a given set of points. Formally, the convex hull of a set of points $\{x_1, x_2, \dots, x_m\} \subseteq \mathbb{R}^n$ is defined as:
+\[\text{conv}(\{x_1, x_2, \dots, x_m\}) = \left\{\sum_{i=1}^m \lambda_i x_i \mid \lambda_i \geq 0, \sum_{i=1}^m \lambda_i = 1\right\}.\]
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.6\textwidth]{theoretical-background/image/convex_hull.png}
+    \caption{Convex hull of a set of points (shaded area).\cite{boyd2004}}
+    \label{fig:convex_hull}
+\end{figure}
+
+In the context of motion planning and GCS, we primarily focus on two types of convex sets:
+\begin{itemize}
+    \item \textbf{Polyhedra:} Defined as the intersection of a finite number of halfspaces, $\mathcal{P} = \{x \in \mathbb{R}^n \mid Ax \leq b\}$. Bounded polyhedra are called \textit{polytopes}.
+    \item \textbf{Ellipsoids:} Defined as the image of a unit ball under an affine transformation, typically represented as $\mathcal{E} = \{x \in \mathbb{R}^n \mid (x-c)^\top Q^{-1} (x-c) \leq 1\}$, where $Q \succ 0$.
+\end{itemize}
+These sets will serve as the regions (vertices) in our motion planning framework.
+
+\subsection{Convex Optimization}
+
+A \textbf{Convex Program (CP)} is an optimization problem of the form
+\begin{subequations}
+\label{eq:convex_program}
+\begin{align}
+\text{minimize} \quad & f(x) \label{eq:cp_objective}\\
+\text{subject to} \quad & x \in \mathcal{C}, \label{eq:cp_constraint}
+\end{align}
+\end{subequations}
+where the objective function $f : \mathbb{R}^n \to \mathbb{R}$ and the constraint set $\mathcal{C} \subset \mathbb{R}^n$ are convex. Sometimes we will refer to the set $\mathcal{C}$ as the \textit{feasible set} of the CP, and to its elements as \textit{feasible solutions}. The CP is said to be \textit{feasible} if a feasible solution exists, i.e., if $\mathcal{C} \neq \emptyset$. A feasible solution $x^{\text{opt}}$ is \textit{optimal} if $f(x^{\text{opt}}) \leq f(x)$ for all $x \in \mathcal{C}$. If an optimal solution exists, we call $f^{\text{opt}} := f(x^{\text{opt}})$ the \textit{optimal value} of the CP.
+
+A fundamental property of CPs is that any locally optimal solution (i.e., any point $x^{\text{opt}}$ such that $f(x^{\text{opt}}) \leq f(x)$ for all $x$ in a neighborhood of $x^{\text{opt}}$) is also an optimal solution according to the (global) definition just given~\cite{boyd2004}. A commonly satisfied assumption for the existence of an optimal solution is that the feasible set $\mathcal{C}$ is nonempty and compact.
+
+CPs are a fundamental class of optimization problems, with applications in essentially every engineering discipline. The great majority of the CPs that we encounter in practice can be solved efficiently and reliably using interior-point methods (or other specialized algorithms such as the simplex method). However, strictly speaking, it is not always true that a CP can be solved efficiently: for example, the set of nonnegative polynomials is a convex cone (in the space of the polynomial coefficients), but checking if a polynomial is nonnegative is NP-hard. In this thesis we will be a little imprecise, and use the term ``convex optimization problem'' almost as a synonym of ``optimization problem that is efficiently solvable.''
+
+\subsection{Conic Optimization}
+
+A \textbf{Conic Program (KP)} is a CP with linear objective function and constraint set in conic form:
+\begin{subequations}
+\label{eq:conic_program}
+\begin{align}
+\text{minimize} \quad & c^\top x \label{eq:kp_objective}\\
+\text{subject to} \quad & Ax + b \in \mathcal{K}, \label{eq:kp_constraint}
+\end{align}
+\end{subequations}
+where $c \in \mathbb{R}^n$, $A \in \mathbb{R}^{m \times n}$, $b \in \mathbb{R}^m$, and $\mathcal{K} \subseteq \mathbb{R}^m$ is a closed convex cone. Special classes of KPs are:
+
+\begin{itemize}
+    \item \textbf{Linear Program (LP)} when $\mathcal{K}$ is the nonnegative orthant.
+    \item \textbf{Second-Order Cone Program (SOCP)} when $\mathcal{K}$ is the Cartesian product of second-order cones.
+    \item \textbf{Semidefinite Program (SDP)} when $\mathcal{K}$ is (isomorphic to) the semidefinite cone.
+\end{itemize}
+
+These classes of problems have increasing modelling power: every LP is an SOCP, and every SOCP is an SDP. SDPs are efficiently solvable, and cover the vast majority of the practical uses of convex optimization.
+
+Another important class of CPs are \textbf{Quadratic Programs (QP)}, these are CPs in the form~\eqref{eq:convex_program} with quadratic objective function $f$ and polyhedral constraint set $\mathcal{C}$. Every QP can be formulated as an SOCP. However, in many cases, active-set algorithms specialized to this class of problems can be more effective than using an SOCP solver.
+
+\subsection{Homogenization (Perspective Operator)}
+Homogenization is a technique used in convex analysis to transform a non-convex set into a convex one by introducing an additional dimension. This process is particularly useful in optimization problems where convexity is desired for efficient solution methods.
+
+Given a set $\mathcal{S} \subseteq \mathbb{R}^n$, the homogenization of $\mathcal{S}$, denoted as $\widetilde{\mathcal{S}}$, is defined as:
+\[
+\widetilde{\mathcal{S}} := \{(x, y) \in \mathbb{R}^{n+1} : y > 0, x \in y\mathcal{S}\}.
+\]
+
+This transformation effectively ``lifts'' the set $\mathcal{S}$ into a higher-dimensional space, where the additional dimension $y$ allows for the representation of convex combinations of points in $\mathcal{S}$. The homogenized set $\widetilde{\mathcal{S}}$ is convex if and only if the original set $\mathcal{S}$ is convex.
+
+\textbf{Homogenization of Sets in Conic Form}
+
+The homogenization of a convex set $\mathcal{C}$ described in conic form is computed very easily. In fact, for $y > 0$, we observe that
+\[
+y\mathcal{C} = \{yx : Ax + b \in \mathcal{K}\} = \{yx : A(yx) + by \in y\mathcal{K}\} = \{x' : Ax' + by \in \mathcal{K}\},
+\]
+and this gives us
+\begin{equation}
+\widetilde{\mathcal{C}} = \{(x, y) : y > 0, Ax + by \in \mathcal{K}\}.
+\label{eq:homogenization_cone}
+\end{equation}
+
+In addition, it is also easily verified that
+\begin{equation}
+\text{cl}(\widetilde{\mathcal{C}}) = \{(x, y) : y \geq 0, Ax + by \in \mathcal{K}\}.
+\label{eq:closure_cone}
+\end{equation}
+
+The expressions \eqref{eq:homogenization_cone} and \eqref{eq:closure_cone} have great practical relevance. Roughly speaking, they tell us that if we can efficiently do computations with a set $\mathcal{C}$ described in conic form, then the same is true for (the closure of) its homogenization $\widetilde{\mathcal{C}}$.
+
+Homogenization is particularly useful in optimization problems, as it allows for the application of convex optimization techniques to problems that may initially appear non-convex. By working in the homogenized space, one can leverage the properties of convex sets and functions to find optimal solutions more efficiently.
