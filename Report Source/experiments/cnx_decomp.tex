@@ -1,0 +1,352 @@
+\section{Phân hoạch không gian an toàn}
+Thay vì tiếp cận bài toán tránh vật cản theo cách truyền thống là mô tả các ràng buộc không lồi dựa trên bề mặt vật cản, nhóm tác giả đề xuất một phương pháp chuyển đổi không gian cấu hình tự do (collision-free configuration space) thành hợp của một tập hợp hữu hạn các vùng lồi bị chặn (bounded convex regions). Trong mô hình này, các vùng lồi có thể chồng lấn lên nhau , và bài toán hoạch định chuyển động được phát biểu lại dưới dạng một chương trình quy hoạch lồi nguyên hỗn hợp (Mixed-Integer Convex Program - MICP). Cụ thể, các biến nguyên được sử dụng để gán từng đoạn quỹ đạo đa thức (polynomial trajectory segments) vào các vùng lồi an toàn cụ thể này. Phương pháp này mang lại lợi thế lớn về mặt tính toán vì số lượng biến nguyên chỉ phụ thuộc vào số lượng vùng an toàn được tạo ra (sử dụng thuật toán IRIS) thay vì phụ thuộc vào số lượng mặt của vật cản, giúp giải quyết hiệu quả các môi trường phức tạp với hàng trăm vật cản. Hơn nữa, việc ràng buộc quỹ đạo nằm trọn trong các tập lồi đảm bảo an toàn tuyệt đối cho toàn bộ hành trình liên tục, khắc phục nhược điểm "cắt góc" (corner cutting) thường gặp ở các phương pháp chỉ kiểm tra va chạm tại các điểm lấy mẫu rời rạc.
+
+\section{Các Phương pháp Cốt lõi cho Phân hoạch Không gian Tự do}
+
+Để giải quyết thách thức về tính toán của phân hoạch tối ưu, một số các phương pháp đã được phát triển. Dưới đây là một số phương pháp được dùng trong bài báo cáo này:
+
+\subsection{Phân hoạch Lồi Xấp xỉ (ACD) của Đa giác} 
+
+Phương pháp Approximate Convex Decomposition (ACD) giới thiệu một cách tiếp cận khác biệt cơ bản để quản lý sự phức tạp. Thay vì yêu cầu sự lồi hoàn hảo, nó cho phép các thành phần "lồi xấp xỉ" trong một dung sai do người dùng xác định, $\tau$.\cite{lien2006} Điều này thường dẫn đến các phân hoạch có ít thành phần hơn nhiều và phù hợp hơn với các đặc điểm cấu trúc nổi bật của đối tượng.
+
+\subsubsection{Các Khái niệm Cơ bản trong Phân rã Lồi}
+\label{sec:basic-concepts}
+
+Phần này trình bày các khái niệm hình học cơ bản được sử dụng trong quá trình phân rã đa giác không lồi thành các vùng lồi. 
+Các định nghĩa này đóng vai trò nền tảng cho các phương pháp đo độ lõm và các thuật toán phân hoạch ở các phần sau.
+
+\begin{itemize}
+    \item \textbf{Bao lồi (Convex Hull – $H_P$):}  
+    Bao lồi của một đa giác $P$ là \textbf{tập hợp lồi nhỏ nhất chứa toàn bộ đa giác} đó.  
+    Trực quan, có thể hình dung bao lồi như một sợi dây chun được kéo căng bao quanh đa giác.  
+    Một đa giác $P$ được gọi là \textbf{lồi} nếu và chỉ nếu nó trùng với bao lồi của chính nó, tức là:
+    \[
+    P = H_P.
+    \]
+
+    \item \textbf{Notches:}  
+    Là các đỉnh của đa giác $P$ \textbf{không nằm trên bao lồi} $H_P$.  
+    Về mặt hình học, đây là những đỉnh có \textbf{góc trong lớn hơn $180^\circ$}.  
+    Các Notches biểu hiện các đặc trưng lõm (concave features) trên biên của đa giác.
+
+    \item \textbf{Cầu (Bridges):}  
+    Là các cạnh của bao lồi $\partial H_P$ nối hai đỉnh không liền kề của biên ngoài $\partial P_0$.  
+    Về mặt toán học, tập hợp các cầu được định nghĩa:
+    \[
+    \text{BRIDGES}(P) = \partial H_P \setminus \partial P.
+    \]
+    Mỗi cầu “bắc qua” một vùng lõm của đa giác.
+
+    \item \textbf{Túi (Pockets):}  
+    Là các \textbf{chuỗi cạnh liên tiếp} của biên đa giác $\partial P$ không thuộc về vỏ lồi $\partial H_P$.  
+    Về mặt toán học:
+    \[
+    \text{POCKETS}(P) = \partial P \setminus \partial H_P.
+    \]
+    Mỗi túi tương ứng với một “vịnh lõm” (concave bay) trên đường biên của đa giác.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\linewidth]{experiments/image/ACD-5.png}
+    % \caption{Enter Caption}
+\end{figure}
+
+\subsubsection{Ý tưởng và Chi tiết Thuật toán}
+
+
+
+Thuật toán là một chiến lược chia để trị đệ quy\cite{lien2006}:
+\begin{enumerate}
+\item Đo độ lõm: Xác định đặc điểm không lồi (một "notch" hay đỉnh lõm) quan trọng nhất trong đa giác. Đây là điểm có độ lõm lớn nhất. Tùy theo từng trường hợp mà ta có thể sử dụng các thước đo độ lõm khác nhau, cách để tính những thước đo độ lõm nãy sẽ được giới thiệu rõ hơn ở phần ~\ref{sec:MEASURING-CONCAVITY}
+
+
+\item Kiểm tra Dung sai: Nếu độ lõm tối đa đo được nhỏ hơn $\tau$, quá trình kết thúc đối với thành phần đó.
+
+\item Giải quyết Đỉnh lõm: Nếu độ lõm vượt quá $\tau$, một đường cắt được thêm vào để giải quyết đỉnh lõm, chia đa giác thành hai thành phần mới (hoặc hợp nhất một lỗ).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{experiments/image/ACD-3.png}
+    \caption{%
+        (a) Nếu $x \in \partial P_i > 0$, hàm \texttt{Resolve} \textbf{gộp} biên $\partial P_i$ vào đa giác $P_0$.
+        (b) Nếu $x \in \partial P_0$, hàm \texttt{Resolve} \textbf{tách} đa giác $P$ thành hai đa giác $P_1$ và $P_2$.
+        (c) \textbf{Độ lõm} tại điểm $x$ thay đổi sau khi đa giác được phân rã.%
+    }
+\end{figure}
+
+\item Đệ quy: Quá trình được áp dụng đệ quy cho các thành phần mới.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{experiments/image/ACD-1.png}
+    \caption{Quá trình đệ quy tiếp tục cho đến khi đạt đến giới hạn độ lõm đầu vào của người dùng $\tau$.}
+\end{figure}
+
+\end{enumerate}
+
+\subsubsection{Các Thước đo Độ lõm}
+\label{sec:MEASURING-CONCAVITY}
+
+Chất lượng của phân hoạch phụ thuộc rất nhiều vào \textbf{cách đo độ lõm} của các đỉnh trong đa giác không lồi. Các phương pháp đo độ lõm phổ biến bao gồm:
+
+\begin{itemize}
+    \item \textbf{Độ lõm Đường thẳng (Straight-Line Concavity – SL-Concavity)}:  
+    Là khoảng cách Euclid từ một đỉnh trong \textit{túi} (pocket) đến \textit{cầu nối} (bridge) liên kết của nó — thường là một cạnh thuộc bao lồi của đa giác.  
+    Phương pháp này rất nhanh, nhưng \textbf{không đảm bảo tính đơn điệu}, có thể khiến một số đặc trưng lõm quan trọng bị bỏ sót.
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=1\linewidth]{experiments/image/ACD-2.png}
+        \caption{%
+            Giả sử $r$ là điểm lõm có độ lõm lớn nhất. 
+            Sau khi giải quyết (resolve) $r$, độ lõm của $s$ tăng lên. 
+            Nếu $\text{concave}(r) < \tau$, vùng $s$ sẽ không bao giờ được xử lý, 
+            ngay cả khi $\text{concave}(s)$ lớn hơn $\tau$.%
+        }
+        \label{fig:nonmonotonic-concavity}
+    \end{figure}
+
+    \item \textbf{Độ lõm Đường đi Ngắn nhất (Shortest Path Concavity – SP-Concavity)}:  
+    Là \textbf{chiều dài đường đi ngắn nhất} từ một đỉnh trong túi đến cầu nối tương ứng, với điều kiện đường đi đó phải nằm hoàn toàn trong túi.  
+    Phương pháp này chậm hơn SL-Concavity nhưng \textbf{đảm bảo tính đơn điệu}: độ lõm của các đỉnh giảm dần sau mỗi lần phân rã, 
+    giúp đảm bảo rằng tất cả các đặc điểm lõm quan trọng cuối cùng sẽ được xử lý.  
+    (Xem chi tiết trong Phần~\ref{sec:SP-Concavity}.)
+
+    \item \textbf{Độ lõm Lai (Hybrid Concavity – H-Concavity)}:  
+    Một giải pháp trung gian thực tiễn — sử dụng SL-Concavity nhanh làm mặc định và chỉ chuyển sang SP-Concavity khi \textbf{phát hiện khả năng không đơn điệu}. Bằng cách thêm bước kiểm tra \textit{nguy cơ tiềm ẩn} bằng cách so sánh $n_\beta$ và $n_i$; nếu tồn tại $n_i \cdot n_\beta < 0$, biên túi bị đảo hướng — dấu hiệu của túi phức tạp mà SL-Concavity có thể thất bại.
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=1\linewidth]{experiments/image/ACD-6.png}
+        \caption{Độ lõm SL có thể xử lý được túi trong (a) một cách chính xác vì không có hướng chuẩn nào của các đỉnh trong túi ngược với hướng chuẩn của cầu. Tuy nhiên, túi trong (b) có thể dẫn đến độ lõm giảm không đơn điệu.}
+    \end{figure}
+   
+\end{itemize}
+
+\subsubsection{Đặc tính của Thuật toán}
+
+\begin{itemize}
+\item Loại thuật toán: Đây là một phương pháp xấp xỉ theo định nghĩa. Một phân hoạch với $\tau=0$ là một phân hoạch lồi chính xác.
+\item Độ phức tạp thời gian: $O(n r^2)$, trong đó $n$ là số đỉnh và $r$ là số đỉnh lõm.\cite{lien2006} Điều này nhanh hơn các thuật toán phân hoạch chính xác tối ưu cho đa giác không có lỗ.
+\end{itemize}
+
+
+
+\subsection{Iterative Regional Inflation by Semi-Definite Programming (IRIS)}
+
+Thuật toán Iterative Regional Inflation by Semidefinite Programming (IRIS) thay vì cố gắng bao phủ toàn bộ không gian tự do cùng một lúc, nó đặt ra câu hỏi: "Với một điểm 'mầm' (seed) ban đầu, vùng lồi lớn nhất của không gian tự do mà tôi có thể tìm thấy xung quanh nó là gì?".  Tức sau khi chạy xong giải thuật output của ta là một vùng lồi lớn nhất có thể của thuật toán từ 1 seed point cho trước.
+
+\subsubsection{Ý tưởng và Chi tiết Thuật toán}
+
+IRIS là một quy trình tối ưu hóa lặp đi lặp lại gồm 4 bước:
+\begin{enumerate}
+\item \textbf{Khởi tạo}: Thuật toán sẽ tạo ra một hình elip ban đầu là một hình cầu rất nhỏ có tâm chính là điểm mầm (seed point).
+\item \textbf{Tìm Siêu phẳng Phân cách (QP)}: 
+
+\begin{figure}[!htp]
+    \centering
+    \includegraphics[width=0.5\linewidth]{experiments/image/iris_algo_1.png}
+    \caption{Siêu phẳng Phân cách}
+\end{figure}
+
+Đối với ellipsoid hiện tại, thuật toán tìm điểm gần nhất trên mỗi chướng ngại vật. Sau đó, nó xây dựng các siêu phẳng phân cách ellipsoid khỏi các chướng ngại vật này. Mỗi siêu phẳng tiếp tuyến với một phiên bản mở rộng của ellipsoid và đi qua điểm gần nhất trên chướng ngại vật tương ứng. Việc tìm điểm gần nhất trên mỗi chướng ngại vật lồi được xây dựng như một bài toán Quy hoạch Toàn phương (Quadratic Program - QP). Để giữ cho bài toán tối ưu hóa tiếp theo có quy mô nhỏ, các siêu phẳng thừa (những siêu phẳng không xác định biên của vùng lồi kết quả) sẽ được loại bỏ.
+
+\textbf{Bước 2.1}. Tìm điểm gần nhất trên obstacle đến hình elip hiện tại
+\begin{itemize}
+\item \textbf{Biến đổi không gian (Từ không gian Ellipsoid sang không gian Quả cầu đơn vị)}  
+
+Việc tính toán khoảng cách đến một ellipsoid là phức tạp. Tuy nhiên, tính khoảng cách đến một quả cầu đơn vị tại gốc tọa độ thì lại rất đơn giản. Ý tưởng ở đây là biến đổi toàn bộ không gian sao cho ellipsoid trở thành một quả cầu đơn vị.
+
+\begin{itemize}
+    \item Một ellipsoid $E$ được định nghĩa là ảnh của một quả cầu đơn vị $\tilde{E}$ qua phép biến đổi affine:
+    \[
+    x = C\tilde{x} + d.
+    \]
+    \item Sử dụng phép biến đổi ngược:
+    \[
+    \tilde{x} = C^{-1}(x - d),
+    \]
+    để ánh xạ mọi điểm trở lại “không gian quả cầu đơn vị”.
+    \item Trong không gian mới này, ellipsoid trở thành quả cầu đơn vị $\tilde{E}$ tại gốc tọa độ, và mỗi chướng ngại vật $l_j$ cũng bị biến đổi (méo đi) thành một đối tượng mới $\tilde{l_j}$.
+\end{itemize}
+\end{itemize}
+
+\textbf{Bước 2.2}: Tìm điểm gần nhất bằng Quy hoạch Toàn phương (QP)
+
+Bây giờ, bài toán tìm điểm trên chướng ngại vật $l_j$ gần ellipsoid $E$ nhất tương đương với việc tìm điểm trên chướng ngại vật đã biến đổi $\tilde{l_j}$ gần gốc tọa độ nhất.  
+
+Bài toán này được xây dựng dưới dạng một bài toán \textit{Quy hoạch Toàn phương} (Quadratic Program - QP):
+
+\[
+\begin{aligned}
+    &\underset{\tilde{x} \in \mathbb{R}^n,\, w \in \mathbb{R}^m}{\text{minimize}} && \|\tilde{x}\|^2 \\
+    &\text{subject to} 
+    && 
+    \begin{cases}
+        [\, \tilde{v}_{j,1} \; \tilde{v}_{j,2} \; \cdots \; \tilde{v}_{j,m} \,]\, w = \tilde{x}, \\
+        \sum_{i=1}^{m} w_i = 1, \\
+        w_i \ge 0, \quad i = 1,\dots,m.
+    \end{cases}
+\end{aligned}
+\]
+
+\noindent
+Về bản chất, ta đang tìm một điểm $\tilde{x}$ là \textbf{tổ hợp lồi} của các đỉnh đã biến đổi $\tilde{v}_{j,k}$ sao cho khoảng cách của $\tilde{x}$ đến gốc tọa độ là nhỏ nhất.  
+
+\textbf{Bước 2.3}. Xác định mặt phẳng tiếp tuyến của ellipsoid tại điểm tiếp xúc
+
+Sau khi tìm được điểm \(x^*\) gần nhất, ta xây dựng mặt phẳng tiếp tuyến với ellipsoid tại điểm đó.  
+Ellipsoid được mô tả bằng biểu thức nghịch đảo:
+
+\[
+E = \{\, x \mid (x - d)^{\top} C^{-1} C^{-\top} (x - d) \le 1 \,\}.
+\]
+
+Vector pháp tuyến của ellipsoid tại \(x^*\) được xác định bởi gradient:
+
+\[
+a_j = \nabla_x \big[(x - d)^{\top} C^{-1} C^{-\top} (x - d)\big]_{x = x^*}
+     = 2C^{-1}C^{-\top}(x^* - d).
+\]
+
+Vì mặt phẳng tiếp tuyến đi qua \(x^*\), ta có:
+
+\[
+b_j = a_j^{\top}x^*.
+\]
+
+Khi đó, phương trình mặt phẳng tiếp tuyến là:
+\[
+a_j^{\top}x = b_j,
+\]
+được thêm vào như một \textbf{ràng buộc tuyến tính} trong tập khả thi của thuật toán IRIS.  
+Mặt phẳng này đảm bảo ellipsoid mở rộng tối đa nhưng không giao với chướng ngại vật.
+
+\textbf{Bước 2.4}. Lặp lại với tất cả các obstacles trong không gian. Ta sẽ có được một tập các siêu phẳng để tạo thành một vùng lồi đa giác.
+
+\newpage
+\item \textbf{Tìm Ellipsoid Nội tiếp Cực đại (SDP)}: Giao của các nửa không gian được xác định bởi các siêu phẳng tạo thành một đa diện lồi (polytope). Thuật toán sau đó tìm ellipsoid có thể tích lớn nhất có thể nội tiếp trong đa diện này. 
+
+\begin{figure}[!htp]
+    \centering
+    \includegraphics[width=0.5\linewidth]{experiments/image/iris_2.png}
+    \caption{Ellipsoid Nội tiếp Cực đại}
+\end{figure}
+
+Bài toán này tìm \textbf{ellipsoid có thể tích lớn nhất} nằm gọn trong một đa diện lồi \( P \):
+\begin{equation}
+    P = \{x \in \mathbb{R}^n \mid A x \leq b\}.
+\end{equation}
+
+Ellipsoid được định nghĩa là \(\mathcal{E}\), với \(d\) là tâm và ma trận \(C\) xác định hình dạng:
+\begin{equation}
+    \mathcal{E} = \{C\tilde{x} + d \mid \|\tilde{x}\|_2 \leq 1\}.
+\end{equation}
+
+Thể tích của ellipsoid tỉ lệ với \(\det(C)\).
+
+Để tìm ellipsoid lớn nhất nội tiếp trong \(P\), ta giải bài toán tối ưu lồi sau:
+\begin{equation}
+\begin{aligned}
+    \underset{C,d}{\text{maximize}} \quad & \log \det C \\
+    \text{subject to} \quad & \|a_i^{\top} C\|_2 + a_i^{\top} d \leq b_i, \quad \forall i = 1, \ldots, N, \\
+    & C \succ 0.
+\end{aligned}
+\end{equation}
+
+\noindent
+\textbf{Mục tiêu:} Cực đại hoá \(\log \det C\) để tối đa hoá thể tích ellipsoid. \\[4pt]
+\textbf{Ràng buộc:} Đảm bảo mọi điểm của ellipsoid đều nằm trong đa diện \(P\).
+
+
+
+\item \textbf{Lặp lại}: Ellipsoid mới, lớn hơn này được sử dụng làm điểm khởi đầu cho vòng lặp tiếp theo. Quá trình này hội tụ khi thể tích của ellipsoid ngừng tăng một cách đáng kể, trả về một đa diện lồi lớn và ellipsoid nội tiếp của nó.
+\end{enumerate}
+
+\begin{figure}[!htp]
+    \centering
+    \includegraphics[width=1\linewidth]{experiments/image/iris-3.png}
+    \caption{Lặp lại}
+\end{figure}
+
+\newpage
+\subsubsection{Đặc tính của Thuật toán}
+
+\begin{itemize}
+\item Loại thuật toán: IRIS là một phương pháp xấp xỉ để bao phủ toàn bộ không gian tự do. Một lần chạy duy nhất chỉ tạo ra một vùng lồi. Để có được một lớp phủ hoàn chỉnh, cần phải chạy thuật toán nhiều lần với các điểm mầm khác nhau.
+\item Độ phức tạp thời gian: IRIS thường hội tụ qua 4-8 vòng lặp. Thời gian tính toán của mỗi vòng lặp bằng thời gian tìm các mặt phẳng phân cách cộng với thời gian tính toán ellipses nội tiếp. Trong khi thời gian giải ellipses (SDP) gần như không đổi (constant) nhờ vào việc loại bỏ các siêu phẳng thừa thì thời gian tính các siêu phẳng phân cách lại tăng tuyến tính theo số lượng các obstacles.  
+\begin{figure}[!htp]
+    \centering
+    \includegraphics[width=1\linewidth]{experiments/image/time-iris.png}
+    \caption{Độ phức tạp thời gian}
+\end{figure}
+
+\item Xử lý Vật cản không lồi:
+\begin{itemize}
+\item Chướng ngại vật trong không gian work space: Thuật toán IRIS ban đầu giả định các chướng ngại vật là lồi, đây cũng là một nhược điểm lớn nhất của thuật toán này. Để đảm bảo các obstacles là lồi, ta thường phải tiền xử lý bằng cách bao lồi  các chướng ngại vật không lồi\cite{DeitsTedrake2014}. Ngoài ra cách tiếp cận tiêu chuẩn cho các chướng ngại vật không lồi là phân hoạch chúng thành một tập hợp các mảnh lồi trước khi chạy IRIS (tức tăng số lượng obtacles của không gian lên). Điều này khả thi vì IRIS có khả năng mở rộng hiệu quả với số lượng lớn chướng ngại vật. 
+
+\item Chướng ngại vật trong không gian cấu hình (Configuration Space): Đối với các robot có động học phức tạp, nơi các chướng ngại vật trong không gian cấu hình được định nghĩa một cách ẩn ý và không lồi, các phần mở rộng như IRIS-NP và C-IRIS được sử dụng. Đặc biệt, bài báo "Motion Planning around Obstacles with Convex Optimization" sử dụng một triển khai có tên là IrisInConfigurationSpace trong thư viện Drake cho ví dụ về cánh tay robot.\cite{motionplanning2022} Phần mở rộng này sử dụng lập trình phi tuyến (nonlinear programming) để xử lý hình học phức tạp của không gian cấu hình.
+\end{itemize}
+\end{itemize}
+
+\subsection{Gieo mầm Tự động qua Lớp phủ Clique Khả kiến (VCC)}
+
+Thuật toán Visibility Clique Cover (VCC) giải quyết trực tiếp một hạn chế chính của IRIS: nhu cầu về các điểm mầm tốt.$^5$ Việc lấy mầm ngẫu nhiên là không hiệu quả. VCC tự động hóa quá trình này bằng cách trước tiên tìm hiểu cấu trúc toàn cục của không gian tự do và sau đó đặt các điểm mầm một cách chiến lược vào các khu vực có khả năng mở rộng lớn.
+
+\subsubsection{Ý tưởng và Chi tiết Thuật toán}
+
+Quy trình VCC bao gồm bốn bước chính \cite{vcc2023}:
+\begin{enumerate}
+\item Lấy mẫu \& Xây dựng Đồ thị Khả kiến (Visibility Graphs): Thuật toán lấy mẫu $n$ điểm ngẫu nhiên trong không gian cấu hình tự do ($C_{free}$). Các điểm này tạo thành các đỉnh của một đồ thị khả kiến (visibility graph)\footnote{\textit{Visibility graph} là đồ thị trong đó các đỉnh biểu diễn vị trí (hoặc đỉnh chướng ngại vật), và có cạnh nối giữa hai đỉnh nếu đoạn thẳng nối chúng nằm hoàn toàn trong không gian tự do.}
+. Một cạnh tồn tại giữa hai đỉnh nếu đoạn thẳng nối hai điểm tương ứng hoàn toàn nằm trong không gian tự do (tức là không va chạm).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{experiments/image/VCC-1.png}
+    \caption{Lấy mẫu \& Xây dựng Đồ thị Khả kiến (Visibility Graphs)}
+\end{figure}
+
+\item Tìm Lớp phủ Clique: Thuật toán tìm một tập hợp các clique lớn (đồ thị con đầy đủ) trong đồ thị khả kiến. Ý tưởng cốt lõi là một tập hợp các điểm mà tất cả đều "nhìn thấy" nhau có khả năng nằm trong cùng một vùng lồi\footnote{Nếu hai điểm có thể nhìn thấy nhau, điều đó ngụ ý rằng con đường thẳng nhất giữa chúng là an toàn. Đây là khối xây dựng cơ bản để hiểu và xấp xỉ các vùng lồi trong.}. Điều này được thực hiện một cách tham lam bằng cách giải lặp đi lặp lại bài toán MAXCLIQUE (tìm clique lớn nhất), được xây dựng dưới dạng một bài toán Integer Linear Programming - ILP.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{experiments/image/VCC-2.png}
+    \caption{Tìm Lớp phủ Clique}
+\end{figure}
+
+\item Khởi tạo Ellipsoid: Đối với mỗi clique được tìm thấy, thuật toán tính toán ellipsoid có thể tích nhỏ nhất bao quanh tất cả các điểm trong clique đó. Ellipsoid này cung cấp một tâm (điểm mầm) và các trục chính (hình dạng ban đầu) cho bước lấp đầy tiếp theo.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{experiments/image/VCC-3.png}
+    \caption{Khởi tạo Ellipsoid}
+\end{figure}
+
+\item Lấp đầy thành Đa diện: Tâm và hình dạng của mỗi ellipsoid được sử dụng để khởi tạo một vòng lặp duy nhất của thuật toán lấp đầy tương tự IRIS. Điều này hiệu quả hơn IRIS tiêu chuẩn vì ellipsoid ban đầu đã được "thông báo" về hình học cục bộ, thường loại bỏ sự cần thiết của nhiều vòng lặp tốn kém.$^5$
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.45\linewidth]{experiments/image/VCC-4.png}
+    \caption{Lấp đầy thành Đa diện}
+\end{figure}
+
+\item Lặp lại và Hội tụ: Quá trình này được lặp lại cho đến khi đạt được độ phủ đủ bằng cách lấy mẫu mới từ không gian trống còn lại và lặp lại các bước trước đó.
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{experiments/image/VCC-5.png}
+    \caption{Lặp lại}
+\end{figure}
+
+\end{enumerate}
+
+\subsubsection{Đặc tính và Tính tối ưu}
+
+\begin{itemize}
+\item Loại thuật toán: VCC là một phương pháp xấp xỉ. Chất lượng của lớp phủ được đo bằng tỷ lệ phần trăm thể tích của $C_{free}$ được bao phủ bởi hợp của các đa diện kết quả.$^5$
+\item Mục tiêu Tối ưu: Thuật toán nhằm tìm một lớp phủ lồi xấp xỉ $\alpha$ ($\alpha$-approximate convex cover) với số lượng vùng tối thiểu. Nó sử dụng bài toán lớp phủ clique tối thiểu (minimum clique cover) như một bài toán tương tự rời rạc cho bài toán lớp phủ lồi tối thiểu.\cite{vcc2023}
+\item Phương pháp: Đây là một cách tiếp cận lai ghép giữa hình học và ILP.
+\item Xử lý Không gian không lồi: VCC không phụ thuộc vào hình dạng của chướng ngại vật vì nó dựa vào một bộ kiểm tra va chạm chung để kiểm tra khả kiến và sau đó sử dụng một thuật toán lấp đầy cơ bản (như IRIS-NP) có thể xử lý các không gian cấu hình không lồi.\cite{vcc2023}
+\end{itemize}

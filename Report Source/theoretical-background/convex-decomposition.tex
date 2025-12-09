@@ -3,34 +3,56 @@
 
 This section provides an overview of convex decomposition, a fundamental technique used in computational geometry and physics simulations.
 
-\subsection{Definition and Properties}
-\label{subsec:convex-decomp-definition}
+\subsection{Định nghĩa}
 
-Convex decomposition involves breaking down a concave polygon or polyhedron into a set of convex sub-shapes. A shape is defined as convex if, for every pair of points within the shape, every point on the straight line segment that joins the pair of points is also within the shape.
+\textbf{Phân hoạch lồi (Convex Decomposition)} là quá trình chia một hình học phức tạp (ví dụ: đa giác hoặc đa diện không lồi) 
+thành một tập hợp các \textbf{vùng con lồi} sao cho hợp của các vùng này khôi phục lại toàn bộ hình ban đầu và 
+các vùng con không chồng lấn nhau, ngoại trừ biên chung.  
 
-\begin{equation}
-    \label{eq:convexity-condition}
-    \forall x, y \in S, \forall \lambda \in [0, 1], \lambda x + (1 - \lambda)y \in S
-\end{equation}
+Về mặt hình thức, với một miền hình học $P\subset\mathbb{R}^n$, 
+một \textit{phân hoạch lồi} của $P$ là tập hợp $\{P_1, P_2, \dots, P_k\}$ sao cho:
+\[
+P = \bigcup_{i=1}^{k} P_i, \quad 
+P_i \cap P_j = \partial P_i \cap \partial P_j \ \text{với mọi } i \ne j,
+\]
+và mỗi $P_i$ là một tập lồi.  
+Mục tiêu là tìm tập phân hoạch này như là số lượng các vùng lồi tối thiểu, giảm thiểu phần chồng chéo hay chất lượng của vùng lồi được tạo ra (tránh quá "mảnh" hoặc "dài").
 
-\subsection{Algorithms for Decomposition}
-\label{subsec:convex-decomp-algorithms}
+\subsection{Phân loại Phương pháp Phân hoạch Lồi}
+\label{sec:convex-decomposition-types}
 
-Several algorithms exist for performing convex decomposition, varying in complexity and the optimality of the resulting set of convex hulls.
+Trong lĩnh vực hình học tính toán và hoạch định chuyển động, các phương pháp phân hoạch lồi thường được chia thành hai loại chính: 
+\textbf{Phân hoạch Lồi Chính xác (Exact Convex Decomposition – ECD)} 
+và 
+\textbf{Phân hoạch Lồi Xấp xỉ (Approximate Convex Decomposition – ACD)}. 
+Sự khác biệt giữa hai loại này phản ánh sự đánh đổi cơ bản giữa \textit{tính chính xác hình học} và \textit{hiệu quả tính toán}.
 
+\subsubsection{Phân hoạch Lồi Chính xác (Exact Convex Decomposition – ECD)}
+
+Phân hoạch Lồi Chính xác (ECD) là quá trình chia một hình dạng không lồi thành các \textbf{thành phần con hoàn toàn lồi}, 
+không chồng lấn, sao cho hợp của chúng tái tạo lại chính xác hình dạng ban đầu. 
+Mục tiêu thường là tối thiểu hóa số lượng vùng lồi.  
+
+Tuy nhiên, ECD gặp hai thách thức lớn:
 \begin{itemize}
-    \item \textbf{Exact Convex Decomposition:} Produces the minimum number of convex pieces but is often computationally expensive (NP-hard for general 3D shapes).
-    \item \textbf{Approximate Convex Decomposition (ACD):} Prioritizes speed and simpler geometry by allowing a small amount of concavity or error, which is often sufficient for collision detection.
+    \item \textbf{Độ phức tạp tính toán cao:}  
+    Bài toán tìm phân hoạch lồi tối thiểu đã được chứng minh là NP-hard đối với đa giác có lỗ, 
+    nên không tồn tại thuật toán hiệu quả cho các trường hợp tổng quát.
+    \item \textbf{Tính khả dụng hạn chế:}  
+    Ngay cả khi tính toán được, ECD thường tạo ra số lượng vùng rất lớn, 
+    khiến việc lưu trữ, xử lý và tối ưu hóa tiếp theo trở nên tốn kém.
 \end{itemize}
+Do đó, các phương pháp ECD chủ yếu mang tính lý thuyết, dùng làm chuẩn so sánh, 
+trong khi hầu hết các ứng dụng thực tế trong robot và mô phỏng đều dựa vào các phương pháp xấp xỉ.
 
-\subsection{Applications in Physics Engines}
-\label{subsec:convex-decomp-applications}
+\subsubsection{Phân hoạch Lồi Xấp xỉ (Approximate Convex Decomposition – ACD)}
 
-In the context of this project, convex decomposition is critical for efficient collision detection. Physics engines like PhysX or Bullet perform collision checks much faster between convex shapes than concave ones.
+Trước những giới hạn của ECD, các phương pháp \textbf{Phân hoạch Lồi Xấp xỉ (ACD)} được phát triển để đạt sự cân bằng giữa độ chính xác và hiệu quả.  
+ACD cho phép các thành phần không hoàn toàn lồi, mà chỉ “\textit{gần lồi}” trong một mức dung sai lõm $\tau$ do người dùng xác định hoặc chỉ bao phủ một phần không gian tự do.
+Triết lý cốt lõi của ACD là chấp nhận một \textbf{mức độ lõm nhỏ có kiểm soát} để đổi lấy:
+\begin{itemize}
+    \item \textbf{Hiệu quả tính toán cao hơn:} Các thuật toán ACD, chẳng hạn như phương pháp của Lien và Amato, chạy nhanh hơn nhiều so với ECD. \cite{lien2006}
+    \item \textbf{Giảm mạnh số lượng vùng:} Cho phép biểu diễn hình dạng với ít vùng lồi hơn, đơn giản hơn và dễ xử lý hơn.
+    \item \textbf{Kiểm soát mức độ chi tiết:} Một số thuật toán ACD như phương pháp của Lien và Amatocho phép người dùng điều chỉnh tham số lõm $\tau$ để cân bằng giữa độ chính xác và số lượng vùng lồi. Hay đối với phương pháp Visibility Clique Cover (VCC), nó cho phép người dùng chọn chỉ số để thể hiện mức độ bao phủ của vùng lồi so với không gian tự do ban đầu. \cite{vcc2023}
+\end{itemize}  
 
-\begin{figure}[h]
-    \centering
-    % \includegraphics[width=0.8\textwidth]{path/to/decomposition-diagram}
-    \caption{Visual comparison between a concave mesh and its convex decomposition.}
-    \label{fig:convex-decomposition-example}
-\end{figure}
