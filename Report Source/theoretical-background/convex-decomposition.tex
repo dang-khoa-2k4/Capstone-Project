@@ -1,0 +1,36 @@
+\section{Convex Decomposition}
+\label{sec:convex-decomposition}
+
+This section provides an overview of convex decomposition, a fundamental technique used in computational geometry and physics simulations.
+
+\subsection{Definition and Properties}
+\label{subsec:convex-decomp-definition}
+
+Convex decomposition involves breaking down a concave polygon or polyhedron into a set of convex sub-shapes. A shape is defined as convex if, for every pair of points within the shape, every point on the straight line segment that joins the pair of points is also within the shape.
+
+\begin{equation}
+    \label{eq:convexity-condition}
+    \forall x, y \in S, \forall \lambda \in [0, 1], \lambda x + (1 - \lambda)y \in S
+\end{equation}
+
+\subsection{Algorithms for Decomposition}
+\label{subsec:convex-decomp-algorithms}
+
+Several algorithms exist for performing convex decomposition, varying in complexity and the optimality of the resulting set of convex hulls.
+
+\begin{itemize}
+    \item \textbf{Exact Convex Decomposition:} Produces the minimum number of convex pieces but is often computationally expensive (NP-hard for general 3D shapes).
+    \item \textbf{Approximate Convex Decomposition (ACD):} Prioritizes speed and simpler geometry by allowing a small amount of concavity or error, which is often sufficient for collision detection.
+\end{itemize}
+
+\subsection{Applications in Physics Engines}
+\label{subsec:convex-decomp-applications}
+
+In the context of this project, convex decomposition is critical for efficient collision detection. Physics engines like PhysX or Bullet perform collision checks much faster between convex shapes than concave ones.
+
+\begin{figure}[h]
+    \centering
+    % \includegraphics[width=0.8\textwidth]{path/to/decomposition-diagram}
+    \caption{Visual comparison between a concave mesh and its convex decomposition.}
+    \label{fig:convex-decomposition-example}
+\end{figure}
