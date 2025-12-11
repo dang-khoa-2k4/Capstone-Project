@@ -1,1 +1,59 @@
-\section {Graphs Theoretical}
+% ref: Discrete Mathematics and Its Applications by Kenneth Rosen
+% ref: Combinatorial Optimization: Theory and Algorithms
+\section{Graph Theory and the Shortest Path Problem}
+
+\subsection{Graph Theory Fundamentals}
+
+\subsubsection{Basic Definitions and Concepts}
+
+Formally, a graph is defined as an ordered pair $G = (\mathcal{V}, \mathcal{E})$, comprising a set of vertices $\mathcal{V}$ and a set of edges $\mathcal{E}$, where each edge connects a pair of vertices. The structural classification of the graph depends on the ordering of these pairs: unordered pairs $\{u, w\}$ denote an undirected graph, whereas ordered pairs $(u, w)$ characterize a directed graph. In the context of optimization, the graph is typically augmented with a cost function $c: \mathcal{E} \rightarrow \mathbb{R}$, assigning a real-valued weight to each edge.
+
+Key topological properties include the vertex degree, which counts incident edges; in directed graphs, this is distinguished into in-degree ($\text{deg}^-$) and out-degree ($\text{deg}^+$). Connectivity is described via paths—finite sequences of distinct vertices and edges—where the path length is the aggregate cost of its constituent edges. A cycle is defined as a path that originates and terminates at the same vertex. Optimization problems generally operate on a search domain defined by subgraphs $H = (W, F)$, formed by subsets of vertices $W \subseteq \mathcal{V}$ and edges $F \subseteq \mathcal{E}$ that maintain incidence relationships.
+
+\subsubsection{Combinatorial Optimization on Graphs}
+
+Combinatorial optimization problems on graphs generally seek a substructure that minimizes an objective function subject to validity constraints. For a weighted graph $G = (\mathcal{V}, \mathcal{E})$ and a set of feasible subgraphs $\mathcal{H}$, the problem is to identify a subgraph $H = (W, F) \in \mathcal{H}$ that minimizes the cumulative weight of its components. This is formally expressed as:
+
+\begin{align}
+\text{minimize} \quad & \sum_{v \in W} c_v + \sum_{e \in F} c_e \tag{1.1a} \\
+\text{subject to} \quad & H=(W, F) \in \mathcal{H}. \tag{1.1b}
+\end{align}
+
+To utilize standard mathematical programming techniques, such as Branch and Bound, the problem is transformed into an Integer Linear Programming (ILP) formulation. This involves parameterizing the search space using incidence vectors $\mathbf{y}^H \in \{0, 1\}^{|\mathcal{V} \cup \mathcal{E}|}$, where binary variables indicate the inclusion of specific vertices or edges in the solution. Geometrically, the set of valid subgraphs corresponds to a polytope $\mathcal{Y}$ in Euclidean space. The intersection of this polytope with the integer grid, $\mathcal{Y} \cap \{0, 1\}^{|\mathcal{V} \cup \mathcal{E}|}$, yields the incidence vectors of feasible subgraphs. Consequently, the discrete optimization problem is recast as a linear optimization over an integer domain:
+
+\begin{align}
+\text{minimize} \quad & \sum_{v \in \mathcal{V}} c_v y_v + \sum_{e \in \mathcal{E}} c_e y_e \tag{1.2a} \\
+\text{subject to} \quad & \mathbf{y} \in \mathcal{Y} \cap \{0, 1\}^{|\mathcal{V} \cup \mathcal{E}|}. \tag{1.2b}
+\end{align}
+
+This formulation allows for the application of convex analysis, ensuring that the optimal solution to the algebraic model corresponds exactly to the optimal substructure in the original graph problem.
+
+\subsection{The Shortest Path Problem (SPP)}
+
+\subsubsection{Definition and Classical Algorithms}
+
+The Shortest Path Problem (SPP) on a weighted graph $G=(\mathcal{V}, \mathcal{E})$ involves identifying a path $P$ between a source $s$ and a destination $t$ such that the summation of edge weights is minimized. If $P$ comprises a sequence of edges $e_1, \ldots, e_k$, the objective is to minimize $\sum_{i=1}^{k} c_{e_i}$.
+
+Classical approaches to solving the SPP vary based on edge weight characteristics. Dijkstra's algorithm employs a greedy strategy suitable for graphs with non-negative weights ($c_e \ge 0$). For graphs containing negative edge weights, provided no negative cycles exist, the Bellman-Ford algorithm is utilized, albeit with higher computational complexity. The Floyd-Warshall algorithm extends this to the all-pairs shortest path problem, accommodating negative edges but remaining sensitive to negative cycles.
+
+\subsubsection{Network Flow Formulation for the Shortest Path Problem}
+
+The Shortest Path Problem on a directed graph $G = (\mathcal{V}, \mathcal{E})$ with non-negative edge costs $c_{uv} \ge 0$ can be rigorously modeled as a Minimum Cost Flow problem involving a single unit of flow. We define binary decision variables $x_{uv} \in \{0, 1\}$ for each edge $(u, v) \in \mathcal{E}$, where $x_{uv} = 1$ indicates the edge is part of the optimal path. The optimization model is formulated as follows:
+
+\begin{subequations}
+\begin{align}
+\text{minimize} \quad & \sum_{(u, v) \in \mathcal{E}} c_{uv} x_{uv} \label{eq:spp_obj} \\
+\text{subject to} \quad & \sum_{v \in \mathcal{V}^+(u)} x_{uv} - \sum_{v \in \mathcal{V}^-(u)} x_{vu} =
+\begin{cases}
+1 & \text{if } u = s \\
+-1 & \text{if } u = t \\
+0 & \text{otherwise}
+\end{cases}, \quad \forall u \in \mathcal{V} \label{eq:flow_conservation} \\
+& \sum_{v \in \mathcal{V}^-(u)} x_{vu} \le 1, \quad \forall u \in \mathcal{V} \setminus \{s, t\} \label{eq:node_capacity} \\
+& x_{uv} \ge 0, \quad \forall (u, v) \in \mathcal{E} \label{eq:non_negativity}
+\end{align}
+\end{subequations}
+
+Here, $\mathcal{V}^+(u)$ and $\mathcal{V}^-(u)$ denote the sets of successors and predecessors of node $u$, respectively. The constraints in this formulation enforce specific structural properties. Equation \eqref{eq:flow_conservation} represents flow conservation (Kirchhoff's law), ensuring that a net flow of one unit leaves the source $s$, enters the target $t$, and is conserved at all intermediate nodes. Equation \eqref{eq:node_capacity} imposes a node capacity constraint, restricting the inflow at any intermediate vertex to unity, thereby enforcing a simple path structure where no vertex is revisited. Given non-negative costs, cycles are inherently suboptimal, rendering explicit cycle-elimination constraints unnecessary.
+
+A significant advantage of this formulation lies in the algebraic properties of the constraint matrix derived from \eqref{eq:flow_conservation}. This node-arc incidence matrix exhibits Total Unimodularity (TUM). According to combinatorial optimization theory, if the constraint matrix is TUM and the right-hand side vector is integral, every basic feasible solution of the Linear Programming (LP) relaxation is guaranteed to be integral~\cite{Ahuja1993}. Consequently, despite the continuous non-negativity constraints in \eqref{eq:non_negativity}, the problem can be solved efficiently using standard LP algorithms to yield a valid binary path, obviating the need for computationally intensive integer programming methods.

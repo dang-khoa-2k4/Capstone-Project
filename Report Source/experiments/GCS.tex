@@ -1,2 +1,124 @@
 \section{Graphs of convex sets}
-Cho một đồ thị vô hướng $G = (V, E)$ với tập đỉnh $V = \{1, 2, \ldots, n\}$ và tập cạnh $E \subseteq V \times V$. Mỗi đỉnh $v \in V$ 
+
+The Graph of Convex Sets (GCS) framework provides a unified methodology for solving hybrid discrete-continuous optimization problems, effectively bridging combinatorial graph search with continuous convex programming. Unlike classical graph theory, GCS generalizes the Shortest Path Problem (SPP) by associating continuous geometric variables directly with the graph topology.
+
+\subsection{Shortest Path Formulation in Graph of Convex Sets}
+A GCS is defined as a directed graph $G = (V, E)$ where each vertex $v \in V$ is associated with a continuous decision variable $x_v$ confined within a non-empty, compact convex set $X_v \subset \mathbb{R}^n$. In the context of motion planning, these sets typically represent pre-computed collision-free regions in the configuration space. Transitions between vertices are governed by edges $e = (u, v) \in E$, which impose auxiliary convex constraints $(x_u, x_v) \in X_e$ and are weighted by a convex cost function $\ell_e(x_u, x_v)$. This function is required to be proper, closed, and convex, explicitly coupling the continuous variables $x_u$ and $x_v$ to model transition metrics such as Euclidean distance or energy expenditure. Note that, despite its name, we do not assume $\ell_e$ to be a valid metric, and properties like symmetry or the triangle inequality are not required to hold~\cite{gcs2023}.
+
+While the classical network flow formulation effectively solves the SPP on discrete graphs with static edge costs, the GCS framework generalizes this by introducing continuous decision variables coupled with the graph topology. In GCS, the cost of traversing an edge $e=(u,v)$ is no longer a constant scalar $c_{uv}$, but a convex function $\ell_e(x_u, x_v)$ dependent on the continuous states $x_u \in X_u$ and $x_v \in X_v$ at the incident vertices. The objective of the SPP in GCS is to identify a path $p$ from a source vertex $s$ to a target vertex $t$ that minimizes the aggregate cost of traversing the edges along the path, while simultaneously selecting appropriate continuous variables at each vertex. Formally, this problem can be expressed as:
+
+\begin{align}
+\min_{p, \{x_v\}_{v \in p}} \quad & \sum_{(u, v) \in E_p} \ell_{(u, v)}(x_u, x_v) \label{eq:gcs_obj} \\
+\text{s.t.} \quad & p \in \mathcal{P}, \label{eq:gcs_path_constraint} \\
+& x_v \in X_v,\quad \forall v \in p, \label{eq:gcs_vertex_constraint} \\
+& (x_u, x_v) \in X_e,\quad \forall e=(u,v) \in E_p \label{eq:gcs_edge_constraint}
+\end{align}
+
+where $\mathcal{P}$ denotes the set of all feasible paths from $s$ to $t$, and $E_p$ represents the edges included in the path $p$.
+
+\subsection{Complexity Analysis}
+
+The computational complexity of the SPP in GCS differs fundamentally from that of the classical Shortest Path Problem on discrete graphs.
+
+In classical graph theory, the SPP is generally NP-hard (e.g., the Longest Path problem or variants involving negative cycles). However, it becomes efficiently solvable in polynomial time under two critical conditions:
+\begin{enumerate}
+    \item The graph is \textbf{acyclic} (allowing for topological sort based solutions).
+    \item All edge and vertex costs are \textbf{non-negative} (solvable via Dijkstra's algorithm).
+\end{enumerate}
+
+\begin{proposition}
+In stark contrast, the Shortest Path Problem in a Graph of Convex Sets remains \textbf{NP-hard} even when both of the aforementioned conditions—acyclicity and non-negative costs—are satisfied.
+\end{proposition}
+
+This hardness is established via a reduction from the \textbf{3SAT} problem (Boolean satisfiability with clauses of three literals), which is known to be NP-complete. As demonstrated in Theorem 9.1 of~\cite{Marcucci24a}, one can construct a layered, acyclic GCS instance with non-negative costs where identifying a valid path is equivalent to finding a satisfying assignment for a 3SAT formula. This implies that merely determining the \textit{feasibility} of an SPP in GCS is NP-hard.
+
+Alternative proofs of NP-hardness have also been provided for cases involving low-dimensional convex sets (1D and 2D), though these instances typically rely on graphs containing cycles~\cite{Marcucci24a}.
+
+\subsection{Detailed Formulation of Vertices and Edges}
+
+In the specific context of trajectory optimization, the components of the GCS are rigorously defined to enforce both geometric safety and kinematic feasibility.
+
+Each vertex $v \in V$ corresponds to a specific convex, collision-free region $Q_v$ within the Configuration Space (C-space). The continuous decision variable $x_v \in \mathbb{R}^{n_v}$ associated with vertex $v$ represents a local trajectory segment or a state configuration. It is crucial to note that the dimension $n_v$ is local to the vertex, allowing for variable dimensionality across the graph.
+
+The variable $x_v$ is constrained to lie within a compact convex set $\mathcal{X}_v \subset \mathbb{R}^{n_v}$. For trajectory generation using piecewise polynomial parameterizations (e.g., Bézier curves), $\mathcal{X}_v$ is explicitly constructed to ensure the curve lies within the safe region $Q_v$ and satisfies dynamic limits. The defining constraints for $\mathcal{X}_v$ are typically formulated as:
+
+\begin{align}
+    & r_{i,k} \in Q_i, \quad && k = 0, \dots, d, \label{eq:geo_containment} \\
+    & \dot{h}_{i,k} \ge \dot{h}_{\text{min}} = 10^{-6}, \quad && k = 0, \dots, d-1, \label{eq:time_scaling} \\
+    & \dot{r}_{i,k} \in \dot{h}_{i,k}D, \quad && k = 0, \dots, d-1, \label{eq:dynamic_limits} \\
+    & h_{i,0} \ge 0, \quad h_{i,d} \le T_{\text{max}}. && \label{eq:duration_bounds}
+\end{align}
+
+Here, \eqref{eq:geo_containment} enforces geometric containment of the spatial control points $r_{i,k}$ within the safe region. Equation \eqref{eq:time_scaling} ensures strict monotonicity of the time-scaling function to preserve causality. Equation \eqref{eq:dynamic_limits} couples spatial and temporal derivatives to satisfy velocity bounds defined by the set $D$, and \eqref{eq:duration_bounds} imposes limits on the trajectory duration.
+
+An edge $e = (u, v) \in E$ defines the transition between two vertices. This transition is governed by a \textit{Coupling Constraint Set} $\mathcal{X}_e \subseteq \mathbb{R}^{n_u + n_v}$. This set imposes constraints on the concatenated vector $(x_u, x_v)$, residing in the Cartesian product of the individual variable spaces. Mathematically, $\mathcal{X}_e$ defines which pairs of configurations $(x_u, x_v)$ are compatible, ensuring continuity (e.g., $C^0, C^1$, or higher-order continuity) between trajectory segments.
+
+Associated with each edge is a \textit{Coupling Cost Function} $f_e: \mathbb{R}^{n_u + n_v} \to \mathbb{R}$. This is a scalar-valued convex function that assigns a cost based on the simultaneous selection of $x_u$ and $x_v$, modeling transition metrics such as path length or energy consumption.
+
+\subsection{Cost Function Specifications}
+
+The choice of the edge cost function $\ell_e(x_u, x_v)$ dictates the physical interpretation of the optimal path. We examine two primary classes of cost functions relevant to this study: geometric path length and dynamic trajectory costs.
+
+For purely geometric problems, such as finding the shortest Euclidean path through regions, the cost is typically defined as the $L_2$-norm or its square. The squared Euclidean distance,
+\[
+\ell_e(x_u, x_v) = \|x_v - x_u\|_2^2,
+\]
+is a quadratic function that fits naturally into Quadratic Programming (QP) solvers. Alternatively, the standard $L_2$-norm
+\[
+\ell_e(x_u, x_v) = \|x_v - x_u\|_2
+\]
+can be modeled using Second-Order Cone Programming (SOCP), preserving convexity.
+
+In the context of motion planning using Bézier curves, the continuous variable $x_v$ encapsulates both the control points and the time duration of the trajectory segment. Here, the cost function represents a trade-off between execution time and control effort (smoothness). A common formulation minimizes the path energy (integral of squared acceleration) normalized by time. For a transition between vertices $u$ and $v$ with duration $T_e$, the cost takes the form 
+\[
+\ell_e(x_u, x_v) = \frac{1}{T_e} \int_0^{T_e} \|\ddot{q}(t)\|^2 dt
+\]
+
+When discretized or expressed via Bézier coefficients, this function essentially behaves as a perspective function of the form quadratic-over-linear ($x^2/y$), which is convex regarding both the control points and the duration $T_e$.
+
+\subsection{Mixed-Integer Convex Programming Formulation via Perspective Relaxation}
+
+To transform the intractable MINLP into a solvable Mixed-Integer Convex Program (MICP), we employ a tight convex relaxation technique known as perspective relaxation. This approach isolates the non-convexity by lifting the continuous variables into a higher-dimensional space and replacing the bilinear constraints with linear flow conservation constraints on these lifted variables.
+
+For each edge $e=(u, v)$, instead of using global variables $x_u$ and $x_v$, we introduce local proxy variables $z_{e,u}$ and $z_{e,v}$ with $z_{e,u}, z_{e,v} \in \mathbb{R}^n$. These variables represent the contribution of the state at vertices $u$ and $v$ specifically to the traversal of edge $e$. If the edge is not active ($y_e=0$), these contributions are forced to zero. 
+\[
+z_{e,u} \in y_e X_u \quad \text{and} \quad z_{e,v} \in y_e X_v
+\]
+This implies:
+\[\begin{cases}
+z_{e,u} \in X_u & \text{if } y_e = 1 \\
+z_{e,u} = 0 & \text{if } y_e = 0
+\end{cases}
+\]
+
+This logic is formalized using the perspective function $\tilde{\ell}_e((z_{e,u}, z_{e,v}), y_e)$, which is the perspective of the original cost function $\ell_e$. A key property of convex analysis is that if $\ell_e$ is convex, its perspective $\tilde{\ell}_e$ is jointly convex in all arguments, enabling the use of efficient convex solvers.
+\[
+\tilde{\ell}_e(z_{e,u}, z_{e,v}, y_e) = 
+\begin{cases} 
+y_e \ell_e\left(\frac{z_{e,u}}{y_e}, \frac{z_{e,v}}{y_e}\right) & \text{if } y_e > 0 \\
+0 & \text{if } y_e = 0 \text{ and } z_{e,u} = z_{e,v} = 0 \\
++\infty & \text{otherwise}
+\end{cases}
+\]
+
+Crucially, rather than enforcing explicit equality constraints like $z_{e,u} = y_e x_u$ which are non-convex, we extends the standard flow conservation law \eqref{eq:flow_conservation} to the continuous variables. It mandates that for any node $u$ (excluding source and target), the sum of continuous states entering the node via incoming edges must equal the sum of continuous states leaving the node via outgoing edges.
+
+The resulting MICP formulation for the Shortest Path Problem in GCS is defined as follows:
+
+\begin{subequations}
+\begin{align}
+\text{minimize} \quad & \sum_{e=(u,v) \in \mathcal{E}} \tilde{\ell}_e((z_{e,u}, z_{e,v}), y_e) \label{eq:gcs_obj_perspective} \\
+\text{subject to} \quad & \sum_{e \in \mathcal{E}^+(u)} y_e - \sum_{e \in \mathcal{E}^-(u)} y_e = \delta_u, \quad \forall u \in \mathcal{V} \label{eq:binary_flow} \\
+& \sum_{e \in \mathcal{E}^+(u)} z_{e,u} - \sum_{e \in \mathcal{E}^-(u)} z_{e,v} = 
+\begin{cases}
+x_s & \text{if } u = s \\
+-x_t & \text{if } u = t \\
+0 & \text{otherwise}
+\end{cases}, \quad \forall u \in \mathcal{V} \label{eq:spatial_flow} \\
+& (z_{e,u}, z_{e,v}) \in y_e \mathcal{X}_e, \quad \forall e \in \mathcal{E} \label{eq:perspective_edge} \\
+& z_{e,u} \in y_e X_u, \quad z_{e,v} \in y_e X_v, \quad \forall e=(u,v) \in \mathcal{E} \label{eq:perspective_vertex} \\
+& y_e \in \{0, 1\}, \quad \forall e \in \mathcal{E} \label{eq:binary_constraint}
+\end{align}
+\end{subequations}
+
+In this model, equation \eqref{eq:binary_flow} ensures topological connectivity (where $\delta_u$ is $1$ for source, $-1$ for target, and $0$ otherwise). Equation \eqref{eq:spatial_flow} ensuring that the continuous trajectory is seamless across the graph. Equations \eqref{eq:perspective_edge} and \eqref{eq:perspective_vertex} enforce the geometric containment within scaled convex sets, ensuring that if $y_e=0$, the associated continuous variables are constrained to the origin, incurring zero cost. This formulation provides a computationally efficient tight relaxation , allowing the solver to find near-global optimal trajectories that satisfy both the discrete graph structure and the complex continuous constraints of motion planning.
