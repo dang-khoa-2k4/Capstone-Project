@@ -1,0 +1,116 @@
+\subsection{Mixed-Integer Convex Programming Formulation via Perspective Relaxation}
+
+Directly solving the problem as a Mixed-Integer Nonlinear Programming (MINLP) formulation poses significant computational challenges due to the presence of non-convex constraints, particularly the bilinear relationship between the binary decision variables $y_e$ and the continuous state variables $x_u$. To overcome this and transform the problem into a tractable Mixed-Integer Convex Programming (MICP) form, we apply the perspective relaxation technique. The primary motivation of this method is to isolate the non-convexity by ``lifting'' the continuous variables into a higher-dimensional space. Instead of utilizing global variables $x_u$, we introduce local proxy variables $z_{e,u}, z_{e,v} \in \mathbb{R}^n$ for each edge $e=(u,v)$, representing the state contribution of the corresponding vertices when that edge is active.
+
+For each edge $e=(u, v)$, the local proxy variables $z_{e,u}$ and $z_{e,v}$ specifically model the contribution of the state at vertices $u$ and $v$ to the traversal of edge $e$. If the edge is not active (i.e., $y_e=0$), these contributions are forced to zero. This relationship is expressed as:
+\[
+z_{e,u} \in y_e X_u \quad \text{and} \quad z_{e,v} \in y_e X_v
+\]
+which implies:
+\[\begin{cases}
+z_{e,u} \in X_u & \text{if } y_e = 1 \\
+z_{e,u} = 0 & \text{if } y_e = 0
+\end{cases}
+\]
+
+This logic is formalized using the perspective function $\tilde{\ell}_e((z_{e,u}, z_{e,v}), y_e)$, which is the perspective of the original cost function $\ell_e$. A fundamental property in convex analysis states that if $\ell_e$ is convex, its perspective $\tilde{\ell}_e$ is jointly convex in all arguments. This property is crucial as it enables the use of efficient convex solvers. The perspective function is defined as:
+\[
+\tilde{\ell}_e(z_{e,u}, z_{e,v}, y_e) = 
+\begin{cases} 
+y_e \ell_e\left(\frac{z_{e,u}}{y_e}, \frac{z_{e,v}}{y_e}\right) & \text{if } y_e > 0 \\
+0 & \text{if } y_e = 0 \text{ and } z_{e,u} = z_{e,v} = 0 \\
++\infty & \text{otherwise}
+\end{cases}
+\]
+
+Crucially, rather than enforcing explicit equality constraints such as $z_{e,u} = y_e x_u$, which are non-convex, we extend the standard flow conservation law~\eqref{eq:flow_conservation} to the continuous variables. This mandates that for any node $u$ (excluding the source and target), the sum of continuous states entering the node via incoming edges must equal the sum of continuous states leaving the node via outgoing edges.
+
+The resulting MICP formulation for the Shortest Path Problem in GCS is defined as follows:
+
+\begin{subequations}
+\begin{align}
+\text{minimize} \quad & \sum_{e=(u,v) \in \mathcal{E}} \tilde{\ell}_e((z_{e,u}, z_{e,v}), y_e) \label{eq:gcs_obj_perspective} \\
+\text{subject to} \quad & \sum_{e \in \mathcal{E}^+(u)} y_e - \sum_{e \in \mathcal{E}^-(u)} y_e = \delta_u, \quad \forall u \in \mathcal{V} \label{eq:binary_flow} \\
+& \sum_{e \in \mathcal{E}^+(u)} z_{e,u} - \sum_{e \in \mathcal{E}^-(u)} z_{e,v} = 
+\begin{cases}
+x_s & \text{if } u = s \\
+-x_t & \text{if } u = t \\
+0 & \text{otherwise}
+\end{cases}, \quad \forall u \in \mathcal{V} \label{eq:spatial_flow} \\
+& (z_{e,u}, z_{e,v}) \in y_e \mathcal{X}_e, \quad \forall e \in \mathcal{E} \label{eq:perspective_edge} \\
+& z_{e,u} \in y_e X_u, \quad z_{e,v} \in y_e X_v, \quad \forall e=(u,v) \in \mathcal{E} \label{eq:perspective_vertex} \\
+& y_e \in \{0, 1\}, \quad \forall e \in \mathcal{E} \label{eq:binary_constraint}
+\end{align}
+\end{subequations}
+
+In this model, Equation~\eqref{eq:binary_flow} ensures topological connectivity, where $\delta_u$ is defined as $1$ for the source, $-1$ for the target, and $0$ otherwise. Equation~\eqref{eq:spatial_flow} ensures that the continuous trajectory is seamless across the graph structure. Equations~\eqref{eq:perspective_edge} and~\eqref{eq:perspective_vertex} enforce geometric containment within scaled convex sets; specifically, if $y_e=0$, the associated continuous variables are constrained to the origin, incurring zero cost. This formulation provides a computationally efficient and tight relaxation, allowing the solver to identify near-global optimal trajectories that satisfy both the discrete graph topology and the complex continuous constraints inherent in motion planning.
+
+\subsection{Convexification of the GCS Problem via the RLT Technique}
+
+To address the inherent non-convexity of the initial Mixed-Integer Non-Convex Program (MINCP)—specifically the bilinear constraints coupling binary decision variables with continuous state variables—we employ a convexification strategy based on the Reformulation-Linearization Technique (RLT) of the first level. The fundamental objective of this approach is to replace intractable constraints with tight convex envelopes. This ensures that the resulting Mixed-Integer Convex Program (MICP) preserves the integer feasible set of the original problem while providing strong lower bounds when the integrality constraints are relaxed.
+
+\subsubsection{Theoretical Foundation: The Duality between Perspective Cones and Valid Inequalities}
+
+Before detailing the optimization model, we must establish the mathematical connection between perspective cones and linear inequalities. Consider the dual cone of the perspective cone $\tilde{X}$, denoted as $(\tilde{X})^*$. This is defined as the set of vectors $(a, b)$ in the extended space such that their inner product with every element in the cone $\tilde{X}$ is non-negative:
+\begin{equation}
+    (\tilde{X})^* := \left\{ (a, b) \in \mathbb{R}^{n+1} \mid (a, b)^\top k \ge 0, \quad \forall k \in \tilde{X} \right\}.
+\end{equation}
+
+A critical result utilized in this formulation is the equivalence between the dual cone $(\tilde{X})^*$ and the set of valid linear inequalities for the set $X$. Geometrically, this represents the intersection of all closed half-spaces containing $X$. We formalize this in the following proposition:
+
+\textbf{Proposition.} The dual cone $(\tilde{X})^*$ is precisely the set of coefficients $(a, b)$ that define valid linear inequalities over the set $X$; that is, $(\tilde{X})^* \equiv X^\circ$.
+
+\textit{Proof.}
+To demonstrate this, consider an arbitrary element $k \in \tilde{X}$. By the definition of a perspective cone, $k$ can be represented as $k = (\lambda x, \lambda)$ for some $x \in X$ and a scalar $\lambda \ge 0$. The condition for a vector pair $(a, b)$ to belong to the dual cone $(\tilde{X})^*$ can be expanded as follows:
+\begin{align}
+    (a, b) \in (\tilde{X})^* &\iff (a, b)^\top (\lambda x, \lambda) \ge 0, \quad \forall x \in X, \forall \lambda \ge 0 \nonumber \\
+    &\iff \lambda (a^\top x + b) \ge 0, \quad \forall x \in X, \forall \lambda \ge 0.
+\end{align}
+Observe that the final inequality must hold for all non-negative values of $\lambda$. In the case where $\lambda > 0$, we may divide both sides by $\lambda$ without altering the inequality sign, yielding the condition $a^\top x + b \ge 0$. The case $\lambda = 0$ is trivially satisfied. Consequently, the necessary and sufficient condition for $(a, b) \in (\tilde{X})^*$ is that the linear expression $a^\top x + b$ remains non-negative over the entire set $X$. This confirms that $(\tilde{X})^*$ constitutes the set of coefficients for all valid inequalities on $X$, completing the proof. \qed
+
+\subsubsection{Construction of Convex Constraints}
+
+Leveraging the proposition above, we can ``lift'' any valid linear constraint from the flow variable space into the mixed state-flow space. Consider an arbitrary vertex $v$ and a valid linear inequality concerning the flow variables $y_e$ incident to $v$, given by:
+\begin{equation}
+    \sum_{e \in E_v} c_e y_e + d \ge 0, \label{eq:valid_ineq}
+\end{equation}
+where $E_v$ denotes the set of edges adjacent to $v$, and $d$ is a problem-dependent constant. By applying the perspective principle, we transform the inequality (~\ref{eq:valid_ineq}) into a constraint within the convex cone $\tilde{X}_v$. To facilitate this, we introduce proxy variables $z_e$ and $z'_e$. The variable $z_e$ represents the state contribution at the source vertex of edge $e$ when active, while $z'_e$ represents the state contribution at the target vertex.
+
+This transformation yields the following convex cone constraint:
+\begin{equation}
+    \left( \sum_{e \in E_{\text{in}}(v)} c_e z'_e + \sum_{e \in E_{\text{out}}(v)} c_e z_e + d x_v, \quad \sum_{e \in E_v} c_e y_e + d \right) \in \tilde{X}_v. \label{eq:lifted_constraint}
+\end{equation}
+
+Equation (~\ref{eq:lifted_constraint}) constrains the relationship between the intermediate state variables ($z, z'$) and the flow variables $y$, ensuring they reside within the perspective cone of the feasible set $X_v$.
+
+A specific yet crucial application of this Lemma involves the non-negativity constraint of the flow, i.e., $y_e \ge 0$. For an edge $e=(u, v)$:
+\begin{itemize}
+    \item At the source vertex $u$, applying the lifting with $c_e=1$ yields the constraint $(z_e, y_e) \in \tilde{X}_u$.
+    \item At the target vertex $v$, applying the lifting with $c_e=1$ yields the constraint $(z'_e, y_e) \in \tilde{X}_v$.
+\end{itemize}
+These constraints effectively function as an ``on/off'' mechanism: if $y_e=1$, the proxy variable $z_e$ is constrained to the set $X_u$; conversely, if $y_e=0$, $z_e$ is forced to the origin.
+
+\subsubsection{Complete MICP Formulation}
+
+Synthesizing the preceding analysis, we propose the Mixed-Integer Convex Programming (MICP) formulation for the Shortest Path Problem on GCS, as described in Theorem 5.7. This model completely eliminates bilinear components, replacing them with convex cone constraints:
+
+\begin{subequations}~\label{eq:micp_formulation}
+\begin{align}
+  \underset{y, z, z'}{\text{minimize}} \quad & \sum_{e \in E} \tilde{\ell}_e((z_e, z'_e), y_e) \tag{5.5a} \\
+  \text{subject to} \quad & \sum_{e \in E_{\text{out}}(s)} y_e = 1, \quad \sum_{e \in E_{\text{in}}(t)} y_e = 1, \tag{5.5b} \\
+  & \sum_{e \in E_{\text{out}}(v)} y_e \le 1, \quad \forall v \in V \setminus \{s, t\}, \tag{5.5c} \\
+  & \sum_{e \in E_{\text{in}}(v)} (z'_e, y_e) = \sum_{e \in E_{\text{out}}(v)} (z_e, y_e), \quad \forall v \in V \setminus \{s, t\}, \tag{5.5d} \\
+  & (z_e, y_e) \in \tilde{X}_u, \quad (z'_e, y_e) \in \tilde{X}_v, \quad \forall e = (u, v) \in E, \tag{5.5e} \\
+  & y_e \in \{0, 1\}, \quad \forall e \in E. \tag{5.5f}
+\end{align}
+\end{subequations}
+
+The formulation (\ref{eq:micp_formulation}) is composed of four primary components that ensure graph connectivity and geometric consistency.
+
+First, the objective function (5.5a) represents the total cost across all edges, where $\tilde{\ell}_e$ is the perspective function of the original cost metric. Since perspective operations preserve convexity, the optimization problem maintains a tractable convex structure.
+
+Second, constraints (5.5b) and (5.5c) enforce classical flow conservation, guaranteeing the existence of a path from the source $s$ to the target $t$ while restricting each intermediate vertex to be visited at most once.
+
+Third, constraint (5.5d) represents the spatial flow conservation, a distinct feature compared to standard shortest path problems. This constraint is derived by multiplying the flow conservation equation at vertex $v$ by the state variable $x_v$. Physically, it ensures trajectory continuity: the aggregated state ``entering'' vertex $v$ (via $z'_e$) must equal the aggregated state ``leaving'' vertex $v$ (via $z_e$).
+
+Finally, constraints (5.5e) result from the convexification process discussed previously. They serve as the convex envelopes for the proxy variables $z_e$ and $z'_e$, ensuring that when an edge $e=(u,v)$ is selected ($y_e=1$), these variables correspond to valid points within the sets $X_u$ and $X_v$, respectively.
