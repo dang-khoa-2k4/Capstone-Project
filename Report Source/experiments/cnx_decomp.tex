@@ -7,7 +7,7 @@ Thay vì tiếp cận bài toán tránh vật cản theo cách truyền thống 
 
 \subsection{Phân hoạch Lồi Xấp xỉ (ACD) của Đa giác} 
 
-Phương pháp Approximate Convex Decomposition (ACD) giới thiệu một cách tiếp cận khác biệt cơ bản để quản lý sự phức tạp. Thay vì yêu cầu sự lồi hoàn hảo, nó cho phép các thành phần "lồi xấp xỉ" trong một dung sai do người dùng xác định, $\tau$.\cite{lien2006} Điều này thường dẫn đến các phân hoạch có ít thành phần hơn nhiều và phù hợp hơn với các đặc điểm cấu trúc nổi bật của đối tượng.
+Phương pháp Approximate Convex Decomposition (ACD) giới thiệu một cách tiếp cận khác biệt cơ bản để quản lý sự phức tạp. Thay vì yêu cầu sự lồi hoàn hảo, nó cho phép các thành phần "lồi xấp xỉ" trong một dung sai do người dùng xác định, $\tau$.\cite{LienAmato2006} Điều này thường dẫn đến các phân hoạch có ít thành phần hơn nhiều và phù hợp hơn với các đặc điểm cấu trúc nổi bật của đối tượng.
 
 \subsubsection{Các Khái niệm Cơ bản trong Phân rã Lồi}
 \label{sec:basic-concepts}
@@ -56,7 +56,7 @@ Các định nghĩa này đóng vai trò nền tảng cho các phương pháp đ
 
 
 
-Thuật toán là một chiến lược chia để trị đệ quy\cite{lien2006}:
+Thuật toán là một chiến lược chia để trị đệ quy\cite{LienAmato2006}:
 \begin{enumerate}
 \item Đo độ lõm: Xác định đặc điểm không lồi (một "notch" hay đỉnh lõm) quan trọng nhất trong đa giác. Đây là điểm có độ lõm lớn nhất. Tùy theo từng trường hợp mà ta có thể sử dụng các thước đo độ lõm khác nhau, cách để tính những thước đo độ lõm nãy sẽ được giới thiệu rõ hơn ở phần ~\ref{sec:MEASURING-CONCAVITY}
 
@@ -128,7 +128,7 @@ Chất lượng của phân hoạch phụ thuộc rất nhiều vào \textbf{cá
 
 \begin{itemize}
 \item Loại thuật toán: Đây là một phương pháp xấp xỉ theo định nghĩa. Một phân hoạch với $\tau=0$ là một phân hoạch lồi chính xác.
-\item Độ phức tạp thời gian: $O(n r^2)$, trong đó $n$ là số đỉnh và $r$ là số đỉnh lõm.\cite{lien2006} Điều này nhanh hơn các thuật toán phân hoạch chính xác tối ưu cho đa giác không có lỗ.
+\item Độ phức tạp thời gian: $O(n r^2)$, trong đó $n$ là số đỉnh và $r$ là số đỉnh lõm.\cite{LienAmato2006} Điều này nhanh hơn các thuật toán phân hoạch chính xác tối ưu cho đa giác không có lỗ.
 \end{itemize}
 
 
@@ -279,7 +279,7 @@ Thể tích của ellipsoid tỉ lệ với \(\det(C)\).
 \begin{figure}[!htp]
     \centering
     \includegraphics[width=1\linewidth]{experiments/image/time-iris.png}
-    \caption{Độ phức tạp thời gian}
+    \caption{Độ phức tạp thời gian \cite{DeitsTedrake2014}}
 \end{figure}
 
 \item Xử lý Vật cản không lồi:
@@ -296,7 +296,7 @@ Thuật toán Visibility Clique Cover (VCC) giải quyết trực tiếp một h
 
 \subsubsection{Ý tưởng và Chi tiết Thuật toán}
 
-Quy trình VCC bao gồm bốn bước chính \cite{vcc2023}:
+Quy trình VCC bao gồm bốn bước chính:
 \begin{enumerate}
 \item Lấy mẫu \& Xây dựng Đồ thị Khả kiến (Visibility Graphs): Thuật toán lấy mẫu $n$ điểm ngẫu nhiên trong không gian cấu hình tự do ($C_{free}$). Các điểm này tạo thành các đỉnh của một đồ thị khả kiến (visibility graph)\footnote{\textit{Visibility graph} là đồ thị trong đó các đỉnh biểu diễn vị trí (hoặc đỉnh chướng ngại vật), và có cạnh nối giữa hai đỉnh nếu đoạn thẳng nối chúng nằm hoàn toàn trong không gian tự do.}
 . Một cạnh tồn tại giữa hai đỉnh nếu đoạn thẳng nối hai điểm tương ứng hoàn toàn nằm trong không gian tự do (tức là không va chạm).
@@ -346,7 +346,7 @@ Quy trình VCC bao gồm bốn bước chính \cite{vcc2023}:
 
 \begin{itemize}
 \item Loại thuật toán: VCC là một phương pháp xấp xỉ. Chất lượng của lớp phủ được đo bằng tỷ lệ phần trăm thể tích của $C_{free}$ được bao phủ bởi hợp của các đa diện kết quả.$^5$
-\item Mục tiêu Tối ưu: Thuật toán nhằm tìm một lớp phủ lồi xấp xỉ $\alpha$ ($\alpha$-approximate convex cover) với số lượng vùng tối thiểu. Nó sử dụng bài toán lớp phủ clique tối thiểu (minimum clique cover) như một bài toán tương tự rời rạc cho bài toán lớp phủ lồi tối thiểu.\cite{vcc2023}
+\item Mục tiêu Tối ưu: Thuật toán nhằm tìm một lớp phủ lồi xấp xỉ $\alpha$ ($\alpha$-approximate convex cover) với số lượng vùng tối thiểu. Nó sử dụng bài toán lớp phủ clique tối thiểu (minimum clique cover) như một bài toán tương tự rời rạc cho bài toán lớp phủ lồi tối thiểu.\cite{DeitsTedrake2023VCC}
 \item Phương pháp: Đây là một cách tiếp cận lai ghép giữa hình học và ILP.
-\item Xử lý Không gian không lồi: VCC không phụ thuộc vào hình dạng của chướng ngại vật vì nó dựa vào một bộ kiểm tra va chạm chung để kiểm tra khả kiến và sau đó sử dụng một thuật toán lấp đầy cơ bản (như IRIS-NP) có thể xử lý các không gian cấu hình không lồi.\cite{vcc2023}
+\item Xử lý Không gian không lồi: VCC không phụ thuộc vào hình dạng của chướng ngại vật vì nó dựa vào một bộ kiểm tra va chạm chung để kiểm tra khả kiến và sau đó sử dụng một thuật toán lấp đầy cơ bản (như IRIS-NP) có thể xử lý các không gian cấu hình không lồi.\cite{DeitsTedrake2023VCC}
 \end{itemize}

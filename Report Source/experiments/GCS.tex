@@ -1,11 +1,138 @@
-\section{Graphs of convex sets}
+% \section{Graphs of convex sets}
 
-The Graph of Convex Sets (GCS) framework provides a unified methodology for solving hybrid discrete-continuous optimization problems, effectively bridging combinatorial graph search with continuous convex programming. Unlike classical graph theory, GCS generalizes the Shortest Path Problem (SPP) by associating continuous geometric variables directly with the graph topology.
+% The Graph of Convex Sets (GCS) framework provides a unified methodology for solving hybrid discrete-continuous optimization problems, effectively bridging combinatorial graph search with continuous convex programming. Unlike classical graph theory, GCS generalizes the Shortest Path Problem (SPP) by associating continuous geometric variables directly with the graph topology.
 
-\subsection{Shortest Path Formulation in Graph of Convex Sets}
-A GCS is defined as a directed graph $G = (V, E)$ where each vertex $v \in V$ is associated with a continuous decision variable $x_v$ confined within a non-empty, compact convex set $X_v \subset \mathbb{R}^n$. In the context of motion planning, these sets typically represent pre-computed collision-free regions in the configuration space. Transitions between vertices are governed by edges $e = (u, v) \in E$, which impose auxiliary convex constraints $(x_u, x_v) \in X_e$ and are weighted by a convex cost function $\ell_e(x_u, x_v)$. This function is required to be proper, closed, and convex, explicitly coupling the continuous variables $x_u$ and $x_v$ to model transition metrics such as Euclidean distance or energy expenditure. Note that, despite its name, we do not assume $\ell_e$ to be a valid metric, and properties like symmetry or the triangle inequality are not required to hold~\cite{gcs2023}.
+% \subsection{Shortest Path Formulation in Graph of Convex Sets}
+% A GCS is defined as a directed graph $G = (V, E)$ where each vertex $v \in V$ is associated with a continuous decision variable $x_v$ confined within a non-empty, compact convex set $X_v \subset \mathbb{R}^n$. In the context of motion planning, these sets typically represent pre-computed collision-free regions in the configuration space. Transitions between vertices are governed by edges $e = (u, v) \in E$, which impose auxiliary convex constraints $(x_u, x_v) \in X_e$ and are weighted by a convex cost function $\ell_e(x_u, x_v)$. This function is required to be proper, closed, and convex, explicitly coupling the continuous variables $x_u$ and $x_v$ to model transition metrics such as Euclidean distance or energy expenditure. Note that, despite its name, we do not assume $\ell_e$ to be a valid metric, and properties like symmetry or the triangle inequality are not required to hold~\cite{gcs2023}.
 
-While the classical network flow formulation effectively solves the SPP on discrete graphs with static edge costs, the GCS framework generalizes this by introducing continuous decision variables coupled with the graph topology. In GCS, the cost of traversing an edge $e=(u,v)$ is no longer a constant scalar $c_{uv}$, but a convex function $\ell_e(x_u, x_v)$ dependent on the continuous states $x_u \in X_u$ and $x_v \in X_v$ at the incident vertices. The objective of the SPP in GCS is to identify a path $p$ from a source vertex $s$ to a target vertex $t$ that minimizes the aggregate cost of traversing the edges along the path, while simultaneously selecting appropriate continuous variables at each vertex. Formally, this problem can be expressed as:
+% While the classical network flow formulation effectively solves the SPP on discrete graphs with static edge costs, the GCS framework generalizes this by introducing continuous decision variables coupled with the graph topology. In GCS, the cost of traversing an edge $e=(u,v)$ is no longer a constant scalar $c_{uv}$, but a convex function $\ell_e(x_u, x_v)$ dependent on the continuous states $x_u \in X_u$ and $x_v \in X_v$ at the incident vertices. The objective of the SPP in GCS is to identify a path $p$ from a source vertex $s$ to a target vertex $t$ that minimizes the aggregate cost of traversing the edges along the path, while simultaneously selecting appropriate continuous variables at each vertex. Formally, this problem can be expressed as:
+
+% \begin{align}
+% \min_{p, \{x_v\}_{v \in p}} \quad & \sum_{(u, v) \in E_p} \ell_{(u, v)}(x_u, x_v) \label{eq:gcs_obj} \\
+% \text{s.t.} \quad & p \in \mathcal{P}, \label{eq:gcs_path_constraint} \\
+% & x_v \in X_v,\quad \forall v \in p, \label{eq:gcs_vertex_constraint} \\
+% & (x_u, x_v) \in X_e,\quad \forall e=(u,v) \in E_p \label{eq:gcs_edge_constraint}
+% \end{align}
+
+% where $\mathcal{P}$ denotes the set of all feasible paths from $s$ to $t$, and $E_p$ represents the edges included in the path $p$.
+
+% \subsection{Complexity Analysis}
+
+% The computational complexity of the SPP in GCS differs fundamentally from that of the classical Shortest Path Problem on discrete graphs.
+
+% In classical graph theory, the SPP is generally NP-hard (e.g., the Longest Path problem or variants involving negative cycles). However, it becomes efficiently solvable in polynomial time under two critical conditions:
+% \begin{enumerate}
+%     \item The graph is \textbf{acyclic} (allowing for topological sort based solutions).
+%     \item All edge and vertex costs are \textbf{non-negative} (solvable via Dijkstra's algorithm).
+% \end{enumerate}
+
+% \begin{proposition}
+% In stark contrast, the Shortest Path Problem in a Graph of Convex Sets remains \textbf{NP-hard} even when both of the aforementioned conditions—acyclicity and non-negative costs—are satisfied.
+% \end{proposition}
+
+% This hardness is established via a reduction from the \textbf{3SAT} problem (Boolean satisfiability with clauses of three literals), which is known to be NP-complete. As demonstrated in Theorem 9.1 of~\cite{Marcucci24a}, one can construct a layered, acyclic GCS instance with non-negative costs where identifying a valid path is equivalent to finding a satisfying assignment for a 3SAT formula. This implies that merely determining the \textit{feasibility} of an SPP in GCS is NP-hard.
+
+% Alternative proofs of NP-hardness have also been provided for cases involving low-dimensional convex sets (1D and 2D), though these instances typically rely on graphs containing cycles~\cite{Marcucci24a}.
+
+% \subsection{Detailed Formulation of Vertices and Edges}
+
+% In the specific context of trajectory optimization, the components of the GCS are rigorously defined to enforce both geometric safety and kinematic feasibility.
+
+% Each vertex $v \in V$ corresponds to a specific convex, collision-free region $Q_v$ within the Configuration Space (C-space). The continuous decision variable $x_v \in \mathbb{R}^{n_v}$ associated with vertex $v$ represents a local trajectory segment or a state configuration. It is crucial to note that the dimension $n_v$ is local to the vertex, allowing for variable dimensionality across the graph.
+
+% The variable $x_v$ is constrained to lie within a compact convex set $\mathcal{X}_v \subset \mathbb{R}^{n_v}$. For trajectory generation using piecewise polynomial parameterizations (e.g., Bézier curves), $\mathcal{X}_v$ is explicitly constructed to ensure the curve lies within the safe region $Q_v$ and satisfies dynamic limits. The defining constraints for $\mathcal{X}_v$ are typically formulated as:
+
+% \begin{align}
+%     & r_{i,k} \in Q_i, \quad && k = 0, \dots, d, \label{eq:geo_containment} \\
+%     & \dot{h}_{i,k} \ge \dot{h}_{\text{min}} = 10^{-6}, \quad && k = 0, \dots, d-1, \label{eq:time_scaling} \\
+%     & \dot{r}_{i,k} \in \dot{h}_{i,k}D, \quad && k = 0, \dots, d-1, \label{eq:dynamic_limits} \\
+%     & h_{i,0} \ge 0, \quad h_{i,d} \le T_{\text{max}}. && \label{eq:duration_bounds}
+% \end{align}
+
+% Here, \eqref{eq:geo_containment} enforces geometric containment of the spatial control points $r_{i,k}$ within the safe region. Equation \eqref{eq:time_scaling} ensures strict monotonicity of the time-scaling function to preserve causality. Equation \eqref{eq:dynamic_limits} couples spatial and temporal derivatives to satisfy velocity bounds defined by the set $D$, and \eqref{eq:duration_bounds} imposes limits on the trajectory duration.
+
+% An edge $e = (u, v) \in E$ defines the transition between two vertices. This transition is governed by a \textit{Coupling Constraint Set} $\mathcal{X}_e \subseteq \mathbb{R}^{n_u + n_v}$. This set imposes constraints on the concatenated vector $(x_u, x_v)$, residing in the Cartesian product of the individual variable spaces. Mathematically, $\mathcal{X}_e$ defines which pairs of configurations $(x_u, x_v)$ are compatible, ensuring continuity (e.g., $C^0, C^1$, or higher-order continuity) between trajectory segments.
+
+% Associated with each edge is a \textit{Coupling Cost Function} $f_e: \mathbb{R}^{n_u + n_v} \to \mathbb{R}$. This is a scalar-valued convex function that assigns a cost based on the simultaneous selection of $x_u$ and $x_v$, modeling transition metrics such as path length or energy consumption.
+
+% \subsection{Cost Function Specifications}
+
+% The choice of the edge cost function $\ell_e(x_u, x_v)$ dictates the physical interpretation of the optimal path. We examine two primary classes of cost functions relevant to this study: geometric path length and dynamic trajectory costs.
+
+% For purely geometric problems, such as finding the shortest Euclidean path through regions, the cost is typically defined as the $L_2$-norm or its square. The squared Euclidean distance,
+% \[
+% \ell_e(x_u, x_v) = \|x_v - x_u\|_2^2,
+% \]
+% is a quadratic function that fits naturally into Quadratic Programming (QP) solvers. Alternatively, the standard $L_2$-norm
+% \[
+% \ell_e(x_u, x_v) = \|x_v - x_u\|_2
+% \]
+% can be modeled using Second-Order Cone Programming (SOCP), preserving convexity.
+
+% In the context of motion planning using Bézier curves, the continuous variable $x_v$ encapsulates both the control points and the time duration of the trajectory segment. Here, the cost function represents a trade-off between execution time and control effort (smoothness). A common formulation minimizes the path energy (integral of squared acceleration) normalized by time. For a transition between vertices $u$ and $v$ with duration $T_e$, the cost takes the form 
+% \[
+% \ell_e(x_u, x_v) = \frac{1}{T_e} \int_0^{T_e} \|\ddot{q}(t)\|^2 dt
+% \]
+
+% When discretized or expressed via Bézier coefficients, this function essentially behaves as a perspective function of the form quadratic-over-linear ($x^2/y$), which is convex regarding both the control points and the duration $T_e$.
+
+% \subsection{Mixed-Integer Convex Programming Formulation via Perspective Relaxation}
+
+% To transform the intractable MINLP into a solvable Mixed-Integer Convex Program (MICP), we employ a tight convex relaxation technique known as perspective relaxation. This approach isolates the non-convexity by lifting the continuous variables into a higher-dimensional space and replacing the bilinear constraints with linear flow conservation constraints on these lifted variables.
+
+% For each edge $e=(u, v)$, instead of using global variables $x_u$ and $x_v$, we introduce local proxy variables $z_{e,u}$ and $z_{e,v}$ with $z_{e,u}, z_{e,v} \in \mathbb{R}^n$. These variables represent the contribution of the state at vertices $u$ and $v$ specifically to the traversal of edge $e$. If the edge is not active ($y_e=0$), these contributions are forced to zero. 
+% \[
+% z_{e,u} \in y_e X_u \quad \text{and} \quad z_{e,v} \in y_e X_v
+% \]
+% This implies:
+% \[\begin{cases}
+% z_{e,u} \in X_u & \text{if } y_e = 1 \\
+% z_{e,u} = 0 & \text{if } y_e = 0
+% \end{cases}
+% \]
+
+% This logic is formalized using the perspective function $\tilde{\ell}_e((z_{e,u}, z_{e,v}), y_e)$, which is the perspective of the original cost function $\ell_e$. A key property of convex analysis is that if $\ell_e$ is convex, its perspective $\tilde{\ell}_e$ is jointly convex in all arguments, enabling the use of efficient convex solvers.
+% \[
+% \tilde{\ell}_e(z_{e,u}, z_{e,v}, y_e) = 
+% \begin{cases} 
+% y_e \ell_e\left(\frac{z_{e,u}}{y_e}, \frac{z_{e,v}}{y_e}\right) & \text{if } y_e > 0 \\
+% 0 & \text{if } y_e = 0 \text{ and } z_{e,u} = z_{e,v} = 0 \\
+% +\infty & \text{otherwise}
+% \end{cases}
+% \]
+
+% Crucially, rather than enforcing explicit equality constraints like $z_{e,u} = y_e x_u$ which are non-convex, we extends the standard flow conservation law \eqref{eq:flow_conservation} to the continuous variables. It mandates that for any node $u$ (excluding source and target), the sum of continuous states entering the node via incoming edges must equal the sum of continuous states leaving the node via outgoing edges.
+
+% The resulting MICP formulation for the Shortest Path Problem in GCS is defined as follows:
+
+% \begin{subequations}
+% \begin{align}
+% \text{minimize} \quad & \sum_{e=(u,v) \in \mathcal{E}} \tilde{\ell}_e((z_{e,u}, z_{e,v}), y_e) \label{eq:gcs_obj_perspective} \\
+% \text{subject to} \quad & \sum_{e \in \mathcal{E}^+(u)} y_e - \sum_{e \in \mathcal{E}^-(u)} y_e = \delta_u, \quad \forall u \in \mathcal{V} \label{eq:binary_flow} \\
+% & \sum_{e \in \mathcal{E}^+(u)} z_{e,u} - \sum_{e \in \mathcal{E}^-(u)} z_{e,v} = 
+% \begin{cases}
+% x_s & \text{if } u = s \\
+% -x_t & \text{if } u = t \\
+% 0 & \text{otherwise}
+% \end{cases}, \quad \forall u \in \mathcal{V} \label{eq:spatial_flow} \\
+% & (z_{e,u}, z_{e,v}) \in y_e \mathcal{X}_e, \quad \forall e \in \mathcal{E} \label{eq:perspective_edge} \\
+% & z_{e,u} \in y_e X_u, \quad z_{e,v} \in y_e X_v, \quad \forall e=(u,v) \in \mathcal{E} \label{eq:perspective_vertex} \\
+% & y_e \in \{0, 1\}, \quad \forall e \in \mathcal{E} \label{eq:binary_constraint}
+% \end{align}
+% \end{subequations}
+
+% In this model, equation \eqref{eq:binary_flow} ensures topological connectivity (where $\delta_u$ is $1$ for source, $-1$ for target, and $0$ otherwise). Equation \eqref{eq:spatial_flow} ensuring that the continuous trajectory is seamless across the graph. Equations \eqref{eq:perspective_edge} and \eqref{eq:perspective_vertex} enforce the geometric containment within scaled convex sets, ensuring that if $y_e=0$, the associated continuous variables are constrained to the origin, incurring zero cost. This formulation provides a computationally efficient tight relaxation , allowing the solver to find near-global optimal trajectories that satisfy both the discrete graph structure and the complex continuous constraints of motion planning.
+
+
+\section{Đồ thị các tập lồi}
+
+Khung phương pháp \textit{Graph of Convex Sets} (GCS) cung cấp một cách tiếp cận thống nhất để giải các bài toán tối ưu lai rời rạc--liên tục, đóng vai trò cầu nối giữa tìm kiếm tổ hợp trên đồ thị và lập trình lồi liên tục. Khác với lý thuyết đồ thị cổ điển, GCS mở rộng bài toán Đường đi ngắn nhất (Shortest Path Problem -- SPP) bằng cách gắn trực tiếp các biến hình học liên tục vào cấu trúc đồ thị.
+
+\subsection{Mô hình bài toán Đường đi ngắn nhất trong Graph of Convex Sets}
+
+Một GCS được định nghĩa là một đồ thị có hướng $G = (V, E)$, trong đó mỗi đỉnh $v \in V$ được gắn với một biến quyết định liên tục $x_v$, bị ràng buộc trong một tập lồi, không rỗng và compact $X_v \subset \mathbb{R}^n$. Trong bối cảnh lập kế hoạch chuyển động, các tập này thường biểu diễn các vùng không va chạm đã được tiền xử lý trong không gian cấu hình. Các chuyển tiếp giữa các đỉnh được mô tả bởi các cạnh $e = (u, v) \in E$, mỗi cạnh áp đặt một tập ràng buộc lồi phụ $(x_u, x_v) \in X_e$ và được gán một hàm chi phí lồi $\ell_e(x_u, x_v)$. Hàm chi phí này được yêu cầu là proper, closed và lồi, nhằm liên kết trực tiếp các biến liên tục $x_u$ và $x_v$ để mô hình hóa các đại lượng chuyển tiếp như khoảng cách Euclid hoặc năng lượng tiêu thụ. Cần lưu ý rằng, mặc dù được gọi là ``chi phí'', $\ell_e$ không nhất thiết phải là một metric hợp lệ; các tính chất như đối xứng hay bất đẳng thức tam giác không được giả định là thỏa mãn~\cite{gcs2023}.
+
+Trong khi mô hình luồng mạng cổ điển giải hiệu quả bài toán SPP trên các đồ thị rời rạc với chi phí cạnh cố định, khung GCS tổng quát hóa cách tiếp cận này bằng cách đưa vào các biến quyết định liên tục gắn với cấu trúc đồ thị. Trong GCS, chi phí khi đi qua một cạnh $e=(u,v)$ không còn là một hằng số $c_{uv}$, mà là một hàm lồi $\ell_e(x_u, x_v)$ phụ thuộc vào trạng thái liên tục $x_u \in X_u$ và $x_v \in X_v$ tại các đỉnh kề. Mục tiêu của bài toán SPP trong GCS là xác định một đường đi $p$ từ đỉnh nguồn $s$ đến đỉnh đích $t$ sao cho tổng chi phí các cạnh trên đường đi là nhỏ nhất, đồng thời lựa chọn các biến liên tục phù hợp tại mỗi đỉnh. Bài toán này được phát biểu một cách hình thức như sau:
 
 \begin{align}
 \min_{p, \{x_v\}_{v \in p}} \quad & \sum_{(u, v) \in E_p} \ell_{(u, v)}(x_u, x_v) \label{eq:gcs_obj} \\
@@ -14,33 +141,33 @@ While the classical network flow formulation effectively solves the SPP on discr
 & (x_u, x_v) \in X_e,\quad \forall e=(u,v) \in E_p \label{eq:gcs_edge_constraint}
 \end{align}
 
-where $\mathcal{P}$ denotes the set of all feasible paths from $s$ to $t$, and $E_p$ represents the edges included in the path $p$.
+trong đó $\mathcal{P}$ ký hiệu tập tất cả các đường đi khả thi từ $s$ đến $t$, và $E_p$ là tập các cạnh thuộc đường đi $p$.
 
-\subsection{Complexity Analysis}
+\subsection{Phân tích độ phức tạp}
 
-The computational complexity of the SPP in GCS differs fundamentally from that of the classical Shortest Path Problem on discrete graphs.
+Độ phức tạp tính toán của bài toán SPP trong GCS khác biệt một cách căn bản so với bài toán Đường đi ngắn nhất trong đồ thị rời rạc cổ điển.
 
-In classical graph theory, the SPP is generally NP-hard (e.g., the Longest Path problem or variants involving negative cycles). However, it becomes efficiently solvable in polynomial time under two critical conditions:
+Trong lý thuyết đồ thị cổ điển, bài toán SPP nói chung là NP-hard (ví dụ như bài toán Đường đi dài nhất hoặc các biến thể có chu trình âm). Tuy nhiên, bài toán này có thể được giải trong thời gian đa thức nếu thỏa mãn hai điều kiện then chốt:
 \begin{enumerate}
-    \item The graph is \textbf{acyclic} (allowing for topological sort based solutions).
-    \item All edge and vertex costs are \textbf{non-negative} (solvable via Dijkstra's algorithm).
+    \item Đồ thị là \textbf{không chu trình} (cho phép giải bằng sắp xếp topo).
+    \item Mọi chi phí đỉnh và cạnh đều \textbf{không âm} (giải được bằng thuật toán Dijkstra).
 \end{enumerate}
 
 \begin{proposition}
-In stark contrast, the Shortest Path Problem in a Graph of Convex Sets remains \textbf{NP-hard} even when both of the aforementioned conditions—acyclicity and non-negative costs—are satisfied.
+Trái ngược hoàn toàn với trường hợp trên, bài toán Đường đi ngắn nhất trong Graph of Convex Sets vẫn là \textbf{NP-hard} ngay cả khi đồng thời thỏa mãn hai điều kiện: đồ thị không chu trình và chi phí không âm.
 \end{proposition}
 
-This hardness is established via a reduction from the \textbf{3SAT} problem (Boolean satisfiability with clauses of three literals), which is known to be NP-complete. As demonstrated in Theorem 9.1 of~\cite{Marcucci24a}, one can construct a layered, acyclic GCS instance with non-negative costs where identifying a valid path is equivalent to finding a satisfying assignment for a 3SAT formula. This implies that merely determining the \textit{feasibility} of an SPP in GCS is NP-hard.
+Tính NP-hard này được chứng minh thông qua phép quy giảm từ bài toán \textbf{3SAT} (bài toán thỏa mãn Boolean với mỗi mệnh đề gồm ba biến), vốn là một bài toán NP-complete. Như đã trình bày trong Định lý 9.1 của~\cite{Marcucci24a}, có thể xây dựng một bài toán GCS dạng phân lớp, không chu trình và có chi phí không âm, sao cho việc xác định sự tồn tại của một đường đi hợp lệ tương đương với việc tìm một gán giá trị thỏa mãn cho công thức 3SAT. Điều này cho thấy rằng ngay cả việc xác định \textit{tính khả thi} của bài toán SPP trong GCS cũng đã là NP-hard.
 
-Alternative proofs of NP-hardness have also been provided for cases involving low-dimensional convex sets (1D and 2D), though these instances typically rely on graphs containing cycles~\cite{Marcucci24a}.
+Các chứng minh khác về tính NP-hard cũng đã được đưa ra cho các trường hợp mà các tập lồi có chiều thấp (1D và 2D), tuy nhiên các trường hợp này thường dựa trên các đồ thị có chu trình~\cite{Marcucci24a}.
 
-\subsection{Detailed Formulation of Vertices and Edges}
+\subsection{Mô hình chi tiết các đỉnh và cạnh}
 
-In the specific context of trajectory optimization, the components of the GCS are rigorously defined to enforce both geometric safety and kinematic feasibility.
+Trong bối cảnh tối ưu quỹ đạo, các thành phần của GCS được định nghĩa một cách chặt chẽ nhằm đảm bảo cả tính an toàn hình học lẫn tính khả thi về động học.
 
-Each vertex $v \in V$ corresponds to a specific convex, collision-free region $Q_v$ within the Configuration Space (C-space). The continuous decision variable $x_v \in \mathbb{R}^{n_v}$ associated with vertex $v$ represents a local trajectory segment or a state configuration. It is crucial to note that the dimension $n_v$ is local to the vertex, allowing for variable dimensionality across the graph.
+Mỗi đỉnh $v \in V$ tương ứng với một vùng lồi, không va chạm $Q_v$ trong không gian cấu hình (C-space). Biến quyết định liên tục $x_v \in \mathbb{R}^{n_v}$ gắn với đỉnh $v$ biểu diễn một đoạn quỹ đạo cục bộ hoặc một cấu hình trạng thái. Cần nhấn mạnh rằng chiều $n_v$ là cục bộ theo từng đỉnh, cho phép đồ thị có các đỉnh với số chiều biến khác nhau.
 
-The variable $x_v$ is constrained to lie within a compact convex set $\mathcal{X}_v \subset \mathbb{R}^{n_v}$. For trajectory generation using piecewise polynomial parameterizations (e.g., Bézier curves), $\mathcal{X}_v$ is explicitly constructed to ensure the curve lies within the safe region $Q_v$ and satisfies dynamic limits. The defining constraints for $\mathcal{X}_v$ are typically formulated as:
+Biến $x_v$ bị ràng buộc trong một tập lồi compact $\mathcal{X}_v \subset \mathbb{R}^{n_v}$. Đối với bài toán sinh quỹ đạo sử dụng các tham số đa thức từng đoạn (ví dụ như đường cong Bézier), tập $\mathcal{X}_v$ được xây dựng một cách tường minh nhằm đảm bảo quỹ đạo nằm hoàn toàn trong vùng an toàn $Q_v$ và thỏa mãn các giới hạn động lực học. Các ràng buộc xác định $\mathcal{X}_v$ thường có dạng:
 
 \begin{align}
     & r_{i,k} \in Q_i, \quad && k = 0, \dots, d, \label{eq:geo_containment} \\
@@ -49,71 +176,72 @@ The variable $x_v$ is constrained to lie within a compact convex set $\mathcal{X
     & h_{i,0} \ge 0, \quad h_{i,d} \le T_{\text{max}}. && \label{eq:duration_bounds}
 \end{align}
 
-Here, \eqref{eq:geo_containment} enforces geometric containment of the spatial control points $r_{i,k}$ within the safe region. Equation \eqref{eq:time_scaling} ensures strict monotonicity of the time-scaling function to preserve causality. Equation \eqref{eq:dynamic_limits} couples spatial and temporal derivatives to satisfy velocity bounds defined by the set $D$, and \eqref{eq:duration_bounds} imposes limits on the trajectory duration.
+Trong đó, \eqref{eq:geo_containment} đảm bảo các điểm điều khiển không gian $r_{i,k}$ nằm trong vùng an toàn. Phương trình \eqref{eq:time_scaling} đảm bảo tính đơn điệu chặt của hàm co giãn thời gian nhằm duy trì tính nhân quả. Phương trình \eqref{eq:dynamic_limits} liên kết đạo hàm không gian và thời gian để thỏa mãn giới hạn vận tốc được xác định bởi tập $D$, và \eqref{eq:duration_bounds} áp đặt các giới hạn lên thời gian thực hiện quỹ đạo.
 
-An edge $e = (u, v) \in E$ defines the transition between two vertices. This transition is governed by a \textit{Coupling Constraint Set} $\mathcal{X}_e \subseteq \mathbb{R}^{n_u + n_v}$. This set imposes constraints on the concatenated vector $(x_u, x_v)$, residing in the Cartesian product of the individual variable spaces. Mathematically, $\mathcal{X}_e$ defines which pairs of configurations $(x_u, x_v)$ are compatible, ensuring continuity (e.g., $C^0, C^1$, or higher-order continuity) between trajectory segments.
+Một cạnh $e = (u, v) \in E$ xác định sự chuyển tiếp giữa hai đỉnh. Chuyển tiếp này được điều khiển bởi một \textit{tập ràng buộc liên kết} $\mathcal{X}_e \subseteq \mathbb{R}^{n_u + n_v}$. Tập này áp đặt các ràng buộc lên vector ghép $(x_u, x_v)$, đảm bảo các cặp cấu hình $(x_u, x_v)$ là tương thích với nhau, chẳng hạn như thỏa mãn tính liên tục $C^0$, $C^1$ hoặc bậc cao hơn giữa các đoạn quỹ đạo.
 
-Associated with each edge is a \textit{Coupling Cost Function} $f_e: \mathbb{R}^{n_u + n_v} \to \mathbb{R}$. This is a scalar-valued convex function that assigns a cost based on the simultaneous selection of $x_u$ and $x_v$, modeling transition metrics such as path length or energy consumption.
+Gắn với mỗi cạnh là một \textit{hàm chi phí liên kết} $f_e: \mathbb{R}^{n_u + n_v} \to \mathbb{R}$. Đây là một hàm lồi giá trị vô hướng, đánh giá chi phí dựa trên việc lựa chọn đồng thời $x_u$ và $x_v$, nhằm mô hình hóa các đại lượng như độ dài đường đi hoặc năng lượng tiêu thụ.
 
-\subsection{Cost Function Specifications}
+\subsection{Đặc tả hàm chi phí}
 
-The choice of the edge cost function $\ell_e(x_u, x_v)$ dictates the physical interpretation of the optimal path. We examine two primary classes of cost functions relevant to this study: geometric path length and dynamic trajectory costs.
+Việc lựa chọn hàm chi phí cạnh $\ell_e(x_u, x_v)$ quyết định ý nghĩa vật lý của đường đi tối ưu. Trong nghiên cứu này, chúng tôi xem xét hai lớp hàm chi phí chính: chi phí hình học và chi phí quỹ đạo động học.
 
-For purely geometric problems, such as finding the shortest Euclidean path through regions, the cost is typically defined as the $L_2$-norm or its square. The squared Euclidean distance,
+Đối với các bài toán thuần hình học, chẳng hạn như tìm đường đi Euclid ngắn nhất qua các vùng, chi phí thường được định nghĩa bằng chuẩn $L_2$ hoặc bình phương của nó. Khoảng cách Euclid bình phương,
 \[
 \ell_e(x_u, x_v) = \|x_v - x_u\|_2^2,
 \]
-is a quadratic function that fits naturally into Quadratic Programming (QP) solvers. Alternatively, the standard $L_2$-norm
+là một hàm bậc hai, phù hợp tự nhiên với các bộ giải Quadratic Programming (QP). Ngoài ra, chuẩn $L_2$ tiêu chuẩn
 \[
 \ell_e(x_u, x_v) = \|x_v - x_u\|_2
 \]
-can be modeled using Second-Order Cone Programming (SOCP), preserving convexity.
+có thể được mô hình hóa bằng Second-Order Cone Programming (SOCP) trong khi vẫn bảo toàn tính lồi.
 
-In the context of motion planning using Bézier curves, the continuous variable $x_v$ encapsulates both the control points and the time duration of the trajectory segment. Here, the cost function represents a trade-off between execution time and control effort (smoothness). A common formulation minimizes the path energy (integral of squared acceleration) normalized by time. For a transition between vertices $u$ and $v$ with duration $T_e$, the cost takes the form 
+Trong bối cảnh lập kế hoạch chuyển động sử dụng đường cong Bézier, biến liên tục $x_v$ bao hàm cả các điểm điều khiển và thời gian thực hiện của đoạn quỹ đạo. Khi đó, hàm chi phí thể hiện sự đánh đổi giữa thời gian thực thi và công điều khiển (độ mượt). Một dạng thường dùng là tối thiểu hóa năng lượng quỹ đạo (tích phân của bình phương gia tốc) được chuẩn hóa theo thời gian. Đối với một chuyển tiếp giữa hai đỉnh $u$ và $v$ có thời lượng $T_e$, chi phí có dạng:
 \[
 \ell_e(x_u, x_v) = \frac{1}{T_e} \int_0^{T_e} \|\ddot{q}(t)\|^2 dt
 \]
 
-When discretized or expressed via Bézier coefficients, this function essentially behaves as a perspective function of the form quadratic-over-linear ($x^2/y$), which is convex regarding both the control points and the duration $T_e$.
+Khi được rời rạc hóa hoặc biểu diễn thông qua các hệ số Bézier, hàm này về bản chất có dạng perspective của biểu thức ``bình phương trên tuyến tính'' ($x^2/y$), và do đó là lồi theo cả các điểm điều khiển lẫn thời lượng $T_e$.
 
-\subsection{Mixed-Integer Convex Programming Formulation via Perspective Relaxation}
+\subsection{Mô hình Mixed-Integer Convex Programming thông qua Perspective Relaxation}
 
-To transform the intractable MINLP into a solvable Mixed-Integer Convex Program (MICP), we employ a tight convex relaxation technique known as perspective relaxation. This approach isolates the non-convexity by lifting the continuous variables into a higher-dimensional space and replacing the bilinear constraints with linear flow conservation constraints on these lifted variables.
+Để chuyển đổi bài toán MINLP không khả giải trực tiếp thành một bài toán Mixed-Integer Convex Program (MICP) có thể giải được, chúng tôi sử dụng một kỹ thuật nới lỏng lồi chặt được gọi là \textit{perspective relaxation}. Cách tiếp cận này cô lập phần không lồi bằng cách nâng các biến liên tục lên một không gian chiều cao hơn và thay thế các ràng buộc song tuyến bằng các ràng buộc bảo toàn luồng tuyến tính trên các biến đã được nâng.
 
-For each edge $e=(u, v)$, instead of using global variables $x_u$ and $x_v$, we introduce local proxy variables $z_{e,u}$ and $z_{e,v}$ with $z_{e,u}, z_{e,v} \in \mathbb{R}^n$. These variables represent the contribution of the state at vertices $u$ and $v$ specifically to the traversal of edge $e$. If the edge is not active ($y_e=0$), these contributions are forced to zero. 
+Cụ thể, với mỗi cạnh $e=(u, v)$, thay vì sử dụng các biến toàn cục $x_u$ và $x_v$, ta giới thiệu các biến đại diện cục bộ $z_{e,u}$ và $z_{e,v}$ với $z_{e,u}, z_{e,v} \in \mathbb{R}^n$. Các biến này biểu diễn đóng góp của trạng thái tại các đỉnh $u$ và $v$ tương ứng với việc đi qua cạnh $e$. Nếu cạnh không được kích hoạt ($y_e=0$), các đóng góp này bị ép về không:
 \[
-z_{e,u} \in y_e X_u \quad \text{and} \quad z_{e,v} \in y_e X_v
+z_{e,u} \in y_e X_u \quad \text{và} \quad z_{e,v} \in y_e X_v
 \]
-This implies:
-\[\begin{cases}
-z_{e,u} \in X_u & \text{if } y_e = 1 \\
-z_{e,u} = 0 & \text{if } y_e = 0
+tương đương với:
+\[
+\begin{cases}
+z_{e,u} \in X_u & \text{nếu } y_e = 1 \\
+z_{e,u} = 0 & \text{nếu } y_e = 0
 \end{cases}
 \]
 
-This logic is formalized using the perspective function $\tilde{\ell}_e((z_{e,u}, z_{e,v}), y_e)$, which is the perspective of the original cost function $\ell_e$. A key property of convex analysis is that if $\ell_e$ is convex, its perspective $\tilde{\ell}_e$ is jointly convex in all arguments, enabling the use of efficient convex solvers.
+Cấu trúc này được hình thức hóa thông qua hàm perspective $\tilde{\ell}_e((z_{e,u}, z_{e,v}), y_e)$, là perspective của hàm chi phí gốc $\ell_e$. Một tính chất quan trọng của giải tích lồi là: nếu $\ell_e$ là hàm lồi, thì perspective của nó cũng lồi theo tất cả các biến, cho phép sử dụng các bộ giải tối ưu lồi hiệu quả.
 \[
 \tilde{\ell}_e(z_{e,u}, z_{e,v}, y_e) = 
 \begin{cases} 
-y_e \ell_e\left(\frac{z_{e,u}}{y_e}, \frac{z_{e,v}}{y_e}\right) & \text{if } y_e > 0 \\
-0 & \text{if } y_e = 0 \text{ and } z_{e,u} = z_{e,v} = 0 \\
-+\infty & \text{otherwise}
+y_e \ell_e\left(\frac{z_{e,u}}{y_e}, \frac{z_{e,v}}{y_e}\right) & \text{nếu } y_e > 0 \\
+0 & \text{nếu } y_e = 0 \text{ và } z_{e,u} = z_{e,v} = 0 \\
++\infty & \text{trường hợp khác}
 \end{cases}
 \]
 
-Crucially, rather than enforcing explicit equality constraints like $z_{e,u} = y_e x_u$ which are non-convex, we extends the standard flow conservation law \eqref{eq:flow_conservation} to the continuous variables. It mandates that for any node $u$ (excluding source and target), the sum of continuous states entering the node via incoming edges must equal the sum of continuous states leaving the node via outgoing edges.
+Điểm mấu chốt là, thay vì áp đặt các ràng buộc đẳng thức không lồi như $z_{e,u} = y_e x_u$, ta mở rộng luật bảo toàn luồng tiêu chuẩn sang các biến liên tục. Luật này yêu cầu rằng, với mọi nút $u$ (trừ nguồn và đích), tổng các trạng thái liên tục đi vào nút thông qua các cạnh vào phải bằng tổng các trạng thái liên tục đi ra thông qua các cạnh ra.
 
-The resulting MICP formulation for the Shortest Path Problem in GCS is defined as follows:
+Từ đó, mô hình MICP cho bài toán Đường đi ngắn nhất trong GCS được phát biểu như sau:
 
 \begin{subequations}
 \begin{align}
 \text{minimize} \quad & \sum_{e=(u,v) \in \mathcal{E}} \tilde{\ell}_e((z_{e,u}, z_{e,v}), y_e) \label{eq:gcs_obj_perspective} \\
 \text{subject to} \quad & \sum_{e \in \mathcal{E}^+(u)} y_e - \sum_{e \in \mathcal{E}^-(u)} y_e = \delta_u, \quad \forall u \in \mathcal{V} \label{eq:binary_flow} \\
-& \sum_{e \in \mathcal{E}^+(u)} z_{e,u} - \sum_{e \in \mathcal{E}^-(u)} z_{e,v} = 
+& \sum_{e \in \mathcal{E}^+(u)} z_{e,u} - \sum_{e \in \mathcal{E}^-(u)} z_{e,v} =
 \begin{cases}
-x_s & \text{if } u = s \\
--x_t & \text{if } u = t \\
-0 & \text{otherwise}
+x_s & \text{nếu } u = s \\
+-x_t & \text{nếu } u = t \\
+0 & \text{trường hợp khác}
 \end{cases}, \quad \forall u \in \mathcal{V} \label{eq:spatial_flow} \\
 & (z_{e,u}, z_{e,v}) \in y_e \mathcal{X}_e, \quad \forall e \in \mathcal{E} \label{eq:perspective_edge} \\
 & z_{e,u} \in y_e X_u, \quad z_{e,v} \in y_e X_v, \quad \forall e=(u,v) \in \mathcal{E} \label{eq:perspective_vertex} \\
@@ -121,4 +249,4 @@ x_s & \text{if } u = s \\
 \end{align}
 \end{subequations}
 
-In this model, equation \eqref{eq:binary_flow} ensures topological connectivity (where $\delta_u$ is $1$ for source, $-1$ for target, and $0$ otherwise). Equation \eqref{eq:spatial_flow} ensuring that the continuous trajectory is seamless across the graph. Equations \eqref{eq:perspective_edge} and \eqref{eq:perspective_vertex} enforce the geometric containment within scaled convex sets, ensuring that if $y_e=0$, the associated continuous variables are constrained to the origin, incurring zero cost. This formulation provides a computationally efficient tight relaxation , allowing the solver to find near-global optimal trajectories that satisfy both the discrete graph structure and the complex continuous constraints of motion planning.
+Trong mô hình này, phương trình \eqref{eq:binary_flow} đảm bảo tính liên thông về mặt tô-pô (với $\delta_u = 1$ cho nguồn, $-1$ cho đích và $0$ cho các nút còn lại). Phương trình \eqref{eq:spatial_flow} đảm bảo quỹ đạo liên tục và liền mạch trên toàn bộ đồ thị. Các ràng buộc \eqref{eq:perspective_edge} và \eqref{eq:perspective_vertex} đảm bảo các biến liên tục nằm trong các tập lồi được co giãn, sao cho nếu $y_e = 0$ thì các biến tương ứng bị ép về gốc tọa độ và không phát sinh chi phí. Mô hình này cung cấp một phép nới lỏng chặt và hiệu quả về mặt tính toán, cho phép bộ giải tìm được các quỹ đạo gần tối ưu toàn cục, đồng thời thỏa mãn cả cấu trúc đồ thị rời rạc lẫn các ràng buộc liên tục phức tạp của bài toán lập kế hoạch chuyển động.
