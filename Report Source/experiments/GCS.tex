@@ -38,18 +38,18 @@ The computational complexity of the SPP in GCS differs fundamentally from that o
 \end{enumerate}
 
 \begin{proposition}
-In stark contrast, the Shortest Path Problem in a Graph of Convex Sets remains \textbf{NP-hard} even when both of the aforementioned conditions—acyclicity and non-negative costs—are satisfied.
+Trái ngược hoàn toàn với trường hợp trên, bài toán Đường đi ngắn nhất trong Graph of Convex Sets vẫn là \textbf{NP-hard} ngay cả khi đồng thời thỏa mãn hai điều kiện: đồ thị không chu trình và chi phí không âm.
 \end{proposition}
 
 This hardness is established via a reduction from the \textbf{3SAT} problem (Boolean satisfiability with clauses of three literals), which is known to be NP-complete. As demonstrated in Theorem 9.1 of~\cite{Marcucci24a}, one can construct a layered, acyclic GCS instance with non-negative costs where identifying a valid path is equivalent to finding a satisfying assignment for a 3SAT formula. This implies that merely determining the \textit{feasibility} of an SPP in GCS is NP-hard. Alternative proofs of NP-hardness have also been provided for cases involving low-dimensional convex sets (1D and 2D), though these instances typically rely on graphs containing cycles~\cite{Marcucci24a}.
 
-\subsection{Detailed Formulation of Vertices and Edges}
+\subsection{Mô hình chi tiết các đỉnh và cạnh}
 
-In the specific context of trajectory optimization, the components of the GCS are rigorously defined to enforce both geometric safety and kinematic feasibility.
+Trong bối cảnh tối ưu quỹ đạo, các thành phần của GCS được định nghĩa một cách chặt chẽ nhằm đảm bảo cả tính an toàn hình học lẫn tính khả thi về động học.
 
-Each vertex $v \in V$ corresponds to a specific convex, collision-free region $Q_v$ within the Configuration Space (C-space). The continuous decision variable $x_v \in \mathbb{R}^{n_v}$ associated with vertex $v$ represents a local trajectory segment or a state configuration. It is crucial to note that the dimension $n_v$ is local to the vertex, allowing for variable dimensionality across the graph.
+Mỗi đỉnh $v \in V$ tương ứng với một vùng lồi, không va chạm $Q_v$ trong không gian cấu hình (C-space). Biến quyết định liên tục $x_v \in \mathbb{R}^{n_v}$ gắn với đỉnh $v$ biểu diễn một đoạn quỹ đạo cục bộ hoặc một cấu hình trạng thái. Cần nhấn mạnh rằng chiều $n_v$ là cục bộ theo từng đỉnh, cho phép đồ thị có các đỉnh với số chiều biến khác nhau.
 
-The variable $x_v$ is constrained to lie within a compact convex set $\mathcal{X}_v \subset \mathbb{R}^{n_v}$. For trajectory generation using piecewise polynomial parameterizations (e.g., Bézier curves), $\mathcal{X}_v$ is explicitly constructed to ensure the curve lies within the safe region $Q_v$ and satisfies dynamic limits. The defining constraints for $\mathcal{X}_v$ are typically formulated as:
+Biến $x_v$ bị ràng buộc trong một tập lồi compact $\mathcal{X}_v \subset \mathbb{R}^{n_v}$. Đối với bài toán sinh quỹ đạo sử dụng các tham số đa thức từng đoạn (ví dụ như đường cong Bézier), tập $\mathcal{X}_v$ được xây dựng một cách tường minh nhằm đảm bảo quỹ đạo nằm hoàn toàn trong vùng an toàn $Q_v$ và thỏa mãn các giới hạn động lực học. Các ràng buộc xác định $\mathcal{X}_v$ thường có dạng:
 
 \begin{align}
     & r_{i,k} \in Q_i, \quad && k = 0, \dots, d, \label{eq:geo_containment} \\
@@ -58,13 +58,13 @@ The variable $x_v$ is constrained to lie within a compact convex set $\mathcal{X
     & h_{i,0} \ge 0, \quad h_{i,d} \le T_{\text{max}}. && \label{eq:duration_bounds}
 \end{align}
 
-Here, \eqref{eq:geo_containment} enforces geometric containment of the spatial control points $r_{i,k}$ within the safe region. Equation \eqref{eq:time_scaling} ensures strict monotonicity of the time-scaling function to preserve causality. Equation \eqref{eq:dynamic_limits} couples spatial and temporal derivatives to satisfy velocity bounds defined by the set $D$, and \eqref{eq:duration_bounds} imposes limits on the trajectory duration.
+Trong đó, \eqref{eq:geo_containment} đảm bảo các điểm điều khiển không gian $r_{i,k}$ nằm trong vùng an toàn. Phương trình \eqref{eq:time_scaling} đảm bảo tính đơn điệu chặt của hàm co giãn thời gian nhằm duy trì tính nhân quả. Phương trình \eqref{eq:dynamic_limits} liên kết đạo hàm không gian và thời gian để thỏa mãn giới hạn vận tốc được xác định bởi tập $D$, và \eqref{eq:duration_bounds} áp đặt các giới hạn lên thời gian thực hiện quỹ đạo.
 
-An edge $e = (u, v) \in E$ defines the transition between two vertices. This transition is governed by a \textit{Coupling Constraint Set} $\mathcal{X}_e \subseteq \mathbb{R}^{n_u + n_v}$. This set imposes constraints on the concatenated vector $(x_u, x_v)$, residing in the Cartesian product of the individual variable spaces. Mathematically, $\mathcal{X}_e$ defines which pairs of configurations $(x_u, x_v)$ are compatible, ensuring continuity (e.g., $C^0, C^1$, or higher-order continuity) between trajectory segments.
+Một cạnh $e = (u, v) \in E$ xác định sự chuyển tiếp giữa hai đỉnh. Chuyển tiếp này được điều khiển bởi một \textit{tập ràng buộc liên kết} $\mathcal{X}_e \subseteq \mathbb{R}^{n_u + n_v}$. Tập này áp đặt các ràng buộc lên vector ghép $(x_u, x_v)$, đảm bảo các cặp cấu hình $(x_u, x_v)$ là tương thích với nhau, chẳng hạn như thỏa mãn tính liên tục $C^0$, $C^1$ hoặc bậc cao hơn giữa các đoạn quỹ đạo.
 
-Associated with each edge is a \textit{Coupling Cost Function} $f_e: \mathbb{R}^{n_u + n_v} \to \mathbb{R}$. This is a scalar-valued convex function that assigns a cost based on the simultaneous selection of $x_u$ and $x_v$, modeling transition metrics such as path length or energy consumption.
+Gắn với mỗi cạnh là một \textit{hàm chi phí liên kết} $f_e: \mathbb{R}^{n_u + n_v} \to \mathbb{R}$. Đây là một hàm lồi giá trị vô hướng, đánh giá chi phí dựa trên việc lựa chọn đồng thời $x_u$ và $x_v$, nhằm mô hình hóa các đại lượng như độ dài đường đi hoặc năng lượng tiêu thụ.
 
-\subsection{Cost Function Specifications}
+\subsection{Đặc tả hàm chi phí}
 
 The selection of the edge cost function $\ell_e(x_u, x_v)$ is pivotal, as it dictates the physical interpretation of the optimal trajectory. Our framework distinguishes between two primary formulations: geometric path planning (LinearGCS) and kinodynamic trajectory optimization (BezierGCS), each employing specific convex structures to ensure computational efficiency.
 
@@ -74,7 +74,7 @@ For problems strictly defined by geometric constraints, such as identifying the 
 \[
 \ell_e(x_u, x_v) = \|x_v - x_u\|_2^2,
 \]
-is a quadratic function that fits naturally into Quadratic Programming (QP) solvers. Alternatively, the standard $L_2$-norm
+là một hàm bậc hai, phù hợp tự nhiên với các bộ giải Quadratic Programming (QP). Ngoài ra, chuẩn $L_2$ tiêu chuẩn
 \[
 \ell_e(x_u, x_v) = \|x_v - x_u\|_2
 \]

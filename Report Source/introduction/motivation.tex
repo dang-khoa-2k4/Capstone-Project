@@ -1,37 +1,37 @@
-\section{Motivation and Technical Challenges}
+\section{Động lực và Thách thức Kỹ thuật}
 
-Making optimal decisions in real-time is a cornerstone of modern engineering. The necessity of tightly coupling \textbf{discrete decisions} with \textbf{continuous control} is vividly illustrated in advanced robotics:
+Việc đưa ra các quyết định tối ưu trong thời gian thực là một nền tảng cốt lõi của kỹ thuật hiện đại. Trong nhiều hệ thống phức tạp, đặc biệt là trong lĩnh vực robot tiên tiến, yêu cầu kết hợp chặt chẽ giữa \textbf{các quyết định rời rạc} và \textbf{điều khiển liên tục} trở nên hết sức rõ ràng.
 
 \begin{itemize}
-    \item \textbf{Humanoid Robots (e.g., Boston Dynamics' Atlas):} Navigating complex terrain, such as a parkour course, requires the robot to simultaneously select footstep locations (discrete) and compute the trajectories for its center of mass and limbs (continuous). Currently, solutions often rely on ``hand-coding'' the discrete components, which severely limits the robot's autonomy in novel environments \cite{bostondynamics2021}.
-    
-    \item \textbf{Industrial Manipulators (e.g., Amazon's Robin):} Sorting efficiency depends on jointly optimizing the sequence of bins (discrete) and the arm's trajectory (continuous) \cite{amazonrobotics2023}. A mere \textbf{1\% increase} in operating speed through superior optimization translates to millions of additional packages processed annually.
+
+\item \textbf{Robot hình người (ví dụ: Atlas của Boston Dynamics):} Việc di chuyển trên địa hình phức tạp, chẳng hạn như các bài toán parkour, đòi hỏi robot phải đồng thời lựa chọn vị trí đặt chân (quyết định rời rạc) và tính toán quỹ đạo chuyển động cho trọng tâm cũng như các chi (điều khiển liên tục). Hiện nay, nhiều phương pháp vẫn phụ thuộc vào việc “lập trình thủ công” các quyết định rời rạc, điều này làm giảm đáng kể mức độ tự chủ của robot khi hoạt động trong những môi trường mới hoặc không xác định \cite{BostonDynamics2021}.
+
+\item \textbf{Robot công nghiệp (ví dụ: Robin của Amazon):} Hiệu quả của quá trình phân loại hàng hóa phụ thuộc vào việc tối ưu đồng thời thứ tự lựa chọn các thùng chứa (rời rạc) và quỹ đạo chuyển động của cánh tay robot (liên tục) \cite{AmazonRobotics2023}. Chỉ cần cải thiện \textbf{1\%} tốc độ vận hành thông qua tối ưu hóa tốt hơn cũng có thể tương đương với việc xử lý thêm hàng triệu kiện hàng mỗi năm.
+
+
 \end{itemize}
- 
-%  2 cols image
+
 \begin{figure}[h]
-    \centering
-    \includegraphics[width=0.475\textwidth]{introduction/image/atlas-robot.png}
-    % \hfill
-    \includegraphics[width=0.5\textwidth]{introduction/image/aws-robin.png}
-    \caption[Boston Dynamics' Atlas and Amazon's Robin]{\textsl{\textbf{Left:} Boston Dynamics' Atlas robot performing parkour, requiring discrete footstep planning and continuous trajectory optimization. \textbf{Right:} Amazon's Robin robotic arm sorting packages, where discrete bin selection and continuous arm trajectory must be optimized jointly.}}
-    \label{fig:robotics_examples}
+\centering
+\includegraphics[width=0.475\textwidth]{introduction/image/atlas-robot.png}
+\includegraphics[width=0.5\textwidth]{introduction/image/aws-robin.png}
+\caption[Boston Dynamics' Atlas and Amazon's Robin]{\textsl{\textbf{Bên trái:} Robot Atlas của Boston Dynamics thực hiện parkour, yêu cầu lập kế hoạch bước chân rời rạc và tối ưu quỹ đạo liên tục. \textbf{Bên phải:} Cánh tay robot Robin của Amazon phân loại hàng hóa, trong đó việc lựa chọn thùng chứa rời rạc và quỹ đạo chuyển động liên tục cần được tối ưu đồng thời.}}
+\label{fig:robotics_examples}
 \end{figure}
 
-\hspace{2cm}
+Tuy nhiên, việc giải quyết đồng thời các bài toán kết hợp này vẫn là một thách thức mở. Trong thực tế, các phương pháp hiện nay thường phải dựa vào sự can thiệp thủ công của con người hoặc chấp nhận các nghiệm dưới mức tối ưu.
 
-However, solving these coupled problems simultaneously remains an open challenge, typically necessitating manual engineering interventions or settling for suboptimal solutions.
-
-Algorithmically, selecting a motion planning method currently forces researchers to compromise between conflicting features: dimensionality, dynamic constraints, and completeness.
+Về mặt thuật toán, việc lựa chọn phương pháp lập kế hoạch chuyển động buộc các nhà nghiên cứu phải đánh đổi giữa nhiều yếu tố mâu thuẫn nhau, bao gồm số chiều của không gian trạng thái, các ràng buộc động học–động lực học và tính đầy đủ của thuật toán.
 
 \begin{itemize}
-    \item \textbf{Trajectory Optimization:} These methods excel at handling robot dynamics and high-dimensional spaces. However, when facing obstacle-cluttered environments—which render the problem inherently nonconvex—they often get trapped in \textbf{local minima}, failing to identify a collision-free trajectory.\cite{diehl2006}
-    
-    \item \textbf{Sampling-based Planners:} To overcome these limitations, the robotics community frequently resorts to sampling-based methods (e.g., RRT, PRM) due to their ``probabilistic completeness''. However, this comes at a cost: the resulting trajectories are often significantly \textbf{suboptimal}, and imposing \textbf{continuous differential constraints} on discrete samples remains notoriously difficult.\cite{lavalle1998,kavraki1996}
+
+\item \textbf{Tối ưu hóa quỹ đạo:} Các phương pháp này có ưu thế trong việc xử lý động lực học của robot và các bài toán có không gian trạng thái nhiều chiều. Tuy nhiên, khi môi trường chứa nhiều vật cản khiến bài toán trở nên phi lồi, chúng thường dễ rơi vào \textbf{cực tiểu cục bộ}, dẫn đến việc không tìm được quỹ đạo tránh va chạm \cite{DiehlEtAl2006}.
+
+\item \textbf{Các phương pháp lập kế hoạch dựa trên lấy mẫu:} Để khắc phục hạn chế trên, cộng đồng robot học thường sử dụng các phương pháp lấy mẫu như RRT hoặc PRM nhờ vào tính “đầy đủ theo xác suất” (probabilistic completeness). Tuy nhiên, cái giá phải trả là các quỹ đạo thu được thường \textbf{kém tối ưu}, và việc áp đặt các \textbf{ràng buộc vi phân liên tục} lên các mẫu rời rạc vẫn là một bài toán rất khó \cite{LLaValle1998,KavrakiEtAl1996}.
+
+
 \end{itemize}
 
-\textbf{Mixed-Integer Convex Programming (MICP)} has emerged as a promising solution that bridges this gap. It combines the strengths of both worlds: the completeness of sampling-based algorithms and the dynamic handling capabilities of trajectory optimization, while guaranteeing \textbf{global optimality} within a unified framework. Nevertheless, the adoption of MICP is severely limited by its prohibitive computational costs, often requiring minutes to solve even small-scale problems.
+\textbf{Lập trình lồi hỗn hợp số nguyên (Mixed-Integer Convex Programming – MICP)} đã nổi lên như một hướng tiếp cận đầy hứa hẹn nhằm thu hẹp khoảng cách giữa hai nhóm phương pháp trên. MICP kết hợp được tính đầy đủ của các thuật toán dựa trên lấy mẫu với khả năng xử lý động lực học của tối ưu hóa quỹ đạo, đồng thời đảm bảo \textbf{tính tối ưu toàn cục} trong một khuôn khổ thống nhất. Tuy vậy, việc ứng dụng MICP trong thực tế vẫn bị hạn chế nghiêm trọng bởi chi phí tính toán rất cao, khi ngay cả những bài toán quy mô nhỏ cũng có thể mất tới vài phút để giải.
 
-The objective of this research is to break this computational barrier. We focus on a crucial class of motion planning problems involving differential constraints and propose an MICP-based planner capable of reliably solving high-dimensional problems in a matter of seconds through a \textbf{Single Convex Program}.
-
-% \section{Động lực và thách thức kỹ thuật}
+Mục tiêu của nghiên cứu này là phá vỡ rào cản tính toán đó. Chúng tôi tập trung vào một lớp bài toán lập kế hoạch chuyển động quan trọng có chứa các ràng buộc vi phân, và đề xuất một bộ lập kế hoạch dựa trên MICP có khả năng giải quyết các bài toán không gian nhiều chiều một cách đáng tin cậy chỉ trong vài giây, thông qua việc giải \textbf{một bài toán lồi duy nhất}.

@@ -1,7 +1,9 @@
-\section{Convex Decomposition}
+% \section{Convex Decomposition}
+\section{Phân hoạch Lồi}
 \label{sec:convex-decomposition}
 
-This section provides an overview of convex decomposition, a fundamental technique used in computational geometry and physics simulations.
+% This section provides an overview of convex decomposition, a fundamental technique used in computational geometry and physics simulations.
+Phần này cung cấp tổng quan về phân hoạch lồi, một kỹ thuật cơ bản được sử dụng trong hình học tính toán và mô phỏng vật lý.
 
 \subsection{Định nghĩa}
 
@@ -51,8 +53,8 @@ Trước những giới hạn của ECD, các phương pháp \textbf{Phân hoạ
 ACD cho phép các thành phần không hoàn toàn lồi, mà chỉ “\textit{gần lồi}” trong một mức dung sai lõm $\tau$ do người dùng xác định hoặc chỉ bao phủ một phần không gian tự do.
 Triết lý cốt lõi của ACD là chấp nhận một \textbf{mức độ lõm nhỏ có kiểm soát} để đổi lấy:
 \begin{itemize}
-    \item \textbf{Hiệu quả tính toán cao hơn:} Các thuật toán ACD, chẳng hạn như phương pháp của Lien và Amato, chạy nhanh hơn nhiều so với ECD. \cite{lien2006}
+    \item \textbf{Hiệu quả tính toán cao hơn:} Các thuật toán ACD, chẳng hạn như phương pháp của Lien và Amato, chạy nhanh hơn nhiều so với ECD. \cite{LienAmato2006}
     \item \textbf{Giảm mạnh số lượng vùng:} Cho phép biểu diễn hình dạng với ít vùng lồi hơn, đơn giản hơn và dễ xử lý hơn.
-    \item \textbf{Kiểm soát mức độ chi tiết:} Một số thuật toán ACD như phương pháp của Lien và Amatocho phép người dùng điều chỉnh tham số lõm $\tau$ để cân bằng giữa độ chính xác và số lượng vùng lồi. Hay đối với phương pháp Visibility Clique Cover (VCC), nó cho phép người dùng chọn chỉ số để thể hiện mức độ bao phủ của vùng lồi so với không gian tự do ban đầu. \cite{vcc2023}
+    \item \textbf{Kiểm soát mức độ chi tiết:} Một số thuật toán ACD như phương pháp của Lien và Amatocho phép người dùng điều chỉnh tham số lõm $\tau$ để cân bằng giữa độ chính xác và số lượng vùng lồi. Hay đối với phương pháp Visibility Clique Cover (VCC), nó cho phép người dùng chọn chỉ số để thể hiện mức độ bao phủ của vùng lồi so với không gian tự do ban đầu. \cite{DeitsTedrake2023VCC}
 \end{itemize}  
 
