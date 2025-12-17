@@ -1,12 +1,12 @@
-\section{Graphs of Convex Sets}
+\section{Đồ thị của các Tập Lồi (Graphs of Convex Sets)}
 
-The Graph of Convex Sets (GCS) framework offers a unified methodology for addressing hybrid discrete-continuous optimization problems. It effectively bridges the gap between combinatorial graph search and continuous convex programming. Unlike classical graph theory, GCS generalizes the Shortest Path Problem (SPP) by associating continuous geometric variables directly with the graph topology.
+Khung Graph of Convex Sets (GCS) cung cấp một phương pháp luận thống nhất để giải quyết các bài toán tối ưu hóa lai ghép rời rạc-liên tục (hybrid discrete-continuous optimization). Nó đóng vai trò cầu nối hiệu quả giữa tìm kiếm đồ thị tổ hợp (combinatorial graph search) và quy hoạch lồi liên tục (continuous convex programming). Khác với lý thuyết đồ thị cổ điển, GCS tổng quát hóa Bài toán Đường đi Ngắn nhất (SPP) bằng cách liên kết trực tiếp các biến hình học liên tục với tô pô của đồ thị.
 
-\subsection{Shortest Path Formulation in Graph of Convex Sets}
+\subsection{Công thức Đường đi Ngắn nhất trong Graph of Convex Sets}
 
-A GCS is defined as a directed graph $G = (V, E)$, where each vertex $v \in V$ is associated with a continuous decision variable $x_v$ confined within a non-empty, compact convex set $X_v \subset \mathbb{R}^n$. In the context of motion planning, these sets typically represent pre-computed collision-free regions within the configuration space. Transitions between vertices are governed by edges $e = (u, v) \in E$, which impose auxiliary convex constraints $(x_u, x_v) \in X_e$ and are weighted by a convex cost function $\ell_e(x_u, x_v)$. This function is required to be proper, closed, and convex, explicitly coupling the continuous variables $x_u$ and $x_v$ to model transition metrics such as Euclidean distance or energy expenditure. It is important to note that, despite the terminology, we do not assume $\ell_e$ to be a valid metric; properties such as symmetry or the triangle inequality are not required to hold~\cite{gcs2023}.
+Một GCS được định nghĩa là một đồ thị có hướng $G = (V, E)$, trong đó mỗi đỉnh $v \in V$ gắn liền với một biến quyết định liên tục $x_v$ nằm trong một tập lồi compact, khác rỗng $X_v \subset \mathbb{R}^n$. Trong ngữ cảnh lập kế hoạch chuyển động (motion planning), các tập hợp này thường đại diện cho các vùng không va chạm đã được tính toán trước trong không gian cấu hình (configuration space). Các bước chuyển tiếp giữa các đỉnh được quy định bởi các cạnh $e = (u, v) \in E$, áp đặt các ràng buộc lồi phụ trợ $(x_u, x_v) \in X_e$ và được trọng số hóa bởi một hàm chi phí lồi $\ell_e(x_u, x_v)$. Hàm này bắt buộc phải là hàm thực sự (proper), đóng (closed) và lồi, liên kết tường minh các biến liên tục $x_u$ và $x_v$ để mô hình hóa các thước đo chuyển tiếp như khoảng cách Euclid hoặc tiêu hao năng lượng. Cần lưu ý rằng, mặc dù sử dụng thuật ngữ này, chúng tôi không giả định $\ell_e$ là một metric hợp lệ; các tính chất như tính đối xứng hay bất đẳng thức tam giác không bắt buộc phải thỏa mãn~\cite{gcs2023}.
 
-While the classical network flow formulation effectively solves the SPP on discrete graphs with static edge costs, the GCS framework generalizes this by introducing continuous decision variables coupled with the graph topology. In GCS, the cost of traversing an edge $e=(u,v)$ is not a constant scalar $c_{uv}$, but a convex function $\ell_e(x_u, x_v)$ dependent on the continuous states $x_u \in X_u$ and $x_v \in X_v$ at the incident vertices. The objective of the SPP in GCS is to identify a path $p$ from a source vertex $s$ to a target vertex $t$ that minimizes the aggregate cost of traversing the edges along the path, while simultaneously selecting appropriate continuous variables at each vertex. Formally, this problem is expressed as:
+Trong khi công thức luồng mạng (network flow) cổ điển giải quyết hiệu quả SPP trên các đồ thị rời rạc với chi phí cạnh tĩnh, khung GCS tổng quát hóa điều này bằng cách đưa vào các biến quyết định liên tục gắn liền với tô pô đồ thị. Trong GCS, chi phí di chuyển qua một cạnh $e=(u,v)$ không phải là một hằng số vô hướng $c_{uv}$, mà là một hàm lồi $\ell_e(x_u, x_v)$ phụ thuộc vào các trạng thái liên tục $x_u \in X_u$ và $x_v \in X_v$ tại các đỉnh liên thuộc. Mục tiêu của SPP trong GCS là xác định một đường đi $p$ từ đỉnh nguồn $s$ đến đỉnh đích $t$ sao cho tối thiểu hóa tổng chi phí di chuyển qua các cạnh dọc theo đường đi, đồng thời lựa chọn các biến liên tục phù hợp tại mỗi đỉnh. Một cách hình thức, bài toán này được biểu diễn như sau:
 
 \begin{align}
 \min_{p, \{x_v\}_{v \in p}} \quad & \sum_{(u, v) \in E_p} \ell_{(u, v)}(x_u, x_v) \label{eq:gcs_obj} \\
@@ -14,9 +14,9 @@ While the classical network flow formulation effectively solves the SPP on discr
 & x_v \in X_v,\quad \forall v \in p, \label{eq:gcs_vertex_constraint} \\
 & (x_u, x_v) \in X_e,\quad \forall e=(u,v) \in E_p \label{eq:gcs_edge_constraint}
 \end{align}
-where $\mathcal{P}$ denotes the set of all feasible paths from $s$ to $t$, and $E_p$ represents the edges included in the path $p$.
+trong đó $\mathcal{P}$ ký hiệu tập hợp tất cả các đường đi khả thi từ $s$ đến $t$, và $E_p$ đại diện cho các cạnh nằm trong đường đi $p$.
 
-By applying the network flow formulation to GCS, the SPP can be represented as a Mixed-Integer Nonlinear Program (MINLP) as follows:
+Bằng cách áp dụng công thức luồng mạng vào GCS, SPP có thể được biểu diễn dưới dạng bài toán Quy hoạch Phi tuyến Nguyên Hỗn hợp (Mixed-Integer Nonlinear Program - MINLP) như sau:
 \begin{subequations}
 \begin{align}
 \text{minimize} \quad & \sum_{e=(u,v) \in
@@ -27,21 +27,21 @@ By applying the network flow formulation to GCS, the SPP can be represented as a
 & y_e \in \{0, 1\}, \quad \forall e \in \mathcal{E} \label{eq:binary_variable}
 \end{align}
 \end{subequations}
-In this formulation, the binary variable $y_e$ indicates whether edge $e$ is included in the selected path ($y_e=1$) or not ($y_e=0$). The flow conservation constraint \eqref{eq:flow_conservation} ensures that the selected edges form a valid path from the source vertex $s$ to the target vertex $t$, where $\delta_u$ is defined as $1$ for the source, $-1$ for the target, and $0$ for all other vertices. Constraints \eqref{eq:edge_constraint} and \eqref{eq:vertex_constraint} enforce that the continuous variables at each vertex and along each edge adhere to their respective convex sets.
+Trong công thức này, biến nhị phân $y_e$ chỉ thị việc cạnh $e$ có được đưa vào đường đi được chọn hay không ($y_e=1$) hoặc không ($y_e=0$). Ràng buộc bảo toàn luồng \eqref{eq:flow_conservation} đảm bảo rằng các cạnh được chọn tạo thành một đường đi hợp lệ từ đỉnh nguồn $s$ đến đỉnh đích $t$, trong đó $\delta_u$ được định nghĩa là $1$ cho nguồn, $-1$ cho đích, và $0$ cho tất cả các đỉnh khác. Các ràng buộc \eqref{eq:edge_constraint} và \eqref{eq:vertex_constraint} bắt buộc các biến liên tục tại mỗi đỉnh và dọc theo mỗi cạnh phải tuân thủ các tập lồi tương ứng của chúng.
 
-\subsection{Complexity Analysis}
+\subsection{Phân tích Độ phức tạp}
 
-The computational complexity of the SPP in GCS differs fundamentally from that of the classical Shortest Path Problem on discrete graphs. In classical graph theory, the SPP is generally NP-hard (e.g., the Longest Path problem or variants involving negative cycles). However, it becomes efficiently solvable in polynomial time under two critical conditions:
+Độ phức tạp tính toán của SPP trong GCS khác biệt cơ bản so với Bài toán Đường đi Ngắn nhất cổ điển trên đồ thị rời rạc. Trong lý thuyết đồ thị cổ điển, SPP nói chung là NP-khó (ví dụ: bài toán Đường đi Dài nhất hoặc các biến thể liên quan đến chu trình âm). Tuy nhiên, nó trở nên giải được một cách hiệu quả trong thời gian đa thức (polynomial time) dưới hai điều kiện tiên quyết:
 \begin{enumerate}
-    \item The graph is \textbf{acyclic} (allowing for topological sort-based solutions).
-    \item All edge and vertex costs are \textbf{non-negative} (solvable via Dijkstra's algorithm).
+    \item Đồ thị là \textbf{không chu trình} (acyclic) (cho phép giải bằng sắp xếp tô pô).
+    \item Tất cả chi phí cạnh và đỉnh là \textbf{không âm} (giải được bằng thuật toán Dijkstra).
 \end{enumerate}
 
 \begin{proposition}
 Trái ngược hoàn toàn với trường hợp trên, bài toán Đường đi ngắn nhất trong Graph of Convex Sets vẫn là \textbf{NP-hard} ngay cả khi đồng thời thỏa mãn hai điều kiện: đồ thị không chu trình và chi phí không âm.
 \end{proposition}
 
-This hardness is established via a reduction from the \textbf{3SAT} problem (Boolean satisfiability with clauses of three literals), which is known to be NP-complete. As demonstrated in Theorem 9.1 of~\cite{Marcucci24a}, one can construct a layered, acyclic GCS instance with non-negative costs where identifying a valid path is equivalent to finding a satisfying assignment for a 3SAT formula. This implies that merely determining the \textit{feasibility} of an SPP in GCS is NP-hard. Alternative proofs of NP-hardness have also been provided for cases involving low-dimensional convex sets (1D and 2D), though these instances typically rely on graphs containing cycles~\cite{Marcucci24a}.
+Độ khó này được thiết lập thông qua việc quy dẫn (reduction) từ bài toán \textbf{3SAT} (bài toán thỏa mãn Boolean với các mệnh đề gồm ba biến), vốn được biết đến là NP-đầy đủ (NP-complete). Như đã chứng minh trong Định lý 9.1 của~\cite{Marcucci24a}, ta có thể xây dựng một thể hiện GCS phân lớp, không chu trình với chi phí không âm, trong đó việc xác định một đường đi hợp lệ tương đương với việc tìm một phép gán thỏa mãn cho công thức 3SAT. Điều này ngụ ý rằng chỉ riêng việc xác định tính \textit{khả thi} (feasibility) của một SPP trong GCS đã là NP-khó. Các chứng minh khác về tính NP-khó cũng đã được đưa ra cho các trường hợp liên quan đến các tập lồi chiều thấp (1D và 2D), mặc dù các trường hợp này thường dựa trên các đồ thị có chứa chu trình~\cite{Marcucci24a}.
 
 \subsection{Mô hình chi tiết các đỉnh và cạnh}
 
@@ -66,11 +66,11 @@ Gắn với mỗi cạnh là một \textit{hàm chi phí liên kết} $f_e: \mat
 
 \subsection{Đặc tả hàm chi phí}
 
-The selection of the edge cost function $\ell_e(x_u, x_v)$ is pivotal, as it dictates the physical interpretation of the optimal trajectory. Our framework distinguishes between two primary formulations: geometric path planning (LinearGCS) and kinodynamic trajectory optimization (BezierGCS), each employing specific convex structures to ensure computational efficiency.
+Việc lựa chọn hàm chi phí cạnh $\ell_e(x_u, x_v)$ mang tính then chốt, vì nó quy định ý nghĩa vật lý của quỹ đạo tối ưu. Khung làm việc của chúng tôi phân biệt giữa hai mô hình chính: lập kế hoạch đường đi hình học (LinearGCS) và tối ưu hóa quỹ đạo động học (BezierGCS), mỗi mô hình sử dụng các cấu trúc lồi cụ thể để đảm bảo hiệu quả tính toán.
 
-\subsubsection{Geometric Path Length}
+\subsubsection{Độ dài Đường đi Hình học}
 
-For problems strictly defined by geometric constraints, such as identifying the shortest path through convex regions, the cost function is characterized by the weighted Euclidean distance. The squared Euclidean distance,
+Đối với các bài toán được xác định chặt chẽ bởi các ràng buộc hình học, chẳng hạn như tìm đường đi ngắn nhất qua các vùng lồi, hàm chi phí được đặc trưng bởi khoảng cách Euclid có trọng số. Bình phương khoảng cách Euclid,
 \[
 \ell_e(x_u, x_v) = \|x_v - x_u\|_2^2,
 \]
@@ -78,22 +78,22 @@ là một hàm bậc hai, phù hợp tự nhiên với các bộ giải Quadrati
 \[
 \ell_e(x_u, x_v) = \|x_v - x_u\|_2
 \]
-can be modeled using Second-Order Cone Programming (SOCP), preserving convexity. These formulations ensure that the cost scales linearly with the Euclidean distance, yielding a geometrically accurate metric for path length.
+có thể được mô hình hóa bằng Quy hoạch Nón Bậc hai (Second-Order Cone Programming - SOCP), giúp bảo toàn tính lồi. Các công thức này đảm bảo rằng chi phí tỷ lệ tuyến tính với khoảng cách Euclid, mang lại một thước đo chính xác về mặt hình học cho độ dài đường đi.
 
-\subsubsection{Dynamic Trajectory Costs}
+\subsubsection{Chi phí Quỹ đạo Động lực học}
 
-In the proposed motion planning framework utilizing Bézier curves, the continuous decision variable $x_v$ is formulated to encapsulate both the spatial control points and the temporal duration of the trajectory segment. To effectively manage the trade-off between execution speed and control effort, the cost function is constructed as a composite objective comprising three distinct terms.
+Trong khung lập kế hoạch chuyển động đề xuất sử dụng đường cong Bézier, biến quyết định liên tục $x_v$ được xây dựng để bao hàm cả các điểm điều khiển không gian và thời gian thực hiện của đoạn quỹ đạo. Để quản lý hiệu quả sự đánh đổi giữa tốc độ thực thi và nỗ lực điều khiển (control effort), hàm chi phí được xây dựng như một mục tiêu tổng hợp bao gồm ba thành phần riêng biệt.
 
-First, to prioritize time optimality, a linear cost is applied to the time-scaling variables $h$. This formulation ensures that the minimization of the total trajectory duration preserves the convexity of the objective function. The time cost is expressed as:
+Đầu tiên, để ưu tiên tính tối ưu về thời gian, một chi phí tuyến tính được áp dụng cho các biến co giãn thời gian $h$. Công thức này đảm bảo rằng việc tối thiểu hóa tổng thời gian quỹ đạo vẫn bảo toàn tính lồi của hàm mục tiêu. Chi phí thời gian được biểu diễn là:
 \begin{equation}
 J_t = w_t T_e,
 \end{equation}
-where $w_t$ denotes the weighting factor assigned to the segment duration $T_e$.
+trong đó $w_t$ biểu thị hệ số trọng số được gán cho thời gian thực hiện đoạn $T_e$.
 
-Simultaneously, to penalize control effort—specifically minimizing the integral of squared velocity or acceleration—the framework leverages the mathematical properties of perspective functions. For a trajectory segment with duration $T_e$, this energy cost is defined as:
+Đồng thời, để phạt nỗ lực điều khiển—cụ thể là tối thiểu hóa tích phân của bình phương vận tốc hoặc gia tốc—khung làm việc tận dụng các tính chất toán học của hàm phối cảnh (perspective functions). Đối với một đoạn quỹ đạo có thời gian $T_e$, chi phí năng lượng này được định nghĩa là:
 \begin{equation}
 J_e = \int_0^{T_e} |\dot{r}(t)|^2 dt.
 \end{equation}
-This term behaves as a perspective function of the form quadratic-over-linear $(x^T x / y)$. A critical advantage of this formulation is that it is jointly convex with respect to both the spatial control points and the duration variable. Consequently, this allows the solver to optimize the geometric path and the time allocation simultaneously within a unified Mixed-Integer Convex Programming (MICP) framework.
+Số hạng này hoạt động như một hàm phối cảnh có dạng bậc hai trên tuyến tính (quadratic-over-linear) $(x^T x / y)$. Một ưu điểm quan trọng của công thức này là nó lồi đồng thời (jointly convex) đối với cả các điểm điều khiển không gian và biến thời gian. Do đó, điều này cho phép bộ giải tối ưu hóa đường đi hình học và phân bổ thời gian một cách đồng thời trong một khung Quy hoạch Lồi Nguyên Hỗn hợp (Mixed-Integer Convex Programming - MICP) thống nhất.
 
-Finally, to ensure higher-order smoothness, such as jerk minimization, the cost function incorporates derivative regularization. Unlike the energy cost, this is achieved by applying standard quadratic costs directly to the coefficients of the trajectory's higher derivatives. This approach avoids the strict requirements of perspective formulations while successfully maintaining the overall convex structure of the optimization problem.
+Cuối cùng, để đảm bảo độ trơn bậc cao, chẳng hạn như tối thiểu hóa độ giật (jerk), hàm chi phí kết hợp điều chuẩn đạo hàm (derivative regularization). Khác với chi phí năng lượng, điều này đạt được bằng cách áp dụng các chi phí bậc hai tiêu chuẩn trực tiếp lên các hệ số của các đạo hàm bậc cao của quỹ đạo. Cách tiếp cận này tránh được các yêu cầu nghiêm ngặt của các công thức phối cảnh trong khi vẫn duy trì thành công cấu trúc lồi tổng thể của bài toán tối ưu hóa.

@@ -1,160 +1,280 @@
 
-\section{Convex Analysis and Optimization}
+% \section{Convex Analysis and Optimization}
 
-\subsection{Convex Sets}
-Before discussing optimization problems, we establish the fundamental geometric
-objects used in this work. A set $\mathcal{C} \subseteq \mathbb{R}^n$ is defined
-as \textit{convex} if, for any two points within the set, the line segment
-connecting them lies entirely within the set.
+% \subsection{Convex Sets}
+% Before discussing optimization problems, we establish the fundamental geometric
+% objects used in this work. A set $\mathcal{C} \subseteq \mathbb{R}^n$ is defined
+% as \textit{convex} if, for any two points within the set, the line segment
+% connecting them lies entirely within the set.
+
+% \begin{figure}[h]
+%     \centering
+%     \includegraphics[width=1\textwidth]{theoretical-background/image/convex_sets.png}
+%     \caption[Convex Sets Examples]{Examples of convex and nonconvex sets. Left: The hexagon (including boundary) is convex. Middle: The kidney-shaped set is nonconvex, as the connecting line segment exits the set. Right: The square with partial boundary inclusion is not convex.\cite{boyd2004}}\label{fig:convex_set}
+% \end{figure}
+
+% Closely related to convexity is the concept of the \textbf{convex hull}. The
+% convex hull of a set of points $\{x_1, x_2, \dots, x_m\} \subseteq \mathbb{R}^n$
+% is the smallest convex set containing those points, formally defined as the set
+% of all convex combinations:
+
+% \begin{figure}[h]
+%     \centering
+%     \includegraphics[width=0.6\textwidth]{theoretical-background/image/convex_hull.png}
+%     \caption[Convex Hull Examples]{The convex hull of a set of points (depicted as the shaded area).\cite{boyd2004}}
+%     \label{fig:convex_hull}
+% \end{figure}
+
+% In the context of motion planning and this thesis, we primarily focus on two
+% specific types of convex sets:
+% \begin{itemize}
+%     \item \textbf{Polyhedra:} Defined as the intersection of a finite number of halfspaces, represented as $\mathcal{P} = \{x \in \mathbb{R}^n \mid Ax \leq b\}$. When a polyhedron is bounded, it is referred to as a \textit{polytope}.
+%     \item \textbf{Ellipsoids:} Defined as the image of a unit ball under an affine transformation. These are typically represented as $\mathcal{E} = \{x \in \mathbb{R}^n \mid (x-c)^\top Q^{-1} (x-c) \leq 1\}$, where $Q$ is a positive definite matrix ($Q \succ 0$).
+% \end{itemize}
+
+% \subsection{Convex Cones and Homogenization}
+% A subset $\mathcal{K} \subseteq \mathbb{R}^n$ is a \textit{cone} if it is closed
+% under positive scalar multiplication (i.e., $\theta x \in \mathcal{K} \forall x
+% \in \mathcal{K}, \theta \geq 0$). A set is a \textit{convex cone} if it is both
+% convex and a cone. Two critical concepts regarding convex cones are essential
+% for this work: perspective cones (constructed via homogenization) and dual
+% cones.
+
+% \subsubsection{Perspective Cones and Homogenization}
+% Homogenization is a powerful technique in convex analysis used to transform a
+% general convex set into a cone in a higher-dimensional space. This process
+% effectively ``lifts'' a set $\mathcal{S} \subseteq \mathbb{R}^n$ into
+% $\mathbb{R}^{n+1}$ by introducing an auxiliary dimension $y$. The homogenization
+% $\widetilde{\mathcal{S}}$ is defined as:
+% \begin{equation}
+%     \widetilde{\mathcal{S}} := \{(x, y) \in \mathbb{R}^{n+1} \mid y > 0, x \in y\mathcal{S}\}.
+%     \label{eq:homogenization_def}
+% \end{equation}
+% Crucially, $\widetilde{\mathcal{S}}$ is convex if and only if the original set $\mathcal{S}$ is convex. This transformation allows for the representation of convex combinations within a conic structure, which is particularly useful for converting affine constraints into conic forms in optimization.
+
+% When a convex set $\mathcal{C}$ is described in a standard conic form, its
+% homogenization is computationally straightforward. Observing that for $y > 0$,
+% the set $y\mathcal{C}$ satisfies $\{yx \mid Ax + b \in \mathcal{K}\} = \{x' \mid
+% Ax' + by \in \mathcal{K}\}$, we derive the \textit{perspective cone}:
+% \begin{equation}
+%     \widetilde{\mathcal{C}} = \{(x, y) \in \mathbb{R}^{n+1} \mid y > 0, Ax + by \in \mathcal{K}\}.
+%     \label{eq:perspective_cone}
+% \end{equation}
+% Of significant practical relevance is the closure of this set, $\text{cl}(\widetilde{\mathcal{C}}) = \{(x, y) \mid y \geq 0, Ax + by \in \mathcal{K}\}$. This closure extends the definition to include the boundary where y=0, which is critical for modeling logical constraints in mixed-integer programming.
+
+% For a compact set $\mathcal{C}$, as the scalar $y$ approaches zero, the scaled set $y\mathcal{C}$ continuously shrinks towards the origin. Consequently, in the limit where $y=0$, the condition $(x, 0) \in \text{cl}(\widetilde{\mathcal{C}})$ implies that $x$ must be the zero vector (assuming $\mathcal{C}$ contains the origin and is bounded). This geometric behavior effectively functions as a logical switch:
+% \begin{itemize}
+% \item When $y > 0$, the variable $x$ is constrained to a scaled version of the set $\mathcal{C}$.
+% \item When $y = 0$, the variable $x$ is forced to the origin ($x=0$).
+% \end{itemize}
+% This property is directly exploited in our application to Shortest Path Problems in Graphs of Convex Sets (GCS). In the Mixed-Integer Convex Programming (MICP) formulation, the binary activation variable for an edge serves as the scaling factor $y$. When an edge is inactive ($y=0$), the associated state contributions are forced to zero, and the cost---modeled via the perspective function---naturally vanishes. The perspective function $\tilde{\ell}_e$ is defined to return $0$ when both $y=0$ and the state variables are $0$, ensuring that inactive components incur no cost in the optimization objective.
+
+% \subsubsection{Dual Cones}
+% The second essential concept is the \textit{dual cone}. For a convex cone
+% $\mathcal{K} \subseteq \mathbb{R}^n$, the dual cone $\mathcal{K}^*$ consists of all
+% vectors making a non-negative inner product with every vector in $\mathcal{K}$:
+% \begin{equation}
+%     \mathcal{K}^* := \{y \in \mathbb{R}^n \mid x^\top y \geq 0, \forall x \in \mathcal{K}\}.
+%     \label{eq:dual_cone}
+% \end{equation}
+% A fundamental property is that $\mathcal{K}^*$ is always convex, regardless of whether $\mathcal{K}$ is convex. We frequently encounter three specific classes of cones, all of which are \textit{self-dual} (i.e., $\mathcal{K}^* = \mathcal{K}$):
+% \begin{enumerate}
+%     \item The \textbf{non-negative orthant}: $\mathbb{R}^n_+ = \{x \in \mathbb{R}^n \mid
+%           x_i \geq 0\}$.
+%     \item The \textbf{second-order cone} (Lorentz cone): $\mathcal{Q}^n = \{(t, x) \in
+%           \mathbb{R} \times \mathbb{R}^{n-1} \mid \|x\|_2 \leq t\}$.
+%     \item The \textbf{positive semidefinite cone}: $\mathcal{S}^n_+ = \{X \in
+%           \mathcal{S}^n \mid X \succeq 0\}$.
+% \end{enumerate}
+
+% \subsection{Convex Functions}
+% A function $f: \mathcal{D} \to \mathbb{R}$ is \textit{convex} if its domain
+% $\mathcal{D} \subseteq \mathbb{R}^n$ is a convex set and if, for all $x, y \in
+% \mathcal{D}$ and $\theta \in [0, 1]$, the following inequality holds:
+% \begin{equation}
+%     f(\theta x + (1-\theta)y) \leq \theta f(x) + (1-\theta)f(y).
+% \end{equation}
+% Geometrically, the line segment connecting any two points on the function's
+% graph lies above or on the graph. A function is \textit{strictly convex} if
+% this inequality holds strictly for $x \neq y$ and $\theta \in (0, 1)$. Conversely,
+% $f$ is \textit{concave} if $-f$ is convex.
+
+% The most critical analytical property of convex functions in optimization is
+% that \textbf{any local minimum is guaranteed to be a global minimum}.
+
+% \subsection{Optimization Problems}
+
+% \subsubsection{Convex Optimization}
+% A \textbf{Convex Program (CP)} is formulated as:
+% \begin{subequations}
+%     \label{eq:convex_program}
+%     \begin{align}
+%         \text{tối thiểu hóa} \quad   & f(x) \label{eq:cp_objective}                \\
+%         \text{với điều kiện} \quad   & x \in \mathcal{C}, \label{eq:cp_constraint}
+%     \end{align}
+% \end{subequations}
+% where the objective function $f$ and the feasible set $\mathcal{C}$ are both convex. A point $x^{\text{opt}}$ is an \textit{optimal solution} if it is feasible and $f(x^{\text{opt}}) \leq f(x)$ for all $x \in \mathcal{C}$.
+
+% While theoretical convexity does not strictly guarantee efficiency (e.g.,
+% checking non-negativity of polynomials is NP-hard despite the set being a
+% convex cone), for the purpose of this thesis, we use ``convex optimization
+% problem'' as a synonym for ``efficiently solvable optimization problem.'' The
+% majority of practical CPs can be solved reliably using interior-point methods.
+
+% \subsubsection{Conic Optimization}
+% A \textbf{Conic Program (KP)} is a subclass of CP with a linear objective and
+% constraints defined by a convex cone $\mathcal{K}$:
+% \begin{subequations}
+%     \label{eq:conic_program}
+%     \begin{align}
+%         \text{minimize} \quad   & c^\top x \label{eq:kp_objective}                 \\
+%         \text{subject to} \quad & Ax + b \in \mathcal{K}. \label{eq:kp_constraint}
+%     \end{align}
+% \end{subequations}
+% Specific classes of KPs include:
+% \begin{itemize}
+%     \item \textbf{Linear Programs (LP):} $\mathcal{K}$ is the non-negative orthant.
+%     \item \textbf{Second-Order Cone Programs (SOCP):} $\mathcal{K}$ is the product of second-order cones.
+%     \item \textbf{Semidefinite Programs (SDP):} $\mathcal{K}$ is the semidefinite cone.
+% \end{itemize}
+% These classes represent a hierarchy of modeling power: $LP \subset SOCP \subset SDP$. Another common class is the \textbf{Quadratic Program (QP)}, which has a quadratic objective and polyhedral constraints. While every QP can be formulated as an SOCP, specialized active-set algorithms for QPs are often more effective.
+
+% \subsubsection{Mixed-Integer Programs}
+
+% \textbf{Mixed-Integer Programs (MIPs)} generalize optimization by partitioning variables into continuous vector $x \in \mathbb{R}^n$ and integer vector $z \in \mathbb{Z}^m$:
+% \begin{subequations}\label{eq:mip}
+%     \begin{align}
+%         \text{minimize} \quad   & f(x, z) \label{eq:mip_objective}                  \\
+%         \text{subject to} \quad & (x, z) \in \mathcal{C}, \label{eq:mip_constraint} \\
+%                                 & z \in \mathbb{Z}^m. \label{eq:mip_integer}
+%     \end{align}
+% \end{subequations}
+% The integrality constraint renders the feasible set non-convex and discrete, typically making MIPs NP-hard. Standard methods relying on differentiability are inapplicable.
+
+% To solve MIPs, \textbf{relaxation} is commonly employed (e.g., replacing $z_j
+% \in \{0,1\}$ with $0 \leq z_j \leq 1$). The optimal value of the relaxed problem
+% provides a lower bound on the MIP solution. If the relaxed solution is not
+% integer-feasible, algorithms like \textbf{Branch-and-Bound} are used. This
+% method systematically partitions the search space into sub-regions (branches)
+% to eliminate fractional values, exploring a search tree to find the global
+% optimum.
+
+\section{Giải tích Lồi và Tối ưu hóa}
+
+\subsection{Tập Lồi (Convex Sets)}
+Trước khi thảo luận về các bài toán tối ưu hóa, chúng ta cần thiết lập các đối tượng hình học cơ bản được sử dụng trong công trình này. Một tập hợp $\mathcal{C} \subseteq \mathbb{R}^n$ được định nghĩa là \textit{lồi} (convex) nếu, với bất kỳ hai điểm nào thuộc tập hợp, đoạn thẳng nối chúng nằm trọn vẹn bên trong tập hợp đó.
 
 \begin{figure}[h]
-    \centering
-    \includegraphics[width=1\textwidth]{theoretical-background/image/convex_sets.png}
-    \caption[Convex Sets Examples]{Examples of convex and nonconvex sets. Left: The hexagon (including boundary) is convex. Middle: The kidney-shaped set is nonconvex, as the connecting line segment exits the set. Right: The square with partial boundary inclusion is not convex.\cite{boyd2004}}\label{fig:convex_set}
+\centering
+\includegraphics[width=1\textwidth]{theoretical-background/image/convex_sets.png}
+\caption[Ví dụ về Tập Lồi]{Các ví dụ về tập lồi và không lồi. Trái: Hình lục giác (bao gồm cả biên) là tập lồi. Giữa: Tập hình quả thận là không lồi, vì đoạn thẳng nối hai điểm đi ra ngoài tập hợp. Phải: Hình vuông chỉ chứa một phần biên không phải là tập lồi.\cite{boyd2004}}
+\label{fig:convex_set}
 \end{figure}
 
-Closely related to convexity is the concept of the \textbf{convex hull}. The
-convex hull of a set of points $\{x_1, x_2, \dots, x_m\} \subseteq \mathbb{R}^n$
-is the smallest convex set containing those points, formally defined as the set
-of all convex combinations:
+Gắn liền mật thiết với tính lồi là khái niệm \textbf{bao lồi} (convex hull). Bao lồi của một tập hợp các điểm $\{x_1, x_2, \dots, x_m\} \subseteq \mathbb{R}^n$ là tập lồi nhỏ nhất chứa các điểm đó, được định nghĩa một cách hình thức là tập hợp của tất cả các tổ hợp lồi (convex combinations):
 
 \begin{figure}[h]
-    \centering
-    \includegraphics[width=0.6\textwidth]{theoretical-background/image/convex_hull.png}
-    \caption[Convex Hull Examples]{The convex hull of a set of points (depicted as the shaded area).\cite{boyd2004}}
-    \label{fig:convex_hull}
+\centering
+\includegraphics[width=0.6\textwidth]{theoretical-background/image/convex_hull.png}
+\caption[Ví dụ về Bao Lồi]{Bao lồi của một tập hợp điểm (phần được tô đậm).\cite{boyd2004}}
+\label{fig:convex_hull}
 \end{figure}
 
-In the context of motion planning and this thesis, we primarily focus on two
-specific types of convex sets:
+Trong bối cảnh quy hoạch chuyển động và luận văn này, chúng tôi tập trung chủ yếu vào hai loại tập lồi cụ thể:
 \begin{itemize}
-    \item \textbf{Polyhedra:} Defined as the intersection of a finite number of halfspaces, represented as $\mathcal{P} = \{x \in \mathbb{R}^n \mid Ax \leq b\}$. When a polyhedron is bounded, it is referred to as a \textit{polytope}.
-    \item \textbf{Ellipsoids:} Defined as the image of a unit ball under an affine transformation. These are typically represented as $\mathcal{E} = \{x \in \mathbb{R}^n \mid (x-c)^\top Q^{-1} (x-c) \leq 1\}$, where $Q$ is a positive definite matrix ($Q \succ 0$).
+\item \textbf{Đa diện (Polyhedra):} Được định nghĩa là giao của một số hữu hạn các nửa không gian (halfspaces), biểu diễn dưới dạng $\mathcal{P} = \{x \in \mathbb{R}^n \mid Ax \leq b\}$. Khi một đa diện bị chặn (bounded), nó được gọi là một \textit{khối đa diện} (polytope).
+\item \textbf{Ellipsoid:} Được định nghĩa là ảnh của một hình cầu đơn vị qua một phép biến đổi afin (affine transformation). Chúng thường được biểu diễn dưới dạng $\mathcal{E} = \{x \in \mathbb{R}^n \mid (x-c)^\top Q^{-1} (x-c) \leq 1\}$, trong đó $Q$ là một ma trận xác định dương ($Q \succ 0$).
 \end{itemize}
 
-\subsection{Convex Cones and Homogenization}
-A subset $\mathcal{K} \subseteq \mathbb{R}^n$ is a \textit{cone} if it is closed
-under positive scalar multiplication (i.e., $\theta x \in \mathcal{K} \forall x
-\in \mathcal{K}, \theta \geq 0$). A set is a \textit{convex cone} if it is both
-convex and a cone. Two critical concepts regarding convex cones are essential
-for this work: perspective cones (constructed via homogenization) and dual
-cones.
+\subsection{Nón Lồi và Đồng nhất hóa (Convex Cones and Homogenization)}
+Một tập con $\mathcal{K} \subseteq \mathbb{R}^n$ được gọi là \textit{nón} (cone) nếu nó đóng dưới phép nhân vô hướng dương (tức là, $\theta x \in \mathcal{K}$ với mọi $x \in \mathcal{K}, \theta \geq 0$). Một tập hợp được gọi là \textit{nón lồi} (convex cone) nếu nó vừa là tập lồi vừa là nón. Hai khái niệm quan trọng liên quan đến nón lồi là cốt yếu cho công trình này: nón phối cảnh (được xây dựng thông qua quá trình đồng nhất hóa) và nón đối ngẫu.
 
-\subsubsection{Perspective Cones and Homogenization}
-Homogenization is a powerful technique in convex analysis used to transform a
-general convex set into a cone in a higher-dimensional space. This process
-effectively ``lifts'' a set $\mathcal{S} \subseteq \mathbb{R}^n$ into
-$\mathbb{R}^{n+1}$ by introducing an auxiliary dimension $y$. The homogenization
-$\widetilde{\mathcal{S}}$ is defined as:
+\subsubsection{Nón Phối cảnh và Đồng nhất hóa (Perspective Cones and Homogenization)}
+Đồng nhất hóa (Homogenization) là một kỹ thuật mạnh mẽ trong giải tích lồi, được sử dụng để biến đổi một tập lồi tổng quát thành một nón trong không gian có số chiều cao hơn. Quá trình này thực chất là ``nâng'' (lifts) một tập $\mathcal{S} \subseteq \mathbb{R}^n$ vào không gian $\mathbb{R}^{n+1}$ bằng cách giới thiệu thêm một chiều phụ $y$. Tập đồng nhất hóa $\widetilde{\mathcal{S}}$ được định nghĩa là:
 \begin{equation}
-    \widetilde{\mathcal{S}} := \{(x, y) \in \mathbb{R}^{n+1} \mid y > 0, x \in y\mathcal{S}\}.
-    \label{eq:homogenization_def}
+\widetilde{\mathcal{S}} := \{(x, y) \in \mathbb{R}^{n+1} \mid y > 0, x \in y\mathcal{S}\}.
+\label{eq:homogenization_def}
 \end{equation}
-Crucially, $\widetilde{\mathcal{S}}$ is convex if and only if the original set $\mathcal{S}$ is convex. This transformation allows for the representation of convex combinations within a conic structure, which is particularly useful for converting affine constraints into conic forms in optimization.
+Điểm mấu chốt là $\widetilde{\mathcal{S}}$ là tập lồi khi và chỉ khi tập gốc $\mathcal{S}$ là lồi. Phép biến đổi này cho phép biểu diễn các tổ hợp lồi bên trong một cấu trúc nón, điều này đặc biệt hữu ích để chuyển đổi các ràng buộc afin sang dạng nón trong tối ưu hóa.
 
-When a convex set $\mathcal{C}$ is described in a standard conic form, its
-homogenization is computationally straightforward. Observing that for $y > 0$,
-the set $y\mathcal{C}$ satisfies $\{yx \mid Ax + b \in \mathcal{K}\} = \{x' \mid
-Ax' + by \in \mathcal{K}\}$, we derive the \textit{perspective cone}:
+Khi một tập lồi $\mathcal{C}$ được mô tả dưới dạng nón tiêu chuẩn, việc đồng nhất hóa nó về mặt tính toán là rất trực tiếp. Quan sát rằng với $y > 0$, tập $y\mathcal{C}$ thỏa mãn $\{yx \mid Ax + b \in \mathcal{K}\} = \{x' \mid Ax' + by \in \mathcal{K}\}$, ta thu được \textit{nón phối cảnh} (perspective cone):
 \begin{equation}
-    \widetilde{\mathcal{C}} = \{(x, y) \in \mathbb{R}^{n+1} \mid y > 0, Ax + by \in \mathcal{K}\}.
-    \label{eq:perspective_cone}
+\widetilde{\mathcal{C}} = \{(x, y) \in \mathbb{R}^{n+1} \mid y > 0, Ax + by \in \mathcal{K}\}.
+\label{eq:perspective_cone}
 \end{equation}
-Of significant practical relevance is the closure of this set, $\text{cl}(\widetilde{\mathcal{C}}) = \{(x, y) \mid y \geq 0, Ax + by \in \mathcal{K}\}$. This closure extends the definition to include the boundary where y=0, which is critical for modeling logical constraints in mixed-integer programming.
+Một ý nghĩa thực tiễn quan trọng nằm ở bao đóng (closure) của tập này, $\text{cl}(\widetilde{\mathcal{C}}) = \{(x, y) \mid y \geq 0, Ax + by \in \mathcal{K}\}$. Bao đóng này mở rộng định nghĩa để bao gồm cả biên nơi $y=0$, điều này rất quan trọng trong việc mô hình hóa các ràng buộc logic trong quy hoạch nguyên-hỗn hợp.
 
-For a compact set $\mathcal{C}$, as the scalar $y$ approaches zero, the scaled set $y\mathcal{C}$ continuously shrinks towards the origin. Consequently, in the limit where $y=0$, the condition $(x, 0) \in \text{cl}(\widetilde{\mathcal{C}})$ implies that $x$ must be the zero vector (assuming $\mathcal{C}$ contains the origin and is bounded). This geometric behavior effectively functions as a logical switch:
+Đối với một tập compact $\mathcal{C}$, khi vô hướng $y$ tiến dần về 0, tập tỉ lệ $y\mathcal{C}$ sẽ co liên tục về gốc tọa độ. Do đó, trong giới hạn khi $y=0$, điều kiện $(x, 0) \in \text{cl}(\widetilde{\mathcal{C}})$ ngụ ý rằng $x$ bắt buộc phải là vector không (giả sử $\mathcal{C}$ chứa gốc tọa độ và bị chặn). Hành vi hình học này hoạt động hiệu quả như một công tắc logic (logical switch):
 \begin{itemize}
-\item When $y > 0$, the variable $x$ is constrained to a scaled version of the set $\mathcal{C}$.
-\item When $y = 0$, the variable $x$ is forced to the origin ($x=0$).
+\item Khi $y > 0$, biến $x$ bị ràng buộc trong phiên bản tỉ lệ của tập $\mathcal{C}$.
+\item Khi $y = 0$, biến $x$ bị ép về gốc tọa độ ($x=0$).
 \end{itemize}
-This property is directly exploited in our application to Shortest Path Problems in Graphs of Convex Sets (GCS). In the Mixed-Integer Convex Programming (MICP) formulation, the binary activation variable for an edge serves as the scaling factor $y$. When an edge is inactive ($y=0$), the associated state contributions are forced to zero, and the cost---modeled via the perspective function---naturally vanishes. The perspective function $\tilde{\ell}_e$ is defined to return $0$ when both $y=0$ and the state variables are $0$, ensuring that inactive components incur no cost in the optimization objective.
+Tính chất này được khai thác trực tiếp trong ứng dụng của chúng tôi đối với Bài toán Đường đi Ngắn nhất trên Đồ thị các Tập Lồi (GCS). Trong mô hình Quy hoạch Lồi Nguyên-Hỗn hợp (MICP), biến kích hoạt nhị phân cho một cạnh đóng vai trò là hệ số tỉ lệ $y$. Khi một cạnh không hoạt động ($y=0$), các đóng góp trạng thái liên quan bị ép về 0, và chi phí---được mô hình hóa qua hàm phối cảnh---sẽ tự nhiên triệt tiêu. Hàm phối cảnh $\tilde{\ell}_e$ được định nghĩa để trả về 0 khi cả $y=0$ và các biến trạng thái bằng 0, đảm bảo rằng các thành phần không hoạt động sẽ không phát sinh chi phí trong hàm mục tiêu tối ưu.
 
-\subsubsection{Dual Cones}
-The second essential concept is the \textit{dual cone}. For a convex cone
-$\mathcal{K} \subseteq \mathbb{R}^n$, the dual cone $\mathcal{K}^*$ consists of all
-vectors making a non-negative inner product with every vector in $\mathcal{K}$:
+\subsubsection{Nón Đối ngẫu (Dual Cones)}
+Khái niệm thiết yếu thứ hai là \textit{nón đối ngẫu}. Đối với một nón lồi $\mathcal{K} \subseteq \mathbb{R}^n$, nón đối ngẫu $\mathcal{K}^*$ bao gồm tất cả các vector tạo thành một tích vô hướng không âm với mọi vector trong $\mathcal{K}$:
 \begin{equation}
-    \mathcal{K}^* := \{y \in \mathbb{R}^n \mid x^\top y \geq 0, \forall x \in \mathcal{K}\}.
-    \label{eq:dual_cone}
+\mathcal{K}^* := \{y \in \mathbb{R}^n \mid x^\top y \geq 0, \forall x \in \mathcal{K}\}.
+\label{eq:dual_cone}
 \end{equation}
-A fundamental property is that $\mathcal{K}^*$ is always convex, regardless of whether $\mathcal{K}$ is convex. We frequently encounter three specific classes of cones, all of which are \textit{self-dual} (i.e., $\mathcal{K}^* = \mathcal{K}$):
+Một tính chất cơ bản là $\mathcal{K}^*$ luôn luôn lồi, bất kể $\mathcal{K}$ có lồi hay không. Chúng ta thường gặp ba lớp nón cụ thể, tất cả đều là \textit{tự đối ngẫu} (tức là $\mathcal{K}^* = \mathcal{K}$):
 \begin{enumerate}
-    \item The \textbf{non-negative orthant}: $\mathbb{R}^n_+ = \{x \in \mathbb{R}^n \mid
-          x_i \geq 0\}$.
-    \item The \textbf{second-order cone} (Lorentz cone): $\mathcal{Q}^n = \{(t, x) \in
-          \mathbb{R} \times \mathbb{R}^{n-1} \mid \|x\|_2 \leq t\}$.
-    \item The \textbf{positive semidefinite cone}: $\mathcal{S}^n_+ = \{X \in
-          \mathcal{S}^n \mid X \succeq 0\}$.
+\item \textbf{Orthant không âm} (Non-negative orthant): $\mathbb{R}^n_+ = \{x \in \mathbb{R}^n \mid x_i \geq 0\}$.
+\item \textbf{Nón bậc hai} (Second-order cone hay Lorentz cone): $\mathcal{Q}^n = \{(t, x) \in \mathbb{R} \times \mathbb{R}^{n-1} \mid \|x\|_2 \leq t\}$.
+\item \textbf{Nón bán xác định dương} (Positive semidefinite cone): $\mathcal{S}^n_+ = \{X \in \mathcal{S}^n \mid X \succeq 0\}$.
 \end{enumerate}
 
-\subsection{Convex Functions}
-A function $f: \mathcal{D} \to \mathbb{R}$ is \textit{convex} if its domain
-$\mathcal{D} \subseteq \mathbb{R}^n$ is a convex set and if, for all $x, y \in
-\mathcal{D}$ and $\theta \in [0, 1]$, the following inequality holds:
+\subsection{Hàm Lồi (Convex Functions)}
+Một hàm số $f: \mathcal{D} \to \mathbb{R}$ là \textit{lồi} (convex) nếu miền xác định $\mathcal{D} \subseteq \mathbb{R}^n$ là một tập lồi và nếu, với mọi $x, y \in \mathcal{D}$ và $\theta \in [0, 1]$, bất đẳng thức sau được thỏa mãn:
 \begin{equation}
-    f(\theta x + (1-\theta)y) \leq \theta f(x) + (1-\theta)f(y).
+f(\theta x + (1-\theta)y) \leq \theta f(x) + (1-\theta)f(y).
 \end{equation}
-Geometrically, the line segment connecting any two points on the function's
-graph lies above or on the graph. A function is \textit{strictly convex} if
-this inequality holds strictly for $x \neq y$ and $\theta \in (0, 1)$. Conversely,
-$f$ is \textit{concave} if $-f$ is convex.
+Về mặt hình học, đoạn thẳng nối bất kỳ hai điểm nào trên đồ thị của hàm số đều nằm phía trên hoặc thuộc đồ thị đó. Một hàm số được gọi là \textit{lồi chặt} (strictly convex) nếu bất đẳng thức này xảy ra dấu nhỏ hơn hẳn với $x \neq y$ và $\theta \in (0, 1)$. Ngược lại, $f$ là \textit{lõm} (concave) nếu $-f$ là lồi.
 
-The most critical analytical property of convex functions in optimization is
-that \textbf{any local minimum is guaranteed to be a global minimum}.
+Tính chất giải tích quan trọng nhất của hàm lồi trong tối ưu hóa là \textbf{bất kỳ cực tiểu địa phương nào cũng được đảm bảo là cực tiểu toàn cục}.
 
-\subsection{Optimization Problems}
+\subsection{Các Bài toán Tối ưu hóa (Optimization Problems)}
 
-\subsubsection{Convex Optimization}
-A \textbf{Convex Program (CP)} is formulated as:
+\subsubsection{Quy hoạch Lồi (Convex Optimization)}
+Một \textbf{Chương trình Lồi (Convex Program - CP)} được thiết lập như sau:
 \begin{subequations}
-    \label{eq:convex_program}
-    \begin{align}
-        \text{tối thiểu hóa} \quad   & f(x) \label{eq:cp_objective}                \\
-        \text{với điều kiện} \quad   & x \in \mathcal{C}, \label{eq:cp_constraint}
-    \end{align}
+\label{eq:convex_program}
+\begin{align}
+\text{minimize} \quad   & f(x) \label{eq:cp_objective}                \\
+\text{subject to} \quad & x \in \mathcal{C}, \label{eq:cp_constraint}
+\end{align}
 \end{subequations}
-where the objective function $f$ and the feasible set $\mathcal{C}$ are both convex. A point $x^{\text{opt}}$ is an \textit{optimal solution} if it is feasible and $f(x^{\text{opt}}) \leq f(x)$ for all $x \in \mathcal{C}$.
+trong đó hàm mục tiêu $f$ và tập chấp nhận được (feasible set) $\mathcal{C}$ đều là lồi. Một điểm $x^{\text{opt}}$ là một \textit{nghiệm tối ưu} nếu nó thuộc tập chấp nhận được và $f(x^{\text{opt}}) \leq f(x)$ với mọi $x \in \mathcal{C}$.
 
-While theoretical convexity does not strictly guarantee efficiency (e.g.,
-checking non-negativity of polynomials is NP-hard despite the set being a
-convex cone), for the purpose of this thesis, we use ``convex optimization
-problem'' as a synonym for ``efficiently solvable optimization problem.'' The
-majority of practical CPs can be solved reliably using interior-point methods.
+Mặc dù tính lồi về mặt lý thuyết không đảm bảo tính hiệu quả một cách tuyệt đối (ví dụ, kiểm tra tính không âm của đa thức là NP-khó mặc dù tập hợp này là một nón lồi), nhưng trong phạm vi luận văn này, chúng tôi sử dụng thuật ngữ `bài toán tối ưu lồi'' gần như đồng nghĩa với `bài toán tối ưu giải được một cách hiệu quả''. Phần lớn các bài toán CP thực tế có thể được giải một cách đáng tin cậy bằng các phương pháp điểm trong (interior-point methods).
 
-\subsubsection{Conic Optimization}
-A \textbf{Conic Program (KP)} is a subclass of CP with a linear objective and
-constraints defined by a convex cone $\mathcal{K}$:
+\subsubsection{Quy hoạch Nón (Conic Optimization)}
+Một \textbf{Chương trình Nón (Conic Program - KP)} là một lớp con của CP với hàm mục tiêu tuyến tính và các ràng buộc được định nghĩa bởi một nón lồi $\mathcal{K}$:
 \begin{subequations}
-    \label{eq:conic_program}
-    \begin{align}
-        \text{minimize} \quad   & c^\top x \label{eq:kp_objective}                 \\
-        \text{subject to} \quad & Ax + b \in \mathcal{K}. \label{eq:kp_constraint}
-    \end{align}
+\label{eq:conic_program}
+\begin{align}
+\text{minimize} \quad   & c^\top x \label{eq:kp_objective}                 \\
+\text{subject to} \quad & Ax + b \in \mathcal{K}. \label{eq:kp_constraint}
+\end{align}
 \end{subequations}
-Specific classes of KPs include:
+Các lớp cụ thể của KP bao gồm:
 \begin{itemize}
-    \item \textbf{Linear Programs (LP):} $\mathcal{K}$ is the non-negative orthant.
-    \item \textbf{Second-Order Cone Programs (SOCP):} $\mathcal{K}$ is the product of second-order cones.
-    \item \textbf{Semidefinite Programs (SDP):} $\mathcal{K}$ is the semidefinite cone.
+\item \textbf{Quy hoạch Tuyến tính (LP):} $\mathcal{K}$ là orthant không âm.
+\item \textbf{Quy hoạch Nón Bậc hai (SOCP):} $\mathcal{K}$ là tích của các nón bậc hai.
+\item \textbf{Quy hoạch Bán xác định (SDP):} $\mathcal{K}$ là nón bán xác định.
 \end{itemize}
-These classes represent a hierarchy of modeling power: $LP \subset SOCP \subset SDP$. Another common class is the \textbf{Quadratic Program (QP)}, which has a quadratic objective and polyhedral constraints. While every QP can be formulated as an SOCP, specialized active-set algorithms for QPs are often more effective.
+Các lớp này đại diện cho một hệ thống phân cấp về khả năng mô hình hóa: $LP \subset SOCP \subset SDP$. Một lớp phổ biến khác là \textbf{Quy hoạch Toàn phương (Quadratic Program - QP)}, có hàm mục tiêu bậc hai và các ràng buộc đa diện. Mặc dù mọi bài toán QP đều có thể được thiết lập dưới dạng SOCP, nhưng các thuật toán tập hoạt động (active-set algorithms) chuyên biệt cho QP thường hiệu quả hơn.
 
-\subsubsection{Mixed-Integer Programs}
+\subsubsection{Quy hoạch Nguyên-Hỗn hợp (Mixed-Integer Programs)}
 
-\textbf{Mixed-Integer Programs (MIPs)} generalize optimization by partitioning variables into continuous vector $x \in \mathbb{R}^n$ and integer vector $z \in \mathbb{Z}^m$:
+\textbf{Quy hoạch Nguyên-Hỗn hợp (Mixed-Integer Programs - MIPs)} tổng quát hóa bài toán tối ưu bằng cách phân hoạch các biến thành vector liên tục $x \in \mathbb{R}^n$ và vector nguyên $z \in \mathbb{Z}^m$:
 \begin{subequations}\label{eq:mip}
-    \begin{align}
-        \text{minimize} \quad   & f(x, z) \label{eq:mip_objective}                  \\
-        \text{subject to} \quad & (x, z) \in \mathcal{C}, \label{eq:mip_constraint} \\
-                                & z \in \mathbb{Z}^m. \label{eq:mip_integer}
-    \end{align}
+\begin{align}
+\text{minimize} \quad   & f(x, z) \label{eq:mip_objective}                  \\
+\text{subject to} \quad & (x, z) \in \mathcal{C}, \label{eq:mip_constraint} \\
+& z \in \mathbb{Z}^m. \label{eq:mip_integer}
+\end{align}
 \end{subequations}
-The integrality constraint renders the feasible set non-convex and discrete, typically making MIPs NP-hard. Standard methods relying on differentiability are inapplicable.
+Ràng buộc nguyên làm cho tập chấp nhận được trở nên rời rạc và không lồi, thường khiến các bài toán MIP trở thành NP-khó. Các phương pháp tiêu chuẩn dựa trên tính khả vi không thể áp dụng được.
 
-To solve MIPs, \textbf{relaxation} is commonly employed (e.g., replacing $z_j
-\in \{0,1\}$ with $0 \leq z_j \leq 1$). The optimal value of the relaxed problem
-provides a lower bound on the MIP solution. If the relaxed solution is not
-integer-feasible, algorithms like \textbf{Branch-and-Bound} are used. This
-method systematically partitions the search space into sub-regions (branches)
-to eliminate fractional values, exploring a search tree to find the global
-optimum.
+Để giải quyết MIP, phương pháp \textbf{nới lỏng} (relaxation) thường được sử dụng (ví dụ: thay thế $z_j \in \{0,1\}$ bằng $0 \leq z_j \leq 1$). Giá trị tối ưu của bài toán nới lỏng cung cấp một cận dưới cho nghiệm của MIP. Nếu nghiệm nới lỏng không thỏa mãn tính nguyên, các thuật toán như \textbf{Nhánh và Cận} (Branch-and-Bound) sẽ được sử dụng. Phương pháp này phân hoạch không gian tìm kiếm thành các vùng nhỏ hơn (các nhánh) một cách có hệ thống để loại bỏ các giá trị phân số, từ đó duyệt cây tìm kiếm để tìm ra tối ưu toàn cục.
