@@ -1,29 +1,29 @@
 \documentclass[a4paper,12pt]{report}
 
 %=====================================================
-% DOCUMENT CLASS & FONT SETTINGS
+% CÀI ĐẶT LỚP VĂN BẢN & PHÔNG CHỮ
 %=====================================================
 \usepackage[fontsize=13pt]{scrextend}
 \usepackage[T1]{fontenc}
 \usepackage{mathptmx} % Times font
 \usepackage{lmodern}
 \usepackage{adjustbox}
-%=====================================================
-% LANGUAGE & ENCODING
-%=====================================================
-\usepackage[utf8]{vietnam}
-\usepackage[english]{babel}
-% \usepackage{vntex}
 
 %=====================================================
-% PAGE LAYOUT & GEOMETRY
+% NGÔN NGỮ & BẢNG MÃ
+%=====================================================
+\usepackage[utf8]{vietnam}
+\usepackage[english,vietnamese]{babel} % Đã thêm vietnamese
+
+%=====================================================
+% BỐ CỤC TRANG & HÌNH HỌC
 %=====================================================
 \usepackage{geometry}
 \usepackage{setspace}
 \usepackage{indentfirst}
 \usepackage{ragged2e}
 
-% Page layout definitions
+% Định nghĩa bố cục trang
 \def\thesislayout{
     \newgeometry{
         a4paper,
@@ -49,24 +49,24 @@
 \setlength\parindent{0pt}
 
 %=====================================================
-% MATHEMATICS PACKAGES
+% GÓI TOÁN HỌC
 %=====================================================
 \usepackage{amsmath,amssymb,amsfonts,amsthm}
 \usepackage{latexsym}
 \usepackage{commath}
 
-% Math font declaration
+% Khai báo font toán học
 \DeclareMathAlphabet{\mathcal}{OMS}{cmsy}{m}{n}
 
-% Theorem environments
-\newtheorem{theorem}{\textbf{Theorem}}
-\newtheorem{property}{\textbf{Property}}
-\newtheorem{proposition}{\textbf{Proposition}}
-\newtheorem{corollary}[proposition]{\textbf{Corollary}}
-\newtheorem{lemma}[proposition]{\textbf{Lemma}}
+% Môi trường định lý (Tiếng Việt)
+\newtheorem{theorem}{\textbf{Định lý}}
+\newtheorem{property}{\textbf{Tính chất}}
+\newtheorem{proposition}{\textbf{Mệnh đề}}
+\newtheorem{corollary}[proposition]{\textbf{Hệ quả}}
+\newtheorem{lemma}[proposition]{\textbf{Bổ đề}}
 
 %=====================================================
-% TABLES & ARRAYS
+% BẢNG BIỂU
 %=====================================================
 \usepackage{array,tabularx,longtable}
 \usepackage{multirow,multicol}
@@ -75,7 +75,7 @@
 \usepackage{diagbox}
 
 %=====================================================
-% GRAPHICS & FIGURES
+% ĐỒ HỌA & HÌNH ẢNH
 %=====================================================
 \usepackage{graphicx}
 \usepackage{epsfig}
@@ -85,28 +85,27 @@
 \usepackage{rotating}
 \usepackage{tikz}
 \usepackage{pdfpages}
-% In main.tex preamble, update the tocloft section:
 \usepackage{tocloft}
 
-\renewcommand{\cftfigpresnum}{\figurename~}
+\renewcommand{\cftfigpresnum}{Hình~}
 \renewcommand{\cftfignumwidth}{5em}
-\renewcommand{\cfttabpresnum}{\tablename~}
+\renewcommand{\cfttabpresnum}{Bảng~}
 \renewcommand{\cfttabnumwidth}{5em}
 
-% Better LOF formatting
+% Định dạng Danh mục hình ảnh tốt hơn
 \setlength{\cftbeforefigskip}{8pt}
 \renewcommand{\cftfigfont}{\small}
 \renewcommand{\cftfigpagefont}{\small}
 
 \usetikzlibrary{arrows,snakes,backgrounds,calc}
 
-% Float spacing
+% Khoảng cách vật thể trôi (float)
 \setlength{\floatsep}{5pt plus 2pt minus 2pt}
 \setlength{\textfloatsep}{5pt plus 2pt minus 2pt}
 \setlength{\intextsep}{10pt plus 2pt minus 2pt}
 
 %=====================================================
-% ALGORITHMS & CODE
+% THUẬT TOÁN & MÃ NGUỒN
 %=====================================================
 \usepackage[lined,boxed,commentsnumbered]{algorithm2e}
 \usepackage{algorithmic}
@@ -114,11 +113,11 @@
 
 \RestyleAlgo{ruled}
 \SetKwComment{Comment}{/* }{ */}
-\renewcommand{\algorithmicrequire}{\textbf{Input:}}
-\renewcommand{\algorithmicensure}{\textbf{Output:}}
+\renewcommand{\algorithmicrequire}{\textbf{Đầu vào:}}
+\renewcommand{\algorithmicensure}{\textbf{Đầu ra:}}
 
 %=====================================================
-% BIBLIOGRAPHY
+% TÀI LIỆU THAM KHẢO
 %=====================================================
 \usepackage{csquotes}
 \usepackage[style=ieee,sorting=none]{biblatex}
@@ -133,7 +132,7 @@
 }
 
 %=====================================================
-% HYPERLINKS & COLORS
+% LIÊN KẾT & MÀU SẮC
 %=====================================================
 \usepackage{xcolor}
 \usepackage{hyperref}
@@ -147,22 +146,21 @@
 }
 
 %=====================================================
-% TABLE OF CONTENTS
+% MỤC LỤC
 %=====================================================
 \usepackage{tocloft}
 
-\renewcommand{\cftfigpresnum}{\figurename~}
-\renewcommand{\cftfignumwidth}{5em}
-\renewcommand{\cfttabpresnum}{\tablename~}
-\renewcommand{\cfttabnumwidth}{5em}
-
 \AtBeginDocument{
-    \renewcommand*\contentsname{Contents}
-    \renewcommand*\refname{References}
+    \renewcommand*\contentsname{Mục lục}
+    \renewcommand*\refname{Tài liệu tham khảo}
+    \renewcommand{\figurename}{\textbf{Hình}}
+    \renewcommand{\tablename}{\textbf{Bảng}}
+    \renewcommand{\listfigurename}{Danh mục hình ảnh}
+    \renewcommand{\listtablename}{Danh mục bảng biểu}
 }
 
 %=====================================================
-% HEADERS & FOOTERS
+% TIÊU ĐỀ TRANG & CHÂN TRANG
 %=====================================================
 \usepackage{fancyhdr}
 \usepackage{lastpage}
@@ -172,23 +170,23 @@
 \renewcommand{\footrulewidth}{0.3pt}
 
 \fancyfoot{}
-\fancyfoot[R]{\scriptsize Page \thepage/\pageref{LastPage}}
+\fancyfoot[R]{\scriptsize Trang \thepage/\pageref{LastPage}}
 
 %=====================================================
-% SECTION FORMATTING
+% ĐỊNH DẠNG CÁC MỤC (SECTION)
 %=====================================================
 \usepackage{titlesec}
 
 \titleformat{\chapter}[display]
     {\normalfont\huge\bfseries}
-    {\chaptertitlename{} \thechapter}
+    {Chương \thechapter}
     {15pt}
     {\Huge}
 
 \setcounter{secnumdepth}{4}
 \setcounter{tocdepth}{3}
 
-% Subsubsubsection definition
+% Định nghĩa Subsubsubsection
 \makeatletter
 \newcounter{subsubsubsection}[subsubsection]
 \renewcommand\thesubsubsubsection{\thesubsubsection.\@alph\c@subsubsubsection}
@@ -201,13 +199,13 @@
 \makeatother
 
 %=====================================================
-% CUSTOM COMMANDS
+% CÁC LỆNH TÙY CHỈNH
 %=====================================================
 \newcommand\tab[1][1cm]{\hspace*{#1}}
 \newcommand\blank[1]{\rule[-.2ex]{#1}{.4pt}}
 
 %=====================================================
-% MISCELLANEOUS PACKAGES
+% CÁC GÓI KHÁC
 %=====================================================
 \usepackage{blindtext}
 \usepackage{comment}
@@ -217,13 +215,7 @@
 \usepackage{longfbox}
 
 %=====================================================
-% FIGURE & TABLE NAMING
-%=====================================================
-\renewcommand{\figurename}{\textbf{Figure}}
-\renewcommand{\tablename}{\textbf{Table}}
-
-%=====================================================
-% DOCUMENT BEGIN
+% BẮT ĐẦU TÀI LIỆU
 %=====================================================
 \begin{document}
 
@@ -241,27 +233,28 @@
     
     \begin{center}
         \vspace{-20pt}
-        \textbf{HO CHI MINH CITY UNIVERSITY OF TECHNOLOGY}\\
-        \textbf{FALTY OF COMPUTER SCIENCE AND ENGINEERING}\\
+        \textbf{ĐẠI HỌC QUỐC GIA THÀNH PHỐ HỒ CHÍ MINH}\\
+        \textbf{KHOA KHOA HỌC VÀ KỸ THUẬT MÁY TÍNH}\\
         \vspace{10pt}
         \includegraphics[width=0.25\linewidth]{image/hcmut.png}\\
         \vspace{8pt}
-        \textbf{\Large CAPSTONE PROJECT}\\
+        \textbf{ĐỒ ÁN MÔN HỌC KỸ THUẬT MÁY TÍNH}\\
         \vspace{8pt}
-        \textbf{\Large COMPUTER ENGINEERING}\\
+        \textbf{\Large NGÀNH KỸ THUẬT MÁY TÍNH}\\
         \vspace{15pt}
         \hrule
         \vspace{20pt}
-        \textcolor{blue}{\Large{\textbf{Motion Planning around Obstacles}}}\\
+        \textcolor{blue}{\Large{\textbf{Hoạch định chuyển động cho rô-bốt sử dụng tối ưu lồi}}}\\
         \vspace{20pt}
         \hrule
     \end{center}
 
     \vspace{5pt}
     \begin{center}
-       \large{\textbf{Semester 251}}\\
+       \large{\textbf{Học kỳ 251}}\\
        \vspace{10pt}
-        \textbf{Instructor:} Assoc. Prof. Le Hong Trang 
+        \textbf{Giảng viên hướng dẫn:} PGS. TS Lê Hồng Trang\\
+                                      TS. Trương Huỳnh Chi    
     \end{center}
 
     \vspace{1cm}
@@ -270,10 +263,10 @@
         \small
         \begin{tabular}{|>{\centering\arraybackslash}m{1cm}|>{\centering\arraybackslash}m{5.3cm}|>{\centering\arraybackslash}m{1.7cm}|>{\centering\arraybackslash}m{4cm}|}
             \hline
-            \textbf{STT} & \textbf{Full name} & \textbf{ID} & \textbf{Note}\\
+            \textbf{STT} & \textbf{Họ và tên} & \textbf{MSSV} & \textbf{Ghi chú}\\
             \hline
-                1 & Nguyen Tran Dang Khoa & 2211635 &\\
-                2 & Ho Dang Khoa & 2211588 &\\
+                1 & Nguyễn Trần Đăng Khoa & 2211635 &\\
+                2 & Hồ Đăng Khoa & 2211588 &\\
             \hline
         \end{tabular}
     \end{adjustbox}
@@ -282,29 +275,17 @@
         ~\\
         ~\\        ~\\
         ~\\
-        \textit{Ho Chi Minh City, December 2025}
+        \textit{Thành phố Hồ Chí Minh, Tháng 12 năm 2025}
     \end{center}
 \end{titlepage}
 
-% \thesislayout
-
-%\thispagestyle{empty}
-\renewcommand{\figurename}{\textbf{Figure}}
-\renewcommand{\tablename}{\textbf{Table}}
 \newpage
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \pagenumbering{roman}
-
-% \include{instructor-signature/main}
-% \includepdf[pages=-]{instructor-signature/task.pdf}
-% \includepdf[pages=-]{instructor-signature/Dong.pdf}
 \setcounter{page}{1}
-% \include{authenticity-declaration/main.tex}
 
-% \include{acknowledgement/main.tex}
-
-\include{abstraction/main.tex}
+\include{abstraction/main.tex} % Tóm tắt luận văn
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \tableofcontents
@@ -317,20 +298,15 @@
 \pagenumbering{arabic}
 \setcounter{page}{1}
 \thesislayout
-\include{introduction/main}
-\include{theoretical-background/main}
-\include{related-work/main}
-\include{experiments/main}
-\include{future-plan/main}
-% \include{system-design/main.tex}
-% \newpage
-% \newpage
-% \include{future-plan/main.tex}
-% \newpage
 
-% \nocite{*}
-\addcontentsline{toc}{chapter}{References}
-\printbibliography[title=References]
+\include{introduction/main}           % Giới thiệu
+\include{theoretical-background/main} % Cơ sở lý thuyết
+\include{related-work/main}           % Các nghiên cứu liên quan
+\include{experiments/main}            % Thực nghiệm
+\include{future-plan/main}            % Hướng phát triển tương lai
 
-\include{appendix/main}
+\addcontentsline{toc}{chapter}{Tài liệu tham khảo}
+\printbibliography[title=Tài liệu tham khảo]
+
+\include{appendix/main}               % Phụ lục
 \end{document}

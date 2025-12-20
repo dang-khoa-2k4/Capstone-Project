@@ -58,7 +58,7 @@ Các định nghĩa này đóng vai trò nền tảng cho các phương pháp đ
 
 Thuật toán là một chiến lược chia để trị đệ quy\cite{LienAmato2006}:
 \begin{enumerate}
-\item Đo độ lõm: Xác định đặc điểm không lồi (một "notch" hay đỉnh lõm) quan trọng nhất trong đa giác. Đây là điểm có độ lõm lớn nhất. Tùy theo từng trường hợp mà ta có thể sử dụng các thước đo độ lõm khác nhau, cách để tính những thước đo độ lõm nãy sẽ được giới thiệu rõ hơn ở phần ~\ref{sec:MEASURING-CONCAVITY}
+\item Đo độ lõm: Xác định đặc điểm không lồi (một notch hay đỉnh lõm) quan trọng nhất trong đa giác. Đây là điểm có độ lõm lớn nhất. Tùy theo từng trường hợp mà ta có thể sử dụng các thước đo độ lõm khác nhau, cách để tính những thước đo độ lõm nãy sẽ được giới thiệu rõ hơn ở phần ~\ref{sec:MEASURING-CONCAVITY}
 
 
 \item Kiểm tra Dung sai: Nếu độ lõm tối đa đo được nhỏ hơn $\tau$, quá trình kết thúc đối với thành phần đó.
@@ -68,7 +68,7 @@ Thuật toán là một chiến lược chia để trị đệ quy\cite{LienAmat
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\linewidth]{experiments/image/ACD-3.png}
-    \caption{%
+    \caption[Ví dụ ACD]{%
         (a) Nếu $x \in \partial P_i > 0$, hàm \texttt{Resolve} \textbf{gộp} biên $\partial P_i$ vào đa giác $P_0$.
         (b) Nếu $x \in \partial P_0$, hàm \texttt{Resolve} \textbf{tách} đa giác $P$ thành hai đa giác $P_1$ và $P_2$.
         (c) \textbf{Độ lõm} tại điểm $x$ thay đổi sau khi đa giác được phân rã.%
@@ -80,7 +80,7 @@ Thuật toán là một chiến lược chia để trị đệ quy\cite{LienAmat
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\linewidth]{experiments/image/ACD-1.png}
-    \caption{Quá trình đệ quy tiếp tục cho đến khi đạt đến giới hạn độ lõm đầu vào của người dùng $\tau$.}
+    \caption[Mô tả quá trình đệ quy]{Quá trình đệ quy tiếp tục cho đến khi đạt đến giới hạn độ lõm đầu vào của người dùng $\tau$.}
 \end{figure}
 
 \end{enumerate}
@@ -98,7 +98,7 @@ Chất lượng của phân hoạch phụ thuộc rất nhiều vào \textbf{cá
     \begin{figure}[H]
         \centering
         \includegraphics[width=1\linewidth]{experiments/image/ACD-2.png}
-        \caption{%
+        \caption[Trường hợp không đảm bảo tính đơn điệu của ACD]{%
             Giả sử $r$ là điểm lõm có độ lõm lớn nhất. 
             Sau khi giải quyết (resolve) $r$, độ lõm của $s$ tăng lên. 
             Nếu $\text{concave}(r) < \tau$, vùng $s$ sẽ không bao giờ được xử lý, 
@@ -119,7 +119,7 @@ Chất lượng của phân hoạch phụ thuộc rất nhiều vào \textbf{cá
     \begin{figure}[H]
         \centering
         \includegraphics[width=1\linewidth]{experiments/image/ACD-6.png}
-        \caption{Độ lõm SL có thể xử lý được túi trong (a) một cách chính xác vì không có hướng chuẩn nào của các đỉnh trong túi ngược với hướng chuẩn của cầu. Tuy nhiên, túi trong (b) có thể dẫn đến độ lõm giảm không đơn điệu.}
+        \caption[Độ lõm Lai (Hybrid Concavity – H-Concavity)]{Độ lõm SL có thể xử lý được túi trong (a) một cách chính xác vì không có hướng chuẩn nào của các đỉnh trong túi ngược với hướng chuẩn của cầu. Tuy nhiên, túi trong (b) có thể dẫn đến độ lõm giảm không đơn điệu.}
     \end{figure}
    
 \end{itemize}
@@ -133,7 +133,7 @@ Chất lượng của phân hoạch phụ thuộc rất nhiều vào \textbf{cá
 
 
 
-\subsection{Iterative Regional Inflation by Semi-Definite Programming (IRIS)}
+\subsection{Iterative Regional Inflation by Semi-Definite \\ Programming (IRIS)}
 
 Thuật toán Iterative Regional Inflation by Semidefinite Programming (IRIS) thay vì cố gắng bao phủ toàn bộ không gian tự do cùng một lúc, nó đặt ra câu hỏi: "Với một điểm 'mầm' (seed) ban đầu, vùng lồi lớn nhất của không gian tự do mà tôi có thể tìm thấy xung quanh nó là gì?".  Tức sau khi chạy xong giải thuật output của ta là một vùng lồi lớn nhất có thể của thuật toán từ 1 seed point cho trước.
 
@@ -267,7 +267,7 @@ Thể tích của ellipsoid tỉ lệ với \(\det(C)\).
 \begin{figure}[!htp]
     \centering
     \includegraphics[width=1\linewidth]{experiments/image/iris-3.png}
-    \caption{Lặp lại}
+    \caption[Vòng lặp IRIS]{Lặp lại}
 \end{figure}
 
 \newpage
@@ -279,20 +279,20 @@ Thể tích của ellipsoid tỉ lệ với \(\det(C)\).
 \begin{figure}[!htp]
     \centering
     \includegraphics[width=1\linewidth]{experiments/image/time-iris.png}
-    \caption{Độ phức tạp thời gian \cite{DeitsTedrake2014}}
+    \caption[Độ phức tạp thời gian của IRIS]{Độ phức tạp thời gian \cite{DeitsTedrake2014}}
 \end{figure}
 
 \item Xử lý Vật cản không lồi:
 \begin{itemize}
 \item Chướng ngại vật trong không gian work space: Thuật toán IRIS ban đầu giả định các chướng ngại vật là lồi, đây cũng là một nhược điểm lớn nhất của thuật toán này. Để đảm bảo các obstacles là lồi, ta thường phải tiền xử lý bằng cách bao lồi  các chướng ngại vật không lồi\cite{DeitsTedrake2014}. Ngoài ra cách tiếp cận tiêu chuẩn cho các chướng ngại vật không lồi là phân hoạch chúng thành một tập hợp các mảnh lồi trước khi chạy IRIS (tức tăng số lượng obtacles của không gian lên). Điều này khả thi vì IRIS có khả năng mở rộng hiệu quả với số lượng lớn chướng ngại vật. 
 
-\item Chướng ngại vật trong không gian cấu hình (Configuration Space): Đối với các robot có động học phức tạp, nơi các chướng ngại vật trong không gian cấu hình được định nghĩa một cách ẩn ý và không lồi, các phần mở rộng như IRIS-NP và C-IRIS được sử dụng. Đặc biệt, bài báo "Motion Planning around Obstacles with Convex Optimization" sử dụng một triển khai có tên là IrisInConfigurationSpace trong thư viện Drake cho ví dụ về cánh tay robot.\cite{motionplanning2022} Phần mở rộng này sử dụng lập trình phi tuyến (nonlinear programming) để xử lý hình học phức tạp của không gian cấu hình.
+\item Chướng ngại vật trong không gian cấu hình (Configuration Space): Đối với các robot có động học phức tạp, nơi các chướng ngại vật trong không gian cấu hình được định nghĩa một cách ẩn ý và không lồi, các phần mở rộng như IRIS-NP \cite{DeitsTedrake2023NP} và C-IRIS \cite{DeitsTedrake2022CIRIS} được sử dụng.
 \end{itemize}
 \end{itemize}
 
-\subsection{Gieo mầm Tự động qua Lớp phủ Clique Khả kiến (VCC)}
+\subsection{Visibility Clique Cover (VCC)}
 
-Thuật toán Visibility Clique Cover (VCC) giải quyết trực tiếp một hạn chế chính của IRIS: nhu cầu về các điểm mầm tốt.$^5$ Việc lấy mầm ngẫu nhiên là không hiệu quả. VCC tự động hóa quá trình này bằng cách trước tiên tìm hiểu cấu trúc toàn cục của không gian tự do và sau đó đặt các điểm mầm một cách chiến lược vào các khu vực có khả năng mở rộng lớn.
+Thuật toán Visibility Clique Cover (VCC) giải quyết trực tiếp một hạn chế chính của IRIS: nhu cầu về các điểm mầm tốt.\cite{DeitsTedrake2023VCC} Việc lấy mầm ngẫu nhiên là không hiệu quả. VCC tự động hóa quá trình này bằng cách trước tiên tìm hiểu cấu trúc toàn cục của không gian tự do và sau đó đặt các điểm mầm một cách chiến lược vào các khu vực có khả năng mở rộng lớn.
 
 \subsubsection{Ý tưởng và Chi tiết Thuật toán}
 
@@ -323,7 +323,7 @@ Quy trình VCC bao gồm bốn bước chính:
     \caption{Khởi tạo Ellipsoid}
 \end{figure}
 
-\item Lấp đầy thành Đa diện: Tâm và hình dạng của mỗi ellipsoid được sử dụng để khởi tạo một vòng lặp duy nhất của thuật toán lấp đầy tương tự IRIS. Điều này hiệu quả hơn IRIS tiêu chuẩn vì ellipsoid ban đầu đã được "thông báo" về hình học cục bộ, thường loại bỏ sự cần thiết của nhiều vòng lặp tốn kém.$^5$
+\item Lấp đầy thành Đa diện: Tâm và hình dạng của mỗi ellipsoid được sử dụng để khởi tạo một vòng lặp duy nhất của thuật toán lấp đầy tương tự IRIS. Điều này hiệu quả hơn IRIS tiêu chuẩn vì ellipsoid ban đầu đã được "thông báo" về hình học cục bộ, thường loại bỏ sự cần thiết của nhiều vòng lặp tốn kém về mặt tính toán.\cite{DeitsTedrake2023VCC}
 
 \begin{figure}[H]
     \centering
@@ -337,16 +337,8 @@ Quy trình VCC bao gồm bốn bước chính:
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\linewidth]{experiments/image/VCC-5.png}
-    \caption{Lặp lại}
+    \caption[Vòng lặp VCC]{Lặp lại}
 \end{figure}
 
 \end{enumerate}
 
-\subsubsection{Đặc tính và Tính tối ưu}
-
-\begin{itemize}
-\item Loại thuật toán: VCC là một phương pháp xấp xỉ. Chất lượng của lớp phủ được đo bằng tỷ lệ phần trăm thể tích của $C_{free}$ được bao phủ bởi hợp của các đa diện kết quả.$^5$
-\item Mục tiêu Tối ưu: Thuật toán nhằm tìm một lớp phủ lồi xấp xỉ $\alpha$ ($\alpha$-approximate convex cover) với số lượng vùng tối thiểu. Nó sử dụng bài toán lớp phủ clique tối thiểu (minimum clique cover) như một bài toán tương tự rời rạc cho bài toán lớp phủ lồi tối thiểu.\cite{DeitsTedrake2023VCC}
-\item Phương pháp: Đây là một cách tiếp cận lai ghép giữa hình học và ILP.
-\item Xử lý Không gian không lồi: VCC không phụ thuộc vào hình dạng của chướng ngại vật vì nó dựa vào một bộ kiểm tra va chạm chung để kiểm tra khả kiến và sau đó sử dụng một thuật toán lấp đầy cơ bản (như IRIS-NP) có thể xử lý các không gian cấu hình không lồi.\cite{DeitsTedrake2023VCC}
-\end{itemize}

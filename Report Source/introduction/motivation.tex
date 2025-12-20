@@ -15,7 +15,7 @@ Việc đưa ra các quyết định tối ưu trong thời gian thực là mộ
 \centering
 \includegraphics[width=0.475\textwidth]{introduction/image/atlas-robot.png}
 \includegraphics[width=0.5\textwidth]{introduction/image/aws-robin.png}
-\caption[Boston Dynamics' Atlas and Amazon's Robin]{\textsl{\textbf{Bên trái:} Robot Atlas của Boston Dynamics thực hiện parkour, yêu cầu lập kế hoạch bước chân rời rạc và tối ưu quỹ đạo liên tục. \textbf{Bên phải:} Cánh tay robot Robin của Amazon phân loại hàng hóa, trong đó việc lựa chọn thùng chứa rời rạc và quỹ đạo chuyển động liên tục cần được tối ưu đồng thời.}}
+\caption[Boston Dynamics' Atlas và Amazon's Robin]{\textsl{\textbf{Bên trái:} Robot Atlas của Boston Dynamics thực hiện parkour, yêu cầu lập kế hoạch bước chân rời rạc và tối ưu quỹ đạo liên tục. \textbf{Bên phải:} Cánh tay robot Robin của Amazon phân loại hàng hóa, trong đó việc lựa chọn thùng chứa rời rạc và quỹ đạo chuyển động liên tục cần được tối ưu đồng thời.}}
 \label{fig:robotics_examples}
 \end{figure}
 
@@ -27,7 +27,7 @@ Về mặt thuật toán, việc lựa chọn phương pháp lập kế hoạch 
 
 \item \textbf{Tối ưu hóa quỹ đạo:} Các phương pháp này có ưu thế trong việc xử lý động lực học của robot và các bài toán có không gian trạng thái nhiều chiều. Tuy nhiên, khi môi trường chứa nhiều vật cản khiến bài toán trở nên phi lồi, chúng thường dễ rơi vào \textbf{cực tiểu cục bộ}, dẫn đến việc không tìm được quỹ đạo tránh va chạm \cite{DiehlEtAl2006}.
 
-\item \textbf{Các phương pháp lập kế hoạch dựa trên lấy mẫu:} Để khắc phục hạn chế trên, cộng đồng robot học thường sử dụng các phương pháp lấy mẫu như RRT hoặc PRM nhờ vào tính “đầy đủ theo xác suất” (probabilistic completeness). Tuy nhiên, cái giá phải trả là các quỹ đạo thu được thường \textbf{kém tối ưu}, và việc áp đặt các \textbf{ràng buộc vi phân liên tục} lên các mẫu rời rạc vẫn là một bài toán rất khó \cite{LLaValle1998,KavrakiEtAl1996}.
+\item \textbf{Các phương pháp lập kế hoạch dựa trên lấy mẫu:} Để khắc phục hạn chế trên, cộng đồng robot học thường sử dụng các phương pháp lấy mẫu như RRT hoặc PRM nhờ vào tính “đầy đủ theo xác suất” (probabilistic completeness). Tuy nhiên, cái giá phải trả là các quỹ đạo thu được thường \textbf{kém tối ưu}, và việc áp đặt các \textbf{ràng buộc vi phân liên tục} lên các mẫu rời rạc vẫn là một bài toán rất khó \cite{KavrakiEtAl1996}.
 
 
 \end{itemize}
