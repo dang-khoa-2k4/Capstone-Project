@@ -9,12 +9,12 @@ Chúng tôi xem xét một không gian làm việc hai chiều đơn giản vớ
 Trong kịch bản này, chúng tôi tập trung phân tích giai đoạn tiền xử lý không gian cấu hình. Chất lượng của các vùng lồi được tạo ra là yếu tố quyết định số lượng biến nguyên trong bài toán MICP, từ đó ảnh hưởng trực tiếp đến thời gian giải và tính tối ưu của quỹ đạo.
 
 \textbf{Mục tiêu:}
-Định lượng sự tác động của các thuật toán phân hoạch lồi khác nhau (ACD, VCC) so với phương pháp phân hoạch thủ công\footnote{Ở đây chúng tôi giả sử kết quả từ phân hoạch thủ công là kết quả tốt nhất để từ đó so sánh mức độ hiệu quả của các giải thuật còn lại.} (Manual) lên hiệu suất của bộ lập kế hoạch GCS.\\
+Định lượng sự tác động của các thuật toán phân hoạch lồi khác nhau (ACD, VCC) so với phương pháp phân hoạch thủ công\footnote{Tức người dùng sẽ tự phân hoạch không gian tự do. Ở đây chúng tôi giả sử kết quả từ phân hoạch thủ công là kết quả tốt nhất để từ đó so sánh mức độ hiệu quả của các giải thuật còn lại.} (Manual) lên hiệu suất của bộ lập kế hoạch GCS.\\
 
 \textbf{Mô tả kịch bản:}
     Thiết lập một không gian làm việc 2D với các vật cản đa giác lồi được bố trí cố định. Cùng với đó thực hiện phân hoạch không gian tự do bằng ba phương pháp:
     \begin{enumerate}
-        \item \textbf{Phân hoạch Thủ công (Ground-truth):} Tạo ra số lượng vùng lồi tối thiểu bằng sự can thiệp của con người để làm chuẩn đối sánh.
+        \item \textbf{Phân hoạch Thủ công:} Tạo ra số lượng vùng lồi tối thiểu bằng sự can thiệp của con người để làm chuẩn đối sánh.
         \item \textbf{Phân hoạch Lồi Xấp xỉ (ACD):} Sử dụng thuật toán với mức dung sai $\tau = 0.0$ (tức các vùng lồi được tạo ra hoàn toàn lồi).
         \item \textbf{Lớp phủ Clique Khả kiến (VCC):} Sử dụng VCC với mức độ phủ của tập các vùng lồi là $96\%$.
     \end{enumerate}
