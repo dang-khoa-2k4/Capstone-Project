@@ -13,7 +13,7 @@
 % NGÔN NGỮ & BẢNG MÃ
 %=====================================================
 \usepackage[utf8]{vietnam}
-\usepackage[english,vietnamese]{babel} % Đã thêm vietnamese
+\usepackage[vietnamese, english]{babel} % Đã thêm vietnamese
 
 %=====================================================
 % BỐ CỤC TRANG & HÌNH HỌC
@@ -120,16 +120,16 @@
 % TÀI LIỆU THAM KHẢO
 %=====================================================
 \usepackage{csquotes}
-\usepackage[style=ieee,sorting=none]{biblatex}
+\usepackage[backend=biber,style=ieee]{biblatex}
 \addbibresource{refs.bib}
 
-\AtEveryBibitem{%
-  \clearfield{issn}
-  \clearfield{doi}
-  \ifentrytype{online}{}{%
-    \clearfield{url}
-  }
-}
+% \AtEveryBibitem{%
+%   \clearfield{issn}
+%   \clearfield{doi}
+%   \ifentrytype{online}{}{%
+%     \clearfield{url}
+%   }
+% }
 
 %=====================================================
 % LIÊN KẾT & MÀU SẮC
@@ -254,7 +254,7 @@
        \large{\textbf{Học kỳ 251}}\\
        \vspace{10pt}
         \textbf{Giảng viên hướng dẫn:} PGS. TS Lê Hồng Trang\\
-                                      TS. Trương Huỳnh Chi    
+                                      ThS. Trương Quỳnh Chi    
     \end{center}
 
     \vspace{1cm}
