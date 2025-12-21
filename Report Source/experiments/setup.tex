@@ -9,37 +9,35 @@ Chúng tôi xem xét một không gian làm việc hai chiều đơn giản vớ
 Trong kịch bản này, chúng tôi tập trung phân tích giai đoạn tiền xử lý không gian cấu hình. Chất lượng của các vùng lồi được tạo ra là yếu tố quyết định số lượng biến nguyên trong bài toán MICP, từ đó ảnh hưởng trực tiếp đến thời gian giải và tính tối ưu của quỹ đạo.
 
 \textbf{Mục tiêu:}
-Định lượng sự tác động của các thuật toán phân hoạch lồi khác nhau (ACD, VCC) so với phương pháp phân hoạch thủ công\footnote{Ở đây chúng tôi giả sử kết quả từ phân hoạch thủ công là kết quả tốt nhất để từ đó so sánh mức độ hiệu quả của các giải thuật còn lại.} (Manual) lên hiệu suất của bộ lập kế hoạch GCS.\\
+Định lượng sự tác động của các thuật toán phân hoạch lồi khác nhau (ACD, VCC) so với phương pháp phân hoạch thủ công\footnote{Tức người dùng sẽ tự phân hoạch không gian tự do. Ở đây chúng tôi giả sử kết quả từ phân hoạch thủ công là kết quả tốt nhất để từ đó so sánh mức độ hiệu quả của các giải thuật còn lại.} (Manual) lên hiệu suất của bộ lập kế hoạch GCS.\\
 
 \textbf{Mô tả kịch bản:}
-\begin{itemize}
-    \item Thiết lập một không gian làm việc 2D với các vật cản đa giác lồi được bố trí cố định.
-    \item Thực hiện phân hoạch không gian tự do bằng ba phương pháp:
-    \begin{itemize}
-        \item \textbf{Phân hoạch Thủ công (Ground-truth):} Tạo ra số lượng vùng lồi tối thiểu bằng sự can thiệp của con người để làm chuẩn đối sánh.
-        \item \textbf{Phân hoạch Lồi Xấp xỉ (ACD):} Sử dụng thuật toán của Lien và Amato với mức dung sai $\tau = 0.0$ (tức các vùng lồi được tạo ra hoàn toàn lồi).
-        \item \textbf{Lớp phủ Clique Khả kiến (VCC):} Sử dụng phương pháp xây dựng đồ thị khả kiến và tìm lớp phủ clique để tự động hóa việc đặt điểm mầm cho IRIS với mức độ phủ $96\%$.
-    \end{itemize}
-\end{itemize}
+    Thiết lập một không gian làm việc 2D với các vật cản đa giác lồi được bố trí cố định. Cùng với đó thực hiện phân hoạch không gian tự do bằng ba phương pháp:
+    \begin{enumerate}
+        \item \textbf{Phân hoạch Thủ công:} Tạo ra số lượng vùng lồi tối thiểu bằng sự can thiệp của con người để làm chuẩn đối sánh.
+        \item \textbf{Phân hoạch Lồi Xấp xỉ (ACD):} Sử dụng thuật toán với mức dung sai $\tau = 0.0$ (tức các vùng lồi được tạo ra hoàn toàn lồi).
+        \item \textbf{Lớp phủ Clique Khả kiến (VCC):} Sử dụng VCC với mức độ phủ của tập các vùng lồi là $96\%$.
+    \end{enumerate}
+
 
 \textbf{Thiết lập bài toán tối ưu:}
 Chúng tôi tập trung vào bài toán tối ưu hóa thời gian thực hiện (minimum-time problem) kết hợp với các ràng buộc động lực học chặt chẽ. Các tham số cấu hình hệ thống được thiết lập như sau:
-\begin{itemize}
+\begin{enumerate}
     \item \textbf{Hàm mục tiêu và chi phí:} Sử dụng hàm chi phí thời gian $J_{t} = w_{t}T_{e}$ với trọng số $w_{t} = 1$.
     \item \textbf{Tham số hóa quỹ đạo:} Quỹ đạo được mô hình hóa bằng các đường cong Bézier bậc $d = 6$.
     \item \textbf{Ràng buộc liên tục:} Áp đặt độ liên tục cấp $C^{2}$ tại các điểm chuyển tiếp giữa các tập lồi.
     \item \textbf{Giới hạn động lực học:} Vận tốc trên mỗi chiều bị giới hạn trong khoảng $\dot{q} \in [-1,1]$.
     \item \textbf{Điều chuẩn và độ trơn:} Áp dụng điều chuẩn đạo hàm bậc hai với trọng số $\epsilon = 10^{-1}$.
-\end{itemize}
+\end{enumerate}
 
 Bằng cách giải bài toán nới lỏng lồi của SPP trong khung làm việc GCS, chúng tôi thu được quỹ đạo tối ưu không va chạm, đồng thời cung cấp cận sai số tối ưu (optimality gap) để chứng minh tính hiệu quả của phương pháp so với nghiệm tối ưu toàn cục.
 
 \textbf{Chỉ số đo lường:}
-\begin{itemize}
+\begin{enumerate}
     \item \textbf{Hiệu quả phân hoạch:} Số lượng vùng lồi ($k$) và thời gian tính toán của thuật toán phân hoạch.
     \item \textbf{Hiệu suất tối ưu hóa:} Thời gian giải bài toán MICP/SOCP.
     \item \textbf{Chất lượng quỹ đạo:} Giá trị chi phí thời gian và giá trị tối ưu của hàm mục tiêu.
-\end{itemize}
+\end{enumerate}
 
 \subsection{Môi trường mê cung}
 
@@ -49,24 +47,21 @@ Trong thực nghiệm này, chúng tôi mở rộng phạm vi kiểm chứng san
 Minh họa khả năng của framework GCS trong môi trường có độ phức tạp tổ hợp lớn và khả năng kết hợp tối ưu hóa rời rạc với tối ưu hóa liên tục.
 
 \textbf{Mô tả kịch bản:}
-\begin{itemize}
-    \item \textbf{Cấu trúc môi trường:} Mê cung kích thước $25 \times 25 = 625$ ô, sinh bằng thuật toán DFS ngẫu nhiên và loại bỏ ngẫu nhiên 100 bức tường.
-    \item \textbf{Thiết lập GCS:} Mỗi ô được mô hình hóa thành một tập an toàn lồi $Q_i$ với các cạnh hai chiều giữa các ô kề nhau.
-\end{itemize}
+    \textbf{Cấu trúc môi trường:} Mê cung kích thước $25 \times 25 = 625$ ô, sinh bằng thuật toán DFS ngẫu nhiên và loại bỏ ngẫu nhiên 100 bức tường. Mỗi ô được mô hình hóa thành một tập an toàn lồi $Q_i$ với các cạnh hai chiều giữa các ô kề nhau.
 
 \textbf{Thiết lập bài toán tối ưu:}
-\begin{itemize}
+\begin{enumerate}
     \item \textbf{Bậc đa thức và độ trơn:} Đường cong Bézier bậc $6$ với ràng buộc liên tục cấp $C^2$.
     \item \textbf{Hàm mục tiêu:} Tối thiểu hóa thời gian kết hợp điều chuẩn đạo hàm bậc hai với $\epsilon = 10^{-1}$.
     \item \textbf{Ràng buộc vi phân:} Vận tốc giới hạn trong $[-1,1]$, với $\dot{h}_{min} = 10^{-1}$.
     \item \textbf{Điều kiện biên:} Vận tốc tại điểm đầu và cuối bằng $0$.
     \item \textbf{Bộ giải:} Sử dụng \texttt{MosekSolver} để giải bài toán SOCP.
-\end{itemize}
+\end{enumerate}
 
 \textbf{Chỉ số đo lường:}
-\begin{itemize}
+\begin{enumerate}
     \item \textbf{Thời gian giải} ($t_{solve}$).
     \item \textbf{Cận sai số tối ưu} ($\delta_{relax} = \frac{C_{round}-C_{relax}}{C_{relax}}$).
     \item \textbf{Tổng chi phí thời gian} ($T$).
     \item \textbf{Độ dài quỹ đạo hình học} ($L$).
-\end{itemize}
+\end{enumerate}

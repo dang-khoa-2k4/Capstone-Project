@@ -176,7 +176,7 @@ Gắn liền mật thiết với tính lồi là khái niệm \textbf{bao lồi}
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.6\textwidth]{theoretical-background/image/convex_hull.png}
-\caption[Ví dụ về Bao Lồi]{Bao lồi của một tập hợp điểm (phần được tô đậm).\cite{boyd2004}}
+\caption[Ví dụ về Bao Lồi]{Bao lồi của một tập hợp điểm (phần được tô đậm).\cite{BoydVandenberghe2004}}
 \label{fig:convex_hull}
 \end{figure}
 
@@ -258,11 +258,11 @@ Một \textbf{Chương trình Nón (Conic Program - KP)} là một lớp con c�
 \end{align}
 \end{subequations}
 Các lớp cụ thể của KP bao gồm:
-\begin{itemize}
+\begin{enumerate}
 \item \textbf{Quy hoạch Tuyến tính (LP):} $\mathcal{K}$ là orthant không âm.
 \item \textbf{Quy hoạch Nón Bậc hai (SOCP):} $\mathcal{K}$ là tích của các nón bậc hai.
 \item \textbf{Quy hoạch Bán xác định (SDP):} $\mathcal{K}$ là nón bán xác định.
-\end{itemize}
+\end{enumerate}
 Các lớp này đại diện cho một hệ thống phân cấp về khả năng mô hình hóa: $LP \subset SOCP \subset SDP$. Một lớp phổ biến khác là \textbf{Quy hoạch Toàn phương (Quadratic Program - QP)}, có hàm mục tiêu bậc hai và các ràng buộc đa diện. Mặc dù mọi bài toán QP đều có thể được thiết lập dưới dạng SOCP, nhưng các thuật toán tập hoạt động (active-set algorithms) chuyên biệt cho QP thường hiệu quả hơn.
 
 \subsubsection{Quy hoạch Nguyên-Hỗn hợp (Mixed-Integer Programs)}

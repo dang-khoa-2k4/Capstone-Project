@@ -15,7 +15,7 @@ Phương pháp Approximate Convex Decomposition (ACD) giới thiệu một cách
 Phần này trình bày các khái niệm hình học cơ bản được sử dụng trong quá trình phân rã đa giác không lồi thành các vùng lồi. 
 Các định nghĩa này đóng vai trò nền tảng cho các phương pháp đo độ lõm và các thuật toán phân hoạch ở các phần sau.
 
-\begin{itemize}
+\begin{enumerate}
     \item \textbf{Bao lồi (Convex Hull – $H_P$):}  
     Bao lồi của một đa giác $P$ là \textbf{tập hợp lồi nhỏ nhất chứa toàn bộ đa giác} đó.  
     Trực quan, có thể hình dung bao lồi như một sợi dây chun được kéo căng bao quanh đa giác.  
@@ -44,7 +44,7 @@ Các định nghĩa này đóng vai trò nền tảng cho các phương pháp đ
     \text{POCKETS}(P) = \partial P \setminus \partial H_P.
     \]
     Mỗi túi tương ứng với một “vịnh lõm” (concave bay) trên đường biên của đa giác.
-\end{itemize}
+\end{enumerate}
 
 \begin{figure}[H]
     \centering
@@ -90,7 +90,7 @@ Thuật toán là một chiến lược chia để trị đệ quy\cite{LienAmat
 
 Chất lượng của phân hoạch phụ thuộc rất nhiều vào \textbf{cách đo độ lõm} của các đỉnh trong đa giác không lồi. Các phương pháp đo độ lõm phổ biến bao gồm:
 
-\begin{itemize}
+\begin{enumerate}
     \item \textbf{Độ lõm Đường thẳng (Straight-Line Concavity – SL-Concavity)}:  
     Là khoảng cách Euclid từ một đỉnh trong \textit{túi} (pocket) đến \textit{cầu nối} (bridge) liên kết của nó — thường là một cạnh thuộc bao lồi của đa giác.  
     Phương pháp này rất nhanh, nhưng \textbf{không đảm bảo tính đơn điệu}, có thể khiến một số đặc trưng lõm quan trọng bị bỏ sót.
@@ -122,15 +122,7 @@ Chất lượng của phân hoạch phụ thuộc rất nhiều vào \textbf{cá
         \caption[Độ lõm Lai (Hybrid Concavity – H-Concavity)]{Độ lõm SL có thể xử lý được túi trong (a) một cách chính xác vì không có hướng chuẩn nào của các đỉnh trong túi ngược với hướng chuẩn của cầu. Tuy nhiên, túi trong (b) có thể dẫn đến độ lõm giảm không đơn điệu.}
     \end{figure}
    
-\end{itemize}
-
-\subsubsection{Đặc tính của Thuật toán}
-
-\begin{itemize}
-\item Loại thuật toán: Đây là một phương pháp xấp xỉ theo định nghĩa. Một phân hoạch với $\tau=0$ là một phân hoạch lồi chính xác.
-\item Độ phức tạp thời gian: $O(n r^2)$, trong đó $n$ là số đỉnh và $r$ là số đỉnh lõm.\cite{LienAmato2006} Điều này nhanh hơn các thuật toán phân hoạch chính xác tối ưu cho đa giác không có lỗ.
-\end{itemize}
-
+\end{enumerate}
 
 
 \subsection{Iterative Regional Inflation by Semi-Definite \\ Programming (IRIS)}
@@ -153,24 +145,10 @@ IRIS là một quy trình tối ưu hóa lặp đi lặp lại gồm 4 bước:
 Đối với ellipsoid hiện tại, thuật toán tìm điểm gần nhất trên mỗi chướng ngại vật. Sau đó, nó xây dựng các siêu phẳng phân cách ellipsoid khỏi các chướng ngại vật này. Mỗi siêu phẳng tiếp tuyến với một phiên bản mở rộng của ellipsoid và đi qua điểm gần nhất trên chướng ngại vật tương ứng. Việc tìm điểm gần nhất trên mỗi chướng ngại vật lồi được xây dựng như một bài toán Quy hoạch Toàn phương (Quadratic Program - QP). Để giữ cho bài toán tối ưu hóa tiếp theo có quy mô nhỏ, các siêu phẳng thừa (những siêu phẳng không xác định biên của vùng lồi kết quả) sẽ được loại bỏ.
 
 \textbf{Bước 2.1}. Tìm điểm gần nhất trên obstacle đến hình elip hiện tại
-\begin{itemize}
-\item \textbf{Biến đổi không gian (Từ không gian Ellipsoid sang không gian Quả cầu đơn vị)}  
+\textbf{Biến đổi không gian (Từ không gian Ellipsoid sang không gian Quả cầu đơn vị)}  
 
 Việc tính toán khoảng cách đến một ellipsoid là phức tạp. Tuy nhiên, tính khoảng cách đến một quả cầu đơn vị tại gốc tọa độ thì lại rất đơn giản. Ý tưởng ở đây là biến đổi toàn bộ không gian sao cho ellipsoid trở thành một quả cầu đơn vị.
-
-\begin{itemize}
-    \item Một ellipsoid $E$ được định nghĩa là ảnh của một quả cầu đơn vị $\tilde{E}$ qua phép biến đổi affine:
-    \[
-    x = C\tilde{x} + d.
-    \]
-    \item Sử dụng phép biến đổi ngược:
-    \[
-    \tilde{x} = C^{-1}(x - d),
-    \]
-    để ánh xạ mọi điểm trở lại “không gian quả cầu đơn vị”.
-    \item Trong không gian mới này, ellipsoid trở thành quả cầu đơn vị $\tilde{E}$ tại gốc tọa độ, và mỗi chướng ngại vật $l_j$ cũng bị biến đổi (méo đi) thành một đối tượng mới $\tilde{l_j}$.
-\end{itemize}
-\end{itemize}
+Cụ thể, một ellipsoid $E$ được định nghĩa là ảnh của một quả cầu đơn vị $\tilde{E}$ qua phép biến đổi affine $x = C\tilde{x} + d$, trong đó $C$ là ma trận xác định hình dạng và hướng của ellipsoid, còn $d$ là tâm của nó. Khi đó, ta có thể sử dụng phép biến đổi ngược $\tilde{x} = C^{-1}(x - d)$ để ánh xạ mọi điểm trong không gian ban đầu trở lại "không gian quả cầu đơn vị". Sau phép biến đổi này, ellipsoid $E$ trở thành quả cầu đơn vị $\tilde{E}$ tại gốc tọa độ, và đồng thời mỗi chướng ngại vật $l_j$ trong không gian ban đầu cũng bị biến đổi (méo đi) thành một đối tượng mới $\tilde{l_j}$ trong không gian mới.
 
 \textbf{Bước 2.2}: Tìm điểm gần nhất bằng Quy hoạch Toàn phương (QP)
 
@@ -225,7 +203,6 @@ Mặt phẳng này đảm bảo ellipsoid mở rộng tối đa nhưng không gi
 
 \textbf{Bước 2.4}. Lặp lại với tất cả các obstacles trong không gian. Ta sẽ có được một tập các siêu phẳng để tạo thành một vùng lồi đa giác.
 
-\newpage
 \item \textbf{Tìm Ellipsoid Nội tiếp Cực đại (SDP)}: Giao của các nửa không gian được xác định bởi các siêu phẳng tạo thành một đa diện lồi (polytope). Thuật toán sau đó tìm ellipsoid có thể tích lớn nhất có thể nội tiếp trong đa diện này. 
 
 \begin{figure}[!htp]
@@ -266,11 +243,10 @@ Thể tích của ellipsoid tỉ lệ với \(\det(C)\).
 
 \begin{figure}[!htp]
     \centering
-    \includegraphics[width=1\linewidth]{experiments/image/iris-3.png}
-    \caption[Vòng lặp IRIS]{Lặp lại}
+    \includegraphics[width=0.6\linewidth]{experiments/image/iris-3.png}
+    \caption[Vòng lặp IRIS]{Lặp lại đến khi hội tụ}
 \end{figure}
 
-\newpage
 \subsubsection{Đặc tính của Thuật toán}
 
 \begin{itemize}
@@ -283,62 +259,69 @@ Thể tích của ellipsoid tỉ lệ với \(\det(C)\).
 \end{figure}
 
 \item Xử lý Vật cản không lồi:
-\begin{itemize}
-\item Chướng ngại vật trong không gian work space: Thuật toán IRIS ban đầu giả định các chướng ngại vật là lồi, đây cũng là một nhược điểm lớn nhất của thuật toán này. Để đảm bảo các obstacles là lồi, ta thường phải tiền xử lý bằng cách bao lồi  các chướng ngại vật không lồi\cite{DeitsTedrake2014}. Ngoài ra cách tiếp cận tiêu chuẩn cho các chướng ngại vật không lồi là phân hoạch chúng thành một tập hợp các mảnh lồi trước khi chạy IRIS (tức tăng số lượng obtacles của không gian lên). Điều này khả thi vì IRIS có khả năng mở rộng hiệu quả với số lượng lớn chướng ngại vật. 
 
-\item Chướng ngại vật trong không gian cấu hình (Configuration Space): Đối với các robot có động học phức tạp, nơi các chướng ngại vật trong không gian cấu hình được định nghĩa một cách ẩn ý và không lồi, các phần mở rộng như IRIS-NP \cite{DeitsTedrake2023NP} và C-IRIS \cite{DeitsTedrake2022CIRIS} được sử dụng.
-\end{itemize}
+Chướng ngại vật trong không gian work space: Thuật toán IRIS ban đầu giả định các chướng ngại vật là lồi, đây cũng là một nhược điểm lớn nhất của thuật toán này. Để đảm bảo các obstacles là lồi, ta thường phải tiền xử lý bằng cách bao lồi  các chướng ngại vật không lồi\cite{DeitsTedrake2014}. Ngoài ra cách tiếp cận tiêu chuẩn cho các chướng ngại vật không lồi là phân hoạch chúng thành một tập hợp các mảnh lồi trước khi chạy IRIS (tức tăng số lượng obtacles của không gian lên). Điều này khả thi vì IRIS có khả năng mở rộng hiệu quả với số lượng lớn chướng ngại vật. 
+\\
+Chướng ngại vật trong không gian cấu hình (Configuration Space): Đối với các robot có động học phức tạp, nơi các chướng ngại vật trong không gian cấu hình được định nghĩa một cách ẩn ý và không lồi, các phần mở rộng như IRIS-NP \cite{DeitsTedrake2023NP} và C-IRIS \cite{DeitsTedrake2022CIRIS} được sử dụng.
+
 \end{itemize}
 
-\subsection{Visibility Clique Cover (VCC)}
+\subsection{Visibility Clique Cover (VCC)} \label{VCC}
 
 Thuật toán Visibility Clique Cover (VCC) giải quyết trực tiếp một hạn chế chính của IRIS: nhu cầu về các điểm mầm tốt.\cite{DeitsTedrake2023VCC} Việc lấy mầm ngẫu nhiên là không hiệu quả. VCC tự động hóa quá trình này bằng cách trước tiên tìm hiểu cấu trúc toàn cục của không gian tự do và sau đó đặt các điểm mầm một cách chiến lược vào các khu vực có khả năng mở rộng lớn.
 
 \subsubsection{Ý tưởng và Chi tiết Thuật toán}
 
-Quy trình VCC bao gồm bốn bước chính:
+\begin{figure}[!htp]
+    \centering
+    \includegraphics[width=1.0\linewidth]{experiments/image/VCC-pipeline.png}
+    \caption[VCC Overview]{Tổng quan về Quy trình VCC\cite{DeitsTedrake2023VCC}}
+    \label{VCC-pipeline}
+\end{figure}
+
+Quy trình VCC như đã thể hiện ở hình \ref{VCC-pipeline} bao gồm bốn bước chính:
 \begin{enumerate}
 \item Lấy mẫu \& Xây dựng Đồ thị Khả kiến (Visibility Graphs): Thuật toán lấy mẫu $n$ điểm ngẫu nhiên trong không gian cấu hình tự do ($C_{free}$). Các điểm này tạo thành các đỉnh của một đồ thị khả kiến (visibility graph)\footnote{\textit{Visibility graph} là đồ thị trong đó các đỉnh biểu diễn vị trí (hoặc đỉnh chướng ngại vật), và có cạnh nối giữa hai đỉnh nếu đoạn thẳng nối chúng nằm hoàn toàn trong không gian tự do.}
 . Một cạnh tồn tại giữa hai đỉnh nếu đoạn thẳng nối hai điểm tương ứng hoàn toàn nằm trong không gian tự do (tức là không va chạm).
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.5\linewidth]{experiments/image/VCC-1.png}
-    \caption{Lấy mẫu \& Xây dựng Đồ thị Khả kiến (Visibility Graphs)}
-\end{figure}
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.5\linewidth]{experiments/image/VCC-1.png}
+%     \caption{Lấy mẫu \& Xây dựng Đồ thị Khả kiến (Visibility Graphs)}
+% \end{figure}
 
-\item Tìm Lớp phủ Clique: Thuật toán tìm một tập hợp các clique lớn (đồ thị con đầy đủ) trong đồ thị khả kiến. Ý tưởng cốt lõi là một tập hợp các điểm mà tất cả đều "nhìn thấy" nhau có khả năng nằm trong cùng một vùng lồi\footnote{Nếu hai điểm có thể nhìn thấy nhau, điều đó ngụ ý rằng con đường thẳng nhất giữa chúng là an toàn. Đây là khối xây dựng cơ bản để hiểu và xấp xỉ các vùng lồi trong.}. Điều này được thực hiện một cách tham lam bằng cách giải lặp đi lặp lại bài toán MAXCLIQUE (tìm clique lớn nhất), được xây dựng dưới dạng một bài toán Integer Linear Programming - ILP.
+\item Tìm Clique Cover: Thuật toán tìm một tập hợp các clique lớn (đồ thị con đầy đủ) trong đồ thị khả kiến. Ý tưởng cốt lõi là một tập hợp các điểm mà tất cả đều "nhìn thấy" nhau có khả năng nằm trong cùng một vùng lồi\footnote{Nếu hai điểm có thể nhìn thấy nhau, điều đó ngụ ý rằng con đường thẳng nhất giữa chúng là an toàn. Đây là khối xây dựng cơ bản để hiểu và xấp xỉ các vùng lồi trong.}. Điều này được thực hiện một cách tham lam bằng cách giải lặp đi lặp lại bài toán MAXCLIQUE (tìm clique lớn nhất), được xây dựng dưới dạng một bài toán Integer Linear Programming - ILP.
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.5\linewidth]{experiments/image/VCC-2.png}
-    \caption{Tìm Lớp phủ Clique}
-\end{figure}
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.5\linewidth]{experiments/image/VCC-2.png}
+%     \caption{Tìm Clique Cover}
+% \end{figure}
 
 \item Khởi tạo Ellipsoid: Đối với mỗi clique được tìm thấy, thuật toán tính toán ellipsoid có thể tích nhỏ nhất bao quanh tất cả các điểm trong clique đó. Ellipsoid này cung cấp một tâm (điểm mầm) và các trục chính (hình dạng ban đầu) cho bước lấp đầy tiếp theo.
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.5\linewidth]{experiments/image/VCC-3.png}
-    \caption{Khởi tạo Ellipsoid}
-\end{figure}
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.5\linewidth]{experiments/image/VCC-3.png}
+%     \caption{Khởi tạo Ellipsoid}
+% \end{figure}
 
 \item Lấp đầy thành Đa diện: Tâm và hình dạng của mỗi ellipsoid được sử dụng để khởi tạo một vòng lặp duy nhất của thuật toán lấp đầy tương tự IRIS. Điều này hiệu quả hơn IRIS tiêu chuẩn vì ellipsoid ban đầu đã được "thông báo" về hình học cục bộ, thường loại bỏ sự cần thiết của nhiều vòng lặp tốn kém về mặt tính toán.\cite{DeitsTedrake2023VCC}
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.45\linewidth]{experiments/image/VCC-4.png}
-    \caption{Lấp đầy thành Đa diện}
-\end{figure}
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.45\linewidth]{experiments/image/VCC-4.png}
+%     \caption{Lấp đầy thành Đa diện}
+% \end{figure}
 
 \item Lặp lại và Hội tụ: Quá trình này được lặp lại cho đến khi đạt được độ phủ đủ bằng cách lấy mẫu mới từ không gian trống còn lại và lặp lại các bước trước đó.
 
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=1\linewidth]{experiments/image/VCC-5.png}
-    \caption[Vòng lặp VCC]{Lặp lại}
-\end{figure}
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=1\linewidth]{experiments/image/VCC-5.png}
+%     \caption[Vòng lặp VCC]{Lặp lại}
+% \end{figure}
 
 \end{enumerate}
 

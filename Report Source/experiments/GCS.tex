@@ -50,7 +50,7 @@ Trong công thức này, biến nhị phân $y_e$ chỉ thị việc cạnh $e$ 
 
 \subsection{Phân tích Độ phức tạp}
 
-Độ phức tạp tính toán của SPP trong GCS khác biệt cơ bản so với Bài toán Đường đi Ngắn nhất cổ điển trên đồ thị rời rạc. Trong lý thuyết đồ thị cổ điển, SPP nói chung là NP-khó (ví dụ: bài toán Đường đi Dài nhất hoặc các biến thể liên quan đến chu trình âm). Tuy nhiên, nó trở nên giải được một cách hiệu quả trong thời gian đa thức (polynomial time) dưới hai điều kiện tiên quyết:
+Độ phức tạp tính toán của SPP trong GCS khác biệt cơ bản so với Bài toán Đường đi Ngắn nhất cổ điển trên đồ thị rời rạc. Trong lý thuyết đồ thị cổ điển, SPP nói chung là NP-hard (ví dụ: bài toán Đường đi Dài nhất hoặc các biến thể liên quan đến chu trình âm). Tuy nhiên, nó trở nên giải được một cách hiệu quả trong thời gian đa thức (polynomial time) dưới hai điều kiện tiên quyết:
 \begin{enumerate}
     \item Đồ thị là \textbf{không chu trình} (acyclic) (cho phép giải bằng sắp xếp tô pô).
     \item Tất cả chi phí cạnh và đỉnh là \textbf{không âm} (giải được bằng thuật toán Dijkstra).
@@ -60,7 +60,7 @@ Trong công thức này, biến nhị phân $y_e$ chỉ thị việc cạnh $e$ 
 Trái ngược hoàn toàn với trường hợp trên, bài toán Đường đi ngắn nhất trong Graph of Convex Sets vẫn là \textbf{NP-hard} ngay cả khi đồng thời thỏa mãn hai điều kiện: đồ thị không chu trình và chi phí không âm.
 \end{proposition}
 
-Độ khó này được thiết lập thông qua việc quy dẫn (reduction) từ bài toán \textbf{3SAT} (bài toán thỏa mãn Boolean với các mệnh đề gồm ba biến), vốn được biết đến là NP-đầy đủ (NP-complete). Như đã chứng minh trong Định lý 9.1 của~\cite{MarcucciEtAl2023GCS}, ta có thể xây dựng một thể hiện GCS phân lớp, không chu trình với chi phí không âm, trong đó việc xác định một đường đi hợp lệ tương đương với việc tìm một phép gán thỏa mãn cho công thức 3SAT. Điều này ngụ ý rằng chỉ riêng việc xác định tính \textit{khả thi} (feasibility) của một SPP trong GCS đã là NP-khó. Các chứng minh khác về tính NP-khó cũng đã được đưa ra cho các trường hợp liên quan đến các tập lồi chiều thấp (1D và 2D), mặc dù các trường hợp này thường dựa trên các đồ thị có chứa chu trình~\cite{Marcucci2024Thesis}.
+Độ khó này được thiết lập thông qua việc quy dẫn (reduction) từ bài toán \textbf{3SAT} (bài toán thỏa mãn Boolean với các mệnh đề gồm ba biến), vốn được biết đến là NP-đầy đủ (NP-complete). Như đã chứng minh trong Định lý 9.1 của~\cite{MarcucciEtAl2023GCS}, ta có thể xây dựng một thể hiện GCS phân lớp, không chu trình với chi phí không âm, trong đó việc xác định một đường đi hợp lệ tương đương với việc tìm một phép gán thỏa mãn cho công thức 3SAT. Điều này ngụ ý rằng chỉ riêng việc xác định tính \textit{khả thi} (feasibility) của một SPP trong GCS đã là NP-hard. Các chứng minh khác về tính NP-hard cũng đã được đưa ra cho các trường hợp liên quan đến các tập lồi chiều thấp (1D và 2D), mặc dù các trường hợp này thường dựa trên các đồ thị có chứa chu trình~\cite{Marcucci2024Thesis}.
 
 \subsection{Mô hình chi tiết các đỉnh và cạnh}
 
