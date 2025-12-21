@@ -1,6 +1,18 @@
 \section{Đồ thị của các Tập Lồi (Graphs of Convex Sets)}
 
-Graph of Convex Sets (GCS) Framework cung cấp một phương pháp luận thống nhất để giải quyết các bài toán tối ưu hóa lai ghép rời rạc-liên tục (hybrid discrete-continuous optimization). Nó đóng vai trò cầu nối hiệu quả giữa tìm kiếm đồ thị tổ hợp (combinatorial graph search) và quy hoạch lồi liên tục (continuous convex programming). Khác với lý thuyết đồ thị cổ điển, GCS tổng quát hóa Bài toán Đường đi Ngắn nhất (SPP) bằng cách liên kết trực tiếp các biến hình học liên tục với tô pô của đồ thị.
+Graph of Convex Sets (GCS) Framework cung cấp một phương pháp luận thống nhất để giải quyết các bài toán tối ưu hóa lai ghép rời rạc-liên tục (hybrid discrete-continuous optimization). Nó đóng vai trò cầu nối hiệu quả giữa tìm kiếm đồ thị tổ hợp (combinatorial graph search) và quy hoạch lồi liên tục (continuous convex programming). Khác với lý thuyết đồ thị cổ điển, GCS tổng quát hóa Bài toán Đường đi Ngắn nhất (SPP) bằng cách liên kết trực tiếp các biến hình học liên tục với tô pô của đồ thị. Như được minh họa trong Hình \ref{fig:gcs_optimization}, quá trình này bắt đầu bằng việc phân rã không gian an toàn thành các vùng lồi và xây dựng đồ thị giao. Một đường đi trên đồ thị này sẽ tương ứng với một chuỗi các phân đoạn quỹ đạo, và việc tối ưu hóa đường đi sẽ đồng thời xác định hình dạng hình học tối ưu của quỹ đạo đó.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.85\textwidth]{experiments/image/gcs_spp.png}
+    \caption{Tối ưu hóa quỹ đạo có độ dài tối thiểu dưới dạng bài toán Tìm đường đi ngắn nhất (SPP) trong GCS. 
+    \textit{Góc trên bên trái}: Môi trường với hai vật cản (màu hồng) cùng cấu hình khởi đầu $q_0^0$ và kết thúc $q_T^0$. 
+    \textit{Góc trên bên phải}: Phân rã vùng an toàn thành các vùng lồi $\mathcal{C}_i$. 
+    \textit{Giữa bên trái}: Đồ thị giao của các vùng phân rã, với các đỉnh nguồn $s$ và đích $t$ đại diện cho các điểm biên.
+    \textit{Giữa bên phải}: Các phân đoạn quỹ đạo $q_i$ được gán ngẫu nhiên thỏa mãn ràng buộc tương ứng cho từng vùng lồi. 
+    \textit{Dưới cùng}: Việc thiết lập một đường đi trong đồ thị giao sẽ kích hoạt các hàm chi phí và ràng buộc liên tục về mặt toán học lên hình dạng tổng thể của các phân đoạn quỹ đạo kết hợp~\cite{MarcucciEtAl2023GCS}.}
+    \label{fig:gcs_optimization}
+\end{figure}
 
 \subsection{Công thức Đường đi Ngắn nhất trong Graph of Convex Sets}
 
@@ -29,6 +41,13 @@ Bằng cách áp dụng công thức luồng mạng vào GCS, SPP có thể đư
 \end{subequations}
 Trong công thức này, biến nhị phân $y_e$ chỉ thị việc cạnh $e$ có được đưa vào đường đi được chọn hay không ($y_e=1$) hoặc không ($y_e=0$). Ràng buộc bảo toàn luồng \eqref{eq:flow_conservation} đảm bảo rằng các cạnh được chọn tạo thành một đường đi hợp lệ từ đỉnh nguồn $s$ đến đỉnh đích $t$, trong đó $\delta_u$ được định nghĩa là $1$ cho nguồn, $-1$ cho đích, và $0$ cho tất cả các đỉnh khác. Các ràng buộc \eqref{eq:edge_constraint} và \eqref{eq:vertex_constraint} bắt buộc các biến liên tục tại mỗi đỉnh và dọc theo mỗi cạnh phải tuân thủ các tập lồi tương ứng của chúng.
 
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.4\textwidth]{experiments/image/gcs_set.png}
+    \caption{Minh họa bài toán SPP in GCS. Mỗi đỉnh $i \in \{\sigma, u, v, w, \tau\}$ trong đồ thị được liên kết với một biến liên tục $x_i$ nằm trong một tập lồi tương ứng $\mathcal{X}_i$. Trọng số của mỗi cạnh là một hàm lồi của các biến liên tục tại hai đỉnh mà cạnh đó kết nối. Trong hình, đường đi màu xanh $p = (\sigma, u, v, \tau)$ thể hiện một nghiệm khả thi của thành phần rời rạc, trong đó tổng chi phí phụ thuộc vào các giá trị tối ưu của $x_\sigma, x_u, x_v, x_\tau$ nhưng độc lập với $x_w$~\cite{MarcucciEtAl2023GCS}.}
+    \label{fig:spp_gcs}
+\end{figure}
+
 \subsection{Phân tích Độ phức tạp}
 
 Độ phức tạp tính toán của SPP trong GCS khác biệt cơ bản so với Bài toán Đường đi Ngắn nhất cổ điển trên đồ thị rời rạc. Trong lý thuyết đồ thị cổ điển, SPP nói chung là NP-khó (ví dụ: bài toán Đường đi Dài nhất hoặc các biến thể liên quan đến chu trình âm). Tuy nhiên, nó trở nên giải được một cách hiệu quả trong thời gian đa thức (polynomial time) dưới hai điều kiện tiên quyết:
@@ -49,7 +68,9 @@ Trong bối cảnh tối ưu quỹ đạo, các thành phần của GCS được
 
 Mỗi đỉnh $v \in V$ tương ứng với một vùng lồi, không va chạm $Q_v$ trong không gian cấu hình (C-space). Biến quyết định liên tục $x_v \in \mathbb{R}^{n_v}$ gắn với đỉnh $v$ biểu diễn một đoạn quỹ đạo cục bộ hoặc một cấu hình trạng thái. Cần nhấn mạnh rằng chiều $n_v$ là cục bộ theo từng đỉnh, cho phép đồ thị có các đỉnh với số chiều biến khác nhau.
 
-Biến $x_v$ bị ràng buộc trong một tập lồi compact $\mathcal{X}_v \subset \mathbb{R}^{n_v}$. Đối với bài toán sinh quỹ đạo sử dụng các tham số đa thức từng đoạn (ví dụ như đường cong Bézier), tập $\mathcal{X}_v$ được xây dựng một cách tường minh nhằm đảm bảo quỹ đạo nằm hoàn toàn trong vùng an toàn $Q_v$ và thỏa mãn các giới hạn động lực học. Các ràng buộc xác định $\mathcal{X}_v$ thường có dạng:
+Biến $x_v$ bị ràng buộc trong một tập lồi compact $\mathcal{X}_v \subset \mathbb{R}^{n_v}$. Đối với bài toán sinh quỹ đạo sử dụng các tham số đa thức từng đoạn (ví dụ như đường cong Bézier), tập $\mathcal{X}_v$ được xây dựng một cách tường minh nhằm đảm bảo quỹ đạo nằm hoàn toàn trong vùng an toàn $Q_v$ và thỏa mãn các giới hạn động lực học.
+
+Các ràng buộc xác định $\mathcal{X}_v$ thường có dạng:
 
 \begin{align}
     & r_{i,k} \in Q_i, \quad && k = 0, \dots, d, \label{eq:geo_containment} \\
@@ -97,3 +118,4 @@ J_e = \int_0^{T_e} |\dot{r}(t)|^2 dt.
 Số hạng này hoạt động như một hàm phối cảnh có dạng bậc hai trên tuyến tính (quadratic-over-linear) $(x^T x / y)$. Một ưu điểm quan trọng của công thức này là nó lồi đồng thời (jointly convex) đối với cả các điểm điều khiển không gian và biến thời gian. Do đó, điều này cho phép bộ giải tối ưu hóa đường đi hình học và phân bổ thời gian một cách đồng thời trong một khung Quy hoạch Lồi Nguyên Hỗn hợp (Mixed-Integer Convex Programming - MICP) thống nhất.
 
 Cuối cùng, để đảm bảo độ trơn bậc cao, chẳng hạn như tối thiểu hóa độ giật (jerk), hàm chi phí kết hợp điều chuẩn đạo hàm (derivative regularization). Khác với chi phí năng lượng, điều này đạt được bằng cách áp dụng các chi phí bậc hai tiêu chuẩn trực tiếp lên các hệ số của các đạo hàm bậc cao của quỹ đạo. Cách tiếp cận này tránh được các yêu cầu nghiêm ngặt của các công thức phối cảnh trong khi vẫn duy trì thành công cấu trúc lồi tổng thể của bài toán tối ưu hóa.
+
