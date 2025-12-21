@@ -1,7 +1,7 @@
 % filepath: /home/dang-khoa/university/Capstone Project/Report Source/experiments/resutls.tex
 
 
-
+\newpage
 \section{Kết quả và Phân tích}
 Trong chương này, chúng tôi trình bày các kết quả định lượng thu được từ các thực nghiệm đã thiết lập ở phần trước. Mục tiêu là phân tích sự đánh đổi giữa độ phức tạp của việc phân hoạch không gian và tính tối ưu của quỹ đạo đầu ra. Toàn bộ các thực nghiệm được thực hiện trên máy tính cá nhân với cấu hình: CPU AMD Ryzen 7 4800H 2.9 GHz, RAM 16GB, hệ điều hành Ubuntu 24.04.
 \subsection{Phân tích Môi trường 2D đơn giản: Tác động của Phân hoạch lồi}
@@ -50,7 +50,7 @@ kết quả đạt được thể hiện như hình \ref{fig:result_c} ưu thế
 Hiệu suất này được củng cố bởi thời gian xử lý nhanh, chỉ xấp xỉ 0,01 giây, hoàn toàn phù hợp với độ phức tạp lý thuyết $O(nr^2)$ \cite{LienAmato2006} của thuật toán khi xử lý các đa giác có số lượng đỉnh lõm không quá lớn. 
 Việc ACD có khả năng kiểm soát mức độ chi tiết thông qua tham số lõm $\tau$ cho phép hệ thống duy trì được sự cân bằng giữa độ chính xác hình học và số lượng vùng lồi tối giản, từ đó giảm thiểu số lượng biến nhị phân trong bài toán quy hoạch nguyên-hỗn hợp (MICP) 
 của GCS framework. \\
-Ngược lại, giải thuật Visibility VCC (VCC) lại mang đến một cấu trúc phân hoạch dày đặc và phức tạp hơn với số lượng vùng lồi dao động từ 33 đến 35 vùng. Sự thiếu ổn định về số lượng vùng phân hoạch giữa các lần thực thi xuất phát trực tiếp 
+Ngược lại, giải thuật Visibility Clique Cover (VCC) như được thể hiện thông qua hình \ref{fig:result_d} lại mang đến một cấu trúc phân hoạch dày đặc và phức tạp hơn với số lượng vùng lồi dao động từ 33 đến 35 vùng. Sự thiếu ổn định về số lượng vùng phân hoạch giữa các lần thực thi xuất phát trực tiếp 
 từ tính chất ngẫu nhiên của bước lấy mẫu $n$ điểm trong không gian cấu hình tự do $C_{free}$ để xây dựng đồ thị khả kiến đã được nêu ở phần \ref{VCC}. Mặc dù sự chênh lệch khoảng 1-3 vùng lồi tại các khu vực hành lang hẹp là mức sai số có thể chấp nhận được, nhưng tổng số lượng vùng lồi lớn đã tạo 
 ra một gánh nặng tính toán đáng kể cho bộ giải Mosek do số lượng biến nhị phân $y_e$ tăng lên theo tỉ lệ xấp xỉ $2|I|$. Thời gian hội tụ của VCC trong môi trường 2D thực tế không mang lại hiệu quả cao cho các ứng dụng yêu cầu phản hồi tức thời so với các kỹ thuật phân hoạch 
 đa giác trực tiếp như ACD. Tuy nhiên, cần phải nhìn nhận rằng VCC được thiết kế như một phương pháp lai ghép mạnh mẽ để xử lý các không gian cấu hình cao chiều, nơi các vật cản không được xác định tường minh bằng các đa giác mà thông qua các bộ kiểm tra va chạm chung. 
@@ -139,7 +139,7 @@ Trong đó, trọng số cho thời gian thực thi được đặt là $w_{t}=1
 
 \subsubsection{Hiệu suất tính toán và Khả năng đáp ứng thời gian thực}
 
-Kết quả thực nghiệm cho thấy một sự tương quan phi tuyến tính chặt chẽ giữa số lượng vùng lồi được phân hoạch và thời gian hội tụ của bộ giải. Phương pháp \textbf{VCC} cho thấy hiệu năng kém nhất trong môi trường thực nghiệm 2D. Mặc dù số lượng vùng lồi được tạo ra (33 vùng) chỉ cao hơn gấp đôi so với ACD, nhưng thời gian giải bài toán tối ưu hóa lại rất lớn lên tới xấp xỉ 269,94 giây. Hiện tượng này xuất phát từ việc gia tăng số lượng vùng lồi dẫn đến sự bùng nổ của các biến quyết định nhị phân  và các ràng buộc nón phối cảnh liên kết, khiến không gian tìm kiếm tổ hợp vượt quá khả năng xử lý hiệu quả của bộ giải trong thời gian thực.
+Kết quả thực nghiệm tại bảng \ref{tab:comparison_all} cho thấy một sự tương quan phi tuyến tính chặt chẽ giữa số lượng vùng lồi được phân hoạch và thời gian hội tụ của bộ giải. Phương pháp \textbf{VCC} cho thấy hiệu năng kém nhất trong môi trường thực nghiệm 2D. Mặc dù số lượng vùng lồi được tạo ra (33 vùng) chỉ cao hơn gấp đôi so với ACD, nhưng thời gian giải bài toán tối ưu hóa lại rất lớn lên tới xấp xỉ 269,94 giây. Hiện tượng này xuất phát từ việc gia tăng số lượng vùng lồi dẫn đến sự bùng nổ của các biến quyết định nhị phân  và các ràng buộc nón phối cảnh liên kết, khiến không gian tìm kiếm tổ hợp vượt quá khả năng xử lý hiệu quả của bộ giải trong thời gian thực.
 
 Ngược lại, phương pháp \textbf{ACD} thể hiện tính thực tiễn vượt trội khi tổng thời gian thực thi (bao gồm cả phân hoạch và giải quỹ đạo) chỉ mất 4,32 giây, nhanh gấp khoảng 64 lần so với VCC. Kết quả này khẳng định rằng đối với các ứng dụng di động trong môi trường 2D, một cấu trúc phân hoạch tối giản (15 vùng) là yếu tố tiên quyết để duy trì khả năng phản hồi nhanh của hệ thống. Trong khi đó, phương pháp \textbf{Phân hoạch thủ công} mặc dù đạt thời gian giải nhanh nhất (3,90 giây) do cấu trúc đồ thị đơn giản (12 vùng), nhưng không được xem là giải pháp khả thi cho các hệ thống tự hành do đòi hỏi sự can thiệp trực tiếp từ con người, vốn là một rào cản lớn đối với tính tự chủ của robot.
 
@@ -147,11 +147,10 @@ Ngược lại, phương pháp \textbf{ACD} thể hiện tính thực tiễn vư
 
 Chất lượng của quỹ đạo được đánh giá thông qua sự đánh đổi giữa thời gian di chuyển thực tế và giá trị tối ưu của hàm mục tiêu (Path cost).
 
-\begin{itemize}
-\item \textbf{Phương pháp VCC}: Đạt giá trị Path cost thấp nhất ($24,44$), đại diện cho nghiệm tối ưu nhất về mặt toán học. Việc chia nhỏ không gian thành nhiều vùng lồi diện tích nhỏ cho phép bộ giải có nhiều "không gian tự do" hơn để tinh chỉnh đường cong Bézier, từ đó tối ưu hóa nỗ lực điều khiển và giảm thiểu tối đa các pha phạt gia tốc. Tuy nhiên, thời gian thực thi vật lý ($13,22$ giây) lại chậm hơn ACD, cho thấy hệ thống chấp nhận di chuyển với vận tốc thấp hơn để đổi lấy độ trơn tuyệt đối. 
-\item \textbf{Phương pháp ACD}: Mang lại kết quả thực dụng nhất khi robot hoàn thành nhiệm vụ với thời gian ngắn nhất ($12,79$ giây). Mặc dù Path cost ($24,63$) cao hơn nhẹ so với VCC, nhưng sự chênh lệch này không đáng kể trong vận hành thực tế. Điều này chứng tỏ ACD đã tạo ra một quỹ đạo "thực dụng": chạy nhanh, đủ mượt mà và duy trì được tính toán hiệu quả. 
-\item \textbf{Phân hoạch thủ công}: Thể hiện hiệu năng kém nhất về mặt chất lượng quỹ đạo với Path cost cao nhất ($27,88$) và thời gian di chuyển lâu nhất ($13,36$ giây). Nguyên nhân chủ yếu nằm ở việc phân chia vùng dựa trên trực giác con người thường tạo ra các vùng lồi thô, các vùng có thể to nhưng hình dạng không tối ưu cho robot lách qua, hoặc các điểm nối giữa các vùng bị đặt ở vị trí xấu, khiến robot phải đi đường vòng hoặc phanh gấp tại các giao điểm.
-\end{itemize}
+\textbf{Phương pháp VCC}: Đạt giá trị Path cost thấp nhất ($24,44$), đại diện cho nghiệm tối ưu nhất về mặt toán học. Việc chia nhỏ không gian thành nhiều vùng lồi diện tích nhỏ cho phép bộ giải có nhiều "không gian tự do" hơn để tinh chỉnh đường cong Bézier, từ đó tối ưu hóa nỗ lực điều khiển và giảm thiểu tối đa các pha phạt gia tốc. Tuy nhiên, thời gian thực thi vật lý ($13,22$ giây) lại chậm hơn ACD, cho thấy hệ thống chấp nhận di chuyển với vận tốc thấp hơn để đổi lấy độ trơn tuyệt đối. \\
+\textbf{Phương pháp ACD}: Mang lại kết quả thực dụng nhất khi robot hoàn thành nhiệm vụ với thời gian ngắn nhất ($12,79$ giây). Mặc dù Path cost ($24,63$) cao hơn nhẹ so với VCC, nhưng sự chênh lệch này không đáng kể trong vận hành thực tế. Điều này chứng tỏ ACD đã tạo ra một quỹ đạo "thực dụng": chạy nhanh, đủ mượt mà và duy trì được tính toán hiệu quả. \\
+\textbf{Phân hoạch thủ công}: Thể hiện hiệu năng kém nhất về mặt chất lượng quỹ đạo với Path cost cao nhất ($27,88$) và thời gian di chuyển lâu nhất ($13,36$ giây). Nguyên nhân chủ yếu nằm ở việc phân chia vùng dựa trên trực giác con người thường tạo ra các vùng lồi thô, các vùng có thể to nhưng hình dạng không tối ưu cho robot lách qua, hoặc các điểm nối giữa các vùng bị đặt ở vị trí xấu, khiến robot phải đi đường vòng hoặc phanh gấp tại các giao điểm.
+
 
 Tóm lại, thông qua các chỉ số đo lường thực nghiệm, chúng tôi xác định \textbf{ACD} là giải pháp tối ưu cho các bài toán hoạch định quỹ đạo 2D, đảm bảo được sự cân bằng giữa chi phí tính toán và hiệu suất vận hành thực tế. Trong khi đó, phương pháp VCC dù cho thấy tiềm năng về tính tối ưu toán học nhưng lại gặp rào cản lớn về thời gian giải, khiến nó phù hợp hơn cho các ứng dụng ngoại tuyến hoặc trong các không gian cấu hình cao chiều phức tạp.
 
@@ -170,15 +169,16 @@ Các tham số tối ưu hóa được thiết lập đồng nhất cho tất c�
 
 \subsubsection{Phân tích Hiệu suất Tính toán và Chi phí Tối ưu}
 
-Dựa trên dữ liệu thu thập từ 10 mẫu thử nghiệm, chúng tôi tiến hành so sánh đối chiếu giữa hai phương pháp:
+Dựa trên dữ liệu thu thập từ 10 mẫu thử nghiệm tại bảng \ref{tab:maze_results}, chúng tôi tiến hành so sánh đối chiếu giữa hai phương pháp:
 \begin{itemize}
     \item \textbf{Linear GCS}: tối thiểu hóa độ dài hình học.
     \item \textbf{Bezier GCS}: tối thiểu hóa thời gian với ràng buộc động lực học.
 \end{itemize}
 
-\begin{table}[!ht]
+\begin{table}[!htp]
     \centering
     \caption{Thống kê kết quả thực nghiệm trên 10 mẫu mê cung ngẫu nhiên}
+    \label{tab:maze_results}
     \begin{tabular}{|l|c|c|c|}
         \hline
         \textbf{Chỉ số (Metric)} 

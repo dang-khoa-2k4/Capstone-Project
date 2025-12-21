@@ -9,10 +9,10 @@ Thay vì tiếp cận bài toán tránh vật cản theo cách truyền thống 
 
 Phương pháp Approximate Convex Decomposition (ACD) giới thiệu một cách tiếp cận khác biệt cơ bản để quản lý sự phức tạp. Thay vì yêu cầu sự lồi hoàn hảo, nó cho phép các thành phần "lồi xấp xỉ" trong một dung sai do người dùng xác định, $\tau$.\cite{LienAmato2006} Điều này thường dẫn đến các phân hoạch có ít thành phần hơn nhiều và phù hợp hơn với các đặc điểm cấu trúc nổi bật của đối tượng.
 
-\subsubsection{Các Khái niệm Cơ bản trong Phân rã Lồi}
+\subsubsection{Các Khái niệm Cơ bản trong phân hoạch Lồi}
 \label{sec:basic-concepts}
 
-Phần này trình bày các khái niệm hình học cơ bản được sử dụng trong quá trình phân rã đa giác không lồi thành các vùng lồi. 
+Phần này trình bày các khái niệm hình học cơ bản được sử dụng trong quá trình phân hoạch đa giác không lồi thành các vùng lồi. 
 Các định nghĩa này đóng vai trò nền tảng cho các phương pháp đo độ lõm và các thuật toán phân hoạch ở các phần sau.
 
 \begin{enumerate}
@@ -71,7 +71,7 @@ Thuật toán là một chiến lược chia để trị đệ quy\cite{LienAmat
     \caption[Ví dụ ACD]{%
         (a) Nếu $x \in \partial P_i > 0$, hàm \texttt{Resolve} \textbf{gộp} biên $\partial P_i$ vào đa giác $P_0$.
         (b) Nếu $x \in \partial P_0$, hàm \texttt{Resolve} \textbf{tách} đa giác $P$ thành hai đa giác $P_1$ và $P_2$.
-        (c) \textbf{Độ lõm} tại điểm $x$ thay đổi sau khi đa giác được phân rã.%
+        (c) \textbf{Độ lõm} tại điểm $x$ thay đổi sau khi đa giác được phân hoạch.%
     }
 \end{figure}
 
@@ -109,9 +109,9 @@ Chất lượng của phân hoạch phụ thuộc rất nhiều vào \textbf{cá
 
     \item \textbf{Độ lõm Đường đi Ngắn nhất (Shortest Path Concavity – SP-Concavity)}:  
     Là \textbf{chiều dài đường đi ngắn nhất} từ một đỉnh trong túi đến cầu nối tương ứng, với điều kiện đường đi đó phải nằm hoàn toàn trong túi.  
-    Phương pháp này chậm hơn SL-Concavity nhưng \textbf{đảm bảo tính đơn điệu}: độ lõm của các đỉnh giảm dần sau mỗi lần phân rã, 
+    Phương pháp này chậm hơn SL-Concavity nhưng \textbf{đảm bảo tính đơn điệu}: độ lõm của các đỉnh giảm dần sau mỗi lần phân hoạch, 
     giúp đảm bảo rằng tất cả các đặc điểm lõm quan trọng cuối cùng sẽ được xử lý.  
-    (Xem chi tiết trong Phần~\ref{sec:SP-Concavity}.)
+    % (Xem chi tiết trong Phần~\ref{sec:SP-Concavity}.)
 
     \item \textbf{Độ lõm Lai (Hybrid Concavity – H-Concavity)}:  
     Một giải pháp trung gian thực tiễn — sử dụng SL-Concavity nhanh làm mặc định và chỉ chuyển sang SP-Concavity khi \textbf{phát hiện khả năng không đơn điệu}. Bằng cách thêm bước kiểm tra \textit{nguy cơ tiềm ẩn} bằng cách so sánh $n_\beta$ và $n_i$; nếu tồn tại $n_i \cdot n_\beta < 0$, biên túi bị đảo hướng — dấu hiệu của túi phức tạp mà SL-Concavity có thể thất bại.
