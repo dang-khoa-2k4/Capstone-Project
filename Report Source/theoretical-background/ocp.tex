@@ -1,0 +1,22 @@
+\section{Bài toán Điều khiển Tối ưu (Optimal Control Problem - OCP)}
+\label{sec:ocp}
+
+Bài toán điều khiển tối ưu (OCP) đóng vai trò cốt lõi trong việc tìm kiếm quỹ đạo và tín hiệu điều khiển tốt nhất cho các hệ thống động lực học sao cho tối thiểu hóa một hàm chi phí, đồng thời thỏa mãn các ràng buộc về động lực học, trạng thái và tín hiệu điều khiển.
+
+Dạng tổng quát của bài toán OCP thời gian liên tục được phát biểu như sau:
+\begin{align}
+    \min_{x(\cdot), u(\cdot)} \quad & \int_{t_0}^{t_f} L(x(t), u(t)) \, dt + E(x(t_f)) \label{eq:ocp_objective} \\
+    \text{subject to:} \quad & \dot{x}(t) = f(x(t), u(t)), \quad t \in [t_0, t_f] \label{eq:ocp_dynamics} \\
+    & x(t_0) = x_0 \label{eq:ocp_init} \\
+    & x(t) \in \mathcal{X}, \quad u(t) \in \mathcal{U}, \quad \forall t \in [t_0, t_f] \label{eq:ocp_constraints}
+\end{align}
+Trong đó:
+\begin{itemize}
+    \item $x(t) \in \mathbb{R}^{n_x}$ là vector trạng thái của hệ thống tại thời điểm $t$.
+    \item $u(t) \in \mathbb{R}^{n_u}$ là vector tín hiệu điều khiển.
+    \item $L(x(t), u(t))$ là hàm chi phí tức thời (running cost) và $E(x(t_f))$ là hàm chi phí đầu cuối (terminal cost).
+    \item Phương trình \eqref{eq:ocp_dynamics} mô tả động lực học của hệ thống thông qua hệ phương trình vi phân.
+    \item $\mathcal{X}$ và $\mathcal{U}$ lần lượt là tập hợp các trạng thái an toàn (ví dụ: tránh vật cản) và giới hạn của tín hiệu điều khiển (ví dụ: giới hạn vận tốc, gia tốc).
+\end{itemize}
+
+Trong bài toán hoạch định chuyển động tránh vật cản, tập hợp $\mathcal{X}$ thường là không gian phi lồi do sự hiện diện của các chướng ngại vật. Việc giải quyết trực tiếp OCP \eqref{eq:ocp_objective}-\eqref{eq:ocp_constraints} là vô cùng khó khăn, đặc biệt là bài toán tối ưu quỹ đạo qua nhiều vùng không gian hỗn hợp. Do đó, các kỹ thuật rời rạc hóa và chia để trị, như phương pháp Multiple Shooting và phân hoạch không gian (sẽ được trình bày ở các phần sau), thường được áp dụng để chuyển hóa OCP liên tục thành các bài toán quy hoạch phi tuyến (NLP) có cấu trúc đặc biệt.

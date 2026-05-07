@@ -1,4 +1,4 @@
-\section{Đồ thị của các Tập Lồi (Graphs of Convex Sets)}
+\subsection{Đồ thị của các Tập Lồi (Graphs of Convex Sets)}
 
 Graph of Convex Sets (GCS) Framework cung cấp một phương pháp luận thống nhất để giải quyết các bài toán tối ưu hóa lai ghép rời rạc-liên tục (hybrid discrete-continuous optimization). Nó đóng vai trò cầu nối hiệu quả giữa tìm kiếm đồ thị tổ hợp (combinatorial graph search) và quy hoạch lồi liên tục (continuous convex programming). Khác với lý thuyết đồ thị cổ điển, GCS tổng quát hóa Bài toán Đường đi Ngắn nhất (SPP) bằng cách liên kết trực tiếp các biến hình học liên tục với tô pô của đồ thị. Như được minh họa trong Hình \ref{fig:gcs_optimization}, quá trình này bắt đầu bằng việc phân rã không gian an toàn thành các vùng lồi và xây dựng đồ thị giao. Một đường đi trên đồ thị này sẽ tương ứng với một chuỗi các phân đoạn quỹ đạo, và việc tối ưu hóa đường đi sẽ đồng thời xác định hình dạng hình học tối ưu của quỹ đạo đó.
 
@@ -14,7 +14,7 @@ Graph of Convex Sets (GCS) Framework cung cấp một phương pháp luận th�
     \label{fig:gcs_optimization}
 \end{figure}
 
-\subsection{Công thức Đường đi Ngắn nhất trong Graph of Convex Sets}
+\subsubsection{Công thức Đường đi Ngắn nhất trong Graph of Convex Sets}
 
 Một GCS được định nghĩa là một đồ thị có hướng $G = (V, E)$, trong đó mỗi đỉnh $v \in V$ gắn liền với một biến quyết định liên tục $x_v$ nằm trong một tập lồi compact, khác rỗng $X_v \subset \mathbb{R}^n$. Trong ngữ cảnh lập kế hoạch chuyển động (motion planning), các tập hợp này thường đại diện cho các vùng không va chạm đã được tính toán trước trong không gian cấu hình (configuration space). Các bước chuyển tiếp giữa các đỉnh được quy định bởi các cạnh $e = (u, v) \in E$, áp đặt các ràng buộc lồi phụ trợ $(x_u, x_v) \in X_e$ và được trọng số hóa bởi một hàm chi phí lồi $\ell_e(x_u, x_v)$. Hàm này bắt buộc phải là hàm thực sự (proper), đóng (closed) và lồi, liên kết tường minh các biến liên tục $x_u$ và $x_v$ để mô hình hóa các thước đo chuyển tiếp như khoảng cách Euclid hoặc tiêu hao năng lượng. Cần lưu ý rằng, mặc dù sử dụng thuật ngữ này, chúng tôi không giả định $\ell_e$ là một metric hợp lệ; các tính chất như tính đối xứng hay bất đẳng thức tam giác không bắt buộc phải thỏa mãn~\cite{MarcucciEtAl2023GCS}.
 
@@ -45,11 +45,10 @@ Trong công thức này, biến nhị phân $y_e$ chỉ thị việc cạnh $e$ 
     \centering
     \includegraphics[width=0.4\textwidth]{experiments/image/gcs_set.png}
     \caption[Minh họa bài toán SPP in GCS]{Minh họa bài toán SPP in GCS. Mỗi đỉnh $i \in \{\sigma, u, v, w, \tau\}$ trong đồ thị được liên kết với một biến liên tục $x_i$ nằm trong một tập lồi tương ứng $\mathcal{X}_i$. Trọng số của mỗi cạnh là một hàm lồi của các biến liên tục tại hai đỉnh mà cạnh đó kết nối. Trong hình, đường đi màu xanh $p = (\sigma, u, v, \tau)$ thể hiện một nghiệm khả thi của thành phần rời rạc, trong đó tổng chi phí phụ thuộc vào các giá trị tối ưu của $x_\sigma, x_u, x_v, x_\tau$ nhưng độc lập với $x_w$~\cite{MarcucciEtAl2023GCS}.}
-    \caption[Minh họa bài toán SPP in GCS.]{Mỗi đỉnh $i \in \{\sigma, u, v, w, \tau\}$ trong đồ thị được liên kết với một biến liên tục $x_i$ nằm trong một tập lồi tương ứng $\mathcal{X}_i$. Trọng số của mỗi cạnh là một hàm lồi của các biến liên tục tại hai đỉnh mà cạnh đó kết nối. Trong hình, đường đi màu xanh $p = (\sigma, u, v, \tau)$ thể hiện một nghiệm khả thi của thành phần rời rạc, trong đó tổng chi phí phụ thuộc vào các giá trị tối ưu của $x_\sigma, x_u, x_v, x_\tau$ nhưng độc lập với $x_w$~\cite{MarcucciEtAl2023GCS}.}
     \label{fig:spp_gcs}
 \end{figure}
 
-\subsection{Phân tích Độ phức tạp}
+\subsubsection{Phân tích Độ phức tạp}
 
 Độ phức tạp tính toán của SPP trong GCS khác biệt cơ bản so với Bài toán Đường đi Ngắn nhất cổ điển trên đồ thị rời rạc. Trong lý thuyết đồ thị cổ điển, SPP nói chung là NP-hard (ví dụ: bài toán Đường đi Dài nhất hoặc các biến thể liên quan đến chu trình âm). Tuy nhiên, nó trở nên giải được một cách hiệu quả trong thời gian đa thức (polynomial time) dưới hai điều kiện tiên quyết:
 \begin{enumerate}
@@ -63,7 +62,7 @@ Trái ngược hoàn toàn với trường hợp trên, bài toán Đường đi
 
 Độ khó này được thiết lập thông qua việc quy dẫn (reduction) từ bài toán \textbf{3SAT} (bài toán thỏa mãn Boolean với các mệnh đề gồm ba biến), vốn được biết đến là NP-đầy đủ (NP-complete). Như đã chứng minh trong Định lý 9.1 của~\cite{MarcucciEtAl2023GCS}, ta có thể xây dựng một thể hiện GCS phân lớp, không chu trình với chi phí không âm, trong đó việc xác định một đường đi hợp lệ tương đương với việc tìm một phép gán thỏa mãn cho công thức 3SAT. Điều này ngụ ý rằng chỉ riêng việc xác định tính \textit{khả thi} (feasibility) của một SPP trong GCS đã là NP-hard. Các chứng minh khác về tính NP-hard cũng đã được đưa ra cho các trường hợp liên quan đến các tập lồi chiều thấp (1D và 2D), mặc dù các trường hợp này thường dựa trên các đồ thị có chứa chu trình~\cite{Marcucci2024Thesis}.
 
-\subsection{Mô hình chi tiết các đỉnh và cạnh}
+\subsubsection{Mô hình chi tiết các đỉnh và cạnh}
 
 Trong bối cảnh tối ưu quỹ đạo, các thành phần của GCS được định nghĩa một cách chặt chẽ nhằm đảm bảo cả tính an toàn hình học lẫn tính khả thi về động học.
 
@@ -86,11 +85,11 @@ Một cạnh $e = (u, v) \in E$ xác định sự chuyển tiếp giữa hai đ�
 
 Gắn với mỗi cạnh là một \textit{hàm chi phí liên kết} $f_e: \mathbb{R}^{n_u + n_v} \to \mathbb{R}$. Đây là một hàm lồi giá trị vô hướng, đánh giá chi phí dựa trên việc lựa chọn đồng thời $x_u$ và $x_v$, nhằm mô hình hóa các đại lượng như độ dài đường đi hoặc năng lượng tiêu thụ.
 
-\subsection{Đặc tả hàm chi phí}
+\subsubsection{Đặc tả hàm chi phí}
 
 Việc lựa chọn hàm chi phí cạnh $\ell_e(x_u, x_v)$ mang tính then chốt, vì nó quy định ý nghĩa vật lý của quỹ đạo tối ưu. Khung làm việc của chúng tôi phân biệt giữa hai mô hình chính: lập kế hoạch đường đi hình học (LinearGCS) và tối ưu hóa quỹ đạo động học (BezierGCS), mỗi mô hình sử dụng các cấu trúc lồi cụ thể để đảm bảo hiệu quả tính toán.
 
-\subsubsection{Độ dài Đường đi Hình học}
+\subsubsubsection{Độ dài Đường đi Hình học}
 
 Đối với các bài toán được xác định chặt chẽ bởi các ràng buộc hình học, chẳng hạn như tìm đường đi ngắn nhất qua các vùng lồi, hàm chi phí được đặc trưng bởi khoảng cách Euclid có trọng số. Bình phương khoảng cách Euclid,
 \[
@@ -102,7 +101,7 @@ là một hàm bậc hai, phù hợp tự nhiên với các bộ giải Quadrati
 \]
 có thể được mô hình hóa bằng Quy hoạch Nón Bậc hai (Second-Order Cone Programming - SOCP), giúp bảo toàn tính lồi. Các công thức này đảm bảo rằng chi phí tỷ lệ tuyến tính với khoảng cách Euclid, mang lại một thước đo chính xác về mặt hình học cho độ dài đường đi.
 
-\subsubsection{Chi phí Quỹ đạo Động lực học}
+\subsubsubsection{Chi phí Quỹ đạo Động lực học}
 
 Trong khung lập kế hoạch chuyển động đề xuất sử dụng đường cong Bézier, biến quyết định liên tục $x_v$ được xây dựng để bao hàm cả các điểm điều khiển không gian và thời gian thực hiện của đoạn quỹ đạo. Để quản lý hiệu quả sự đánh đổi giữa tốc độ thực thi và nỗ lực điều khiển (control effort), hàm chi phí được xây dựng như một mục tiêu tổng hợp bao gồm ba thành phần riêng biệt.
 

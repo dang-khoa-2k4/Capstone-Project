@@ -1,0 +1,31 @@
+\section{Phương pháp Multiple Shooting}
+\label{sec:multiple_shooting}
+
+Để giải quyết bài toán OCP trên máy tính, người ta thường sử dụng các phương pháp rời rạc hóa (discretization methods) để chuyển OCP vô hạn chiều về bài toán quy hoạch phi tuyến (NLP) hữu hạn chiều. Trong số đó, Multiple Shooting \cite{BockPlitt1984_Multiple_Shooting} là một trong những phương pháp trực tiếp (direct methods) phổ biến và hiệu quả nhất, đặc biệt phù hợp để kết hợp với các bài toán có sự phân chia không gian rõ rệt như GCS.
+
+Thay vì tích phân động lực học từ trạng thái ban đầu $x_0$ đến cuối như phương pháp Single Shooting (dễ gây ra bất ổn định số học và cực tiểu cục bộ), phương pháp Multiple Shooting chia khoảng thời gian $[t_0, t_f]$ thành $N$ khoảng nhỏ (shooting intervals) tại các nút thời gian:
+\[ t_0 < t_1 < t_2 < \dots < t_N = t_f \]
+
+Tại mỗi nút $k \in \{0, 1, \dots, N-1\}$, tín hiệu điều khiển $u(t)$ thường được xấp xỉ bằng một hàm đơn giản, ví dụ như hằng số từng khúc (piecewise constant) $u(t) = u_k$ với $t \in [t_k, t_{k+1})$. Cùng với đó, phương pháp đặt thêm các biến trạng thái nhân tạo (artificial state variables) $s_k$ đóng vai trò là điểm xuất phát (initial value) cho việc giải phương trình vi phân trên từng khoảng $[t_k, t_{k+1}]$.
+
+Giả sử quỹ đạo tích phân thu được trên đoạn $[t_k, t_{k+1}]$ bắt đầu từ trạng thái $s_k$ với tín hiệu điều khiển $u_k$ là:
+\[ x(t_{k+1}; s_k, u_k) = s_k + \int_{t_k}^{t_{k+1}} f(x(\tau), u_k) d\tau \]
+
+Để đảm bảo quỹ đạo liên tục trên toàn bộ đoạn $[t_0, t_f]$, Multiple Shooting yêu cầu thêm các ràng buộc nối điểm (continuity constraints hay matching conditions) tại các nút giao:
+\[ s_{k+1} - x(t_{k+1}; s_k, u_k) = 0, \quad k = 0, 1, \dots, N-1 \]
+
+Dưới dạng NLP, bài toán OCP rời rạc hóa trở thành:
+\begin{align}
+    \min_{s, u} \quad & \sum_{k=0}^{N-1} l_k(s_k, u_k) + E(s_N) \\
+    \text{subject to:} \quad & s_0 = x_{in} \\
+    & s_{k+1} = \Phi(s_k, u_k), \quad k = 0, \dots, N-1 \\
+    & s_k \in \mathcal{X}, \quad u_k \in \mathcal{U}
+\end{align}
+Trong đó $\Phi(s_k, u_k) = x(t_{k+1}; s_k, u_k)$ là kết quả của bộ tích phân số học (numerical integrator).
+
+Phương pháp Multiple Shooting mang lại nhiều ưu điểm vượt trội:
+\begin{enumerate}
+    \item \textbf{Độ ổn định cao:} Do chia nhỏ khoảng thời gian tích phân, phương pháp giảm thiểu hiện tượng khuếch đại sai số số học.
+    \item \textbf{Khả năng khai thác cấu trúc thưa (sparsity):} Các ràng buộc nối điểm chỉ liên kết các biến ở hai nút liền kề, tạo ra ma trận Jacobian dạng thưa, giúp các thuật toán giải NLP (như SQP hay Interior Point) hoạt động rất nhanh.
+    \item \textbf{Khởi tạo dễ dàng:} Cho phép khởi tạo (warm-start) các biến trạng thái $s_k$ bằng một quỹ đạo tham khảo hình học (ví dụ: lấy từ kết quả của GCS).
+\end{enumerate}

@@ -1,4 +1,4 @@
-\subsection{Xây dựng Bài toán Quy hoạch Lồi Nguyên Hỗn hợp thông qua Nới lỏng Phối cảnh}
+\subsubsection{Xây dựng Bài toán Quy hoạch Lồi Nguyên Hỗn hợp thông qua Nới lỏng Phối cảnh}
 
 Việc giải quyết trực tiếp bài toán dưới dạng Quy hoạch Phi tuyến Nguyên Hỗn hợp (Mixed-Integer Nonlinear Programming - MINLP) đặt ra những thách thức tính toán đáng kể do sự hiện diện của các ràng buộc không lồi (non-convex constraints), đặc biệt là mối quan hệ song tuyến tính (bilinear relationship) giữa các biến quyết định nhị phân $y_e$ và các biến trạng thái liên tục $x_u$. Để khắc phục điều này và chuyển đổi bài toán sang dạng Quy hoạch Lồi Nguyên Hỗn hợp (Mixed-Integer Convex Programming - MICP) có thể giải quyết được, chúng tôi áp dụng kỹ thuật nới lỏng phối cảnh (perspective relaxation). Động lực chính của phương pháp này là cô lập tính không lồi bằng cách ``nâng'' (lifting) các biến liên tục vào một không gian có chiều cao hơn. Thay vì sử dụng các biến toàn cục $x_u$, chúng tôi giới thiệu các biến đại diện cục bộ (local proxy variables) $z_{e,u}, z_{e,v} \in \mathbb{R}^n$ cho mỗi cạnh $e=(u,v)$, đại diện cho sự đóng góp trạng thái của các đỉnh tương ứng khi cạnh đó được kích hoạt.
 
@@ -45,11 +45,11 @@ x_s & \text{nếu } u = s \\
 
 Trong mô hình này, Phương trình~\eqref{eq:binary_flow} đảm bảo tính liên thông tô pô (topological connectivity), trong đó $\delta_u$ được định nghĩa là $1$ cho nguồn, $-1$ cho đích, và $0$ cho các trường hợp khác. Phương trình~\eqref{eq:spatial_flow} đảm bảo rằng quỹ đạo liên tục là liền mạch trên cấu trúc đồ thị. Các phương trình~\eqref{eq:perspective_edge} và~\eqref{eq:perspective_vertex} thực thi sự bao hàm hình học (geometric containment) bên trong các tập lồi đã được tỉ lệ hóa; cụ thể, nếu $y_e=0$, các biến liên tục liên quan bị ràng buộc về gốc tọa độ, phát sinh chi phí bằng không. Công thức này cung cấp một sự nới lỏng chặt chẽ và hiệu quả về mặt tính toán, cho phép bộ giải xác định các quỹ đạo tối ưu gần toàn cục (near-global optimal) thỏa mãn cả tô pô đồ thị rời rạc và các ràng buộc liên tục phức tạp vốn có trong lập kế hoạch chuyển động.
 
-\subsection{Lồi hóa Bài toán GCS thông qua Kỹ thuật RLT}
+\subsubsection{Lồi hóa Bài toán GCS thông qua Kỹ thuật RLT}
 
 Để giải quyết tính không lồi vốn có của Chương trình Phi lồi Nguyên Hỗn hợp (Mixed-Integer Non-Convex Program - MINCP) ban đầu—cụ thể là các ràng buộc song tuyến tính liên kết các biến quyết định nhị phân với các biến trạng thái liên tục—chúng tôi sử dụng chiến lược lồi hóa (convexification strategy) dựa trên Kỹ thuật Cải biến-Tuyến tính hóa (Reformulation-Linearization Technique - RLT) cấp độ một. Mục tiêu cơ bản của phương pháp này là thay thế các ràng buộc khó giải bằng các bao lồi (convex envelopes) chặt chẽ. Điều này đảm bảo rằng Chương trình Lồi Nguyên Hỗn hợp (MICP) kết quả bảo toàn tập khả thi nguyên của bài toán gốc đồng thời cung cấp các cận dưới mạnh (strong lower bounds) khi các ràng buộc nguyên được nới lỏng.
 
-\subsubsection{Cơ sở Lý thuyết: Tính Đối ngẫu giữa Nón Phối cảnh và Bất đẳng thức Hợp lệ}
+\subsubsubsection{Cơ sở Lý thuyết: Tính Đối ngẫu giữa Nón Phối cảnh và Bất đẳng thức Hợp lệ}
 
 Trước khi đi vào chi tiết mô hình tối ưu hóa, chúng ta phải thiết lập mối liên hệ toán học giữa các nón phối cảnh (perspective cones) và các bất đẳng thức tuyến tính. Xét nón đối ngẫu (dual cone) của nón phối cảnh $\tilde{X}$, ký hiệu là $(\tilde{X})^*$. Nón này được định nghĩa là tập hợp các vectơ $(a, b)$ trong không gian mở rộng sao cho tích vô hướng của chúng với mọi phần tử trong nón $\tilde{X}$ là không âm:
 \begin{equation}
@@ -68,7 +68,7 @@ Một kết quả quan trọng được sử dụng trong công thức này là 
 \end{align}
 Quan sát thấy rằng bất đẳng thức cuối cùng phải thỏa mãn với mọi giá trị không âm của $\lambda$. Trong trường hợp $\lambda > 0$, ta có thể chia cả hai vế cho $\lambda$ mà không làm thay đổi dấu bất đẳng thức, thu được điều kiện $a^\top x + b \ge 0$. Trường hợp $\lambda = 0$ được thỏa mãn một cách hiển nhiên. Do đó, điều kiện cần và đủ để $(a, b) \in (\tilde{X})^*$ là biểu thức tuyến tính $a^\top x + b$ vẫn không âm trên toàn bộ tập $X$. Điều này xác nhận rằng $(\tilde{X})^*$ cấu thành tập hợp các hệ số cho tất cả các bất đẳng thức hợp lệ trên $X$, hoàn tất chứng minh.
 
-\subsubsection{Xây dựng các Ràng buộc Lồi}
+\subsubsubsection{Xây dựng các Ràng buộc Lồi}
 
 Tận dụng mệnh đề trên, chúng ta có thể ``nâng'' bất kỳ ràng buộc tuyến tính hợp lệ nào từ không gian biến luồng (flow variable space) vào không gian hỗn hợp trạng thái-luồng (mixed state-flow space). Xét một đỉnh $v$ tùy ý và một bất đẳng thức tuyến tính hợp lệ liên quan đến các biến luồng $y_e$ kề với $v$, được cho bởi:
 \begin{equation}
@@ -90,7 +90,7 @@ Một ứng dụng cụ thể nhưng quan trọng của Bổ đề này liên qu
 \end{itemize}
 Các ràng buộc này hoạt động hiệu quả như một cơ chế ``bật/tắt'': nếu $y_e=1$, biến đại diện $z_e$ bị ràng buộc vào tập $X_u$; ngược lại, nếu $y_e=0$, $z_e$ bị buộc về gốc tọa độ.
 
-\subsubsection{Công thức MICP Hoàn chỉnh}
+\subsubsubsection{Công thức MICP Hoàn chỉnh}
 
 Tổng hợp các phân tích trước đó, chúng tôi đề xuất công thức Quy hoạch Lồi Nguyên Hỗn hợp (MICP) cho Bài toán Đường đi Ngắn nhất trên GCS, như được mô tả trong Định lý 5.7. Mô hình này loại bỏ hoàn toàn các thành phần song tuyến tính, thay thế chúng bằng các ràng buộc nón lồi:
 

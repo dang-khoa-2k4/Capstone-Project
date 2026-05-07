@@ -1,0 +1,185 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T5]{fontenc}
+\usepackage[vietnamese]{babel}
+\usepackage{amsmath, amssymb, amsfonts}
+\usepackage{geometry}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{hyperref}
+
+\geometry{margin=2.5cm}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.75em}
+
+\title{Ghi chú về tránh hiện tượng ``đi xuyên biên'' bằng shooting interval và log-barrier}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+Về việc tránh hiện tượng ``đi xuyên biên'', tức đoạn quỹ đạo tạo ra qua những lần \textit{shooting interval}, có hai cách có thể thực hiện. Mình nêu 2 cách dưới đây, có lẽ dễ cho các bạn thực thi nhất. Cách 1 thì các bạn cũng đã biết và làm rồi, nhưng cách này hướng thực nghiệm.
+
+\begin{enumerate}
+    \item Giảm \textit{step size}, tức là tăng số lượng \textit{red points} lên thì có thể giúp giảm hiện tượng ``xuyên biên''. \textit{Step size} thậm chí có thể lấy khác nhau trên mỗi vùng lồi, hoặc có thể đổi theo số iteration của thuật toán. Về mặt tính toán và áp dụng thực tế thì đây là cách có lẽ là thực chiến nhất, tuy nhiên nó không ``đẹp'' về học thuật.
+
+    \item Sử dụng hàm phạt trong mô hình bài toán bằng hàm Cản--Logarit (log-barrier).
+\end{enumerate}
+
+Hình dưới đây minh hoạ sát nhất về hàm log-barrier liên quan trực tiếp đến bài của mình. Các bạn có thể search thêm để đọc về định nghĩa gốc của nó và các ví dụ ứng dụng khác nếu muốn. Mình lấy tạm trong một slide nói về cái Tâm Giải tích của một đa giác / đa diện lồi để minh hoạ, chứ ta không dùng cái Tâm Giải tích này trong bài.
+
+\section*{Analytic center và hàm log-barrier}
+
+Xét các bất đẳng thức tuyến tính
+\[
+    a_i^T x \leq b_i, \qquad i = 1,\ldots,m.
+\]
+
+Analytic center của các bất đẳng thức tuyến tính này là nghiệm
+\[
+    x_{ac} = \arg\min_x \phi(x),
+\]
+trong đó
+\[
+    \phi(x) = - \sum_{i=1}^{m} \log\left(b_i - a_i^T x\right).
+\]
+
+Ta hình dung công thức
+\[
+    A_v x \leq b_v
+\]
+trong hình chính là mỗi vùng lồi trong bài của mình, tương tự công thức
+\[
+    A_v x \leq b_v.
+\]
+Khi đó hàm
+\[
+    \phi(x) = - \sum_{i=1}^{m} \log\left(b_i - a_i^T x\right)
+\]
+chính là log-barrier của các biên vùng lồi đó, tức chính là đường nét đứt phía trong trong hình, mà ta có thể gọi là các xấp xỉ trong của hình lồi đó.
+
+\begin{itemize}
+    \item Mỗi đường xấp xỉ đó được tạo ra bởi một tham số khác nhau. Dưới đây các bạn sẽ thấy trong mô hình của mình.
+    \item Khi tham số đó tiến đến vô cùng thì đường nét đứt đó tiến về biên của hình lồi. Ngược lại, tham số đó tiến về 0 thì nét đứt đó sẽ tiến về tâm giải tích $x_{ac}$ như trên hình.
+\end{itemize}
+
+\section*{Ý tưởng chính}
+
+Vậy idea ở đây là gì?
+
+\begin{itemize}
+    \item Muốn quỹ đạo không ``đi xuyên'' tường thì ta ``ép'' vùng lồi nhỏ lại bằng một xấp xỉ trong, và ép các điểm nằm trong xấp xỉ trong này. Tức các điểm đó chắc chắn nằm trong vùng lồi.
+    \item Ta bắt đầu một bằng một xấp xỉ trong nhỏ, rồi dần dần tăng chu vi nó lên, tiến sát về biên. Bằng cách đó ta sẽ giảm được việc đi xuyên tường.
+\end{itemize}
+
+Cụ thể, thay vì mình ràng buộc cứng trong mô hình như
+\[
+    A_v x \leq b_v,
+\]
+thì ta phạt hàm mục tiêu của mô hình bằng log-barrier của ràng buộc này. Cụ thể như minh hoạ dưới đây. Lưu ý đây chỉ là minh hoạ để các bạn hiểu ý tưởng; sau đó sử dụng phù hợp trong mô hình hiện tại của mình, chứ công thức dưới đây không phải công thức cho chính mô hình ta đang làm nhé.
+
+Giả sử bài optimal control gốc, trong một vùng lồi $Q_v$, của ta được cho như thế này:
+\[
+\begin{aligned}
+    \min_{x(\cdot),u(\cdot)} \quad & \int_{0}^{T_v} \ell(x(t),u(t))\,dt \\
+    \text{s.t.} \quad & \dot{x}(t) = f(x(t),u(t)), \\
+    & A_v x(t) \leq b_v, \qquad \forall t \in [0,T_v], \\
+    & x(0) = x_v^{\mathrm{in}}, \qquad x(T_v) = x_v^{\mathrm{out}}.
+\end{aligned}
+\]
+
+Với từng bất đẳng thức
+\[
+    (A_v x)_j \leq (b_v)_j,
+\]
+ta định nghĩa log-barrier
+\[
+    \phi_v(x) = - \sum_{j=1}^{m_v} \log\left((b_v)_j - (A_v x)_j\right).
+\]
+
+Chuyển ràng buộc này thành một đại lượng ``phạt'' hàm mục tiêu, bài toán gốc sẽ thành như dưới đây:
+\[
+\begin{aligned}
+    \min_{x(\cdot),u(\cdot)} \quad & \int_{0}^{T_v} \left[\ell(x(t),u(t)) + \mu_v \phi_v(x(t))\right] dt \\
+    \text{s.t.} \quad & \dot{x}(t) = f(x(t),u(t)), \\
+    & x(0) = x_v^{\mathrm{in}}, \\
+    & x(T_v) = x_v^{\mathrm{out}}.
+\end{aligned}
+\]
+
+Trong đó $\mu_v > 0$ chính là hệ số điều chỉnh độ lớn của đường xấp xỉ trong như trình bày trên đây.
+
+\begin{itemize}
+    \item Trong quá trình giải, qua từng bước lặp, ta sẽ điều chỉnh $\mu_v$ từ lớn đến nhỏ, thường là từ $10^{-2}$ rồi để dần, thường đến $10^{-5}$.
+\end{itemize}
+
+Ví dụ trên đây thì dưới đây là rời rạc hoá của nó.
+
+Chia đoạn thời gian thành $N_v$ nút:
+\[
+    x_k \approx x(t_k), \qquad k=0,\ldots,N_v.
+\]
+
+Bài toán NLP tương ứng:
+\[
+\begin{aligned}
+    \min_{\{x_k,u_k\}} \quad & \sum_{k=0}^{N_v-1}
+    \left(
+        \ell(x_k,u_k)\Delta t
+        + \mu_v \sum_{j=1}^{m_v} -\log\left((b_v)_j - (A_v x_k)_j\right)
+    \right) \\
+    \text{subject to:} \quad & x_{k+1} = \Phi(x_k,u_k), \\
+    & x_0 = x_v^{\mathrm{in}}, \qquad x_{N_v} = x_v^{\mathrm{out}}.
+\end{aligned}
+\]
+
+Hai đứa check qua idea này cho vấn đề tránh bị văng. Nếu chỗ nào chưa clear thì trao đổi tiếp.
+
+Lưu ý trên đây là mình đang nói idea cho 1 vùng lồi. Từ đó, các bạn có thể sửa tương ứng cho bài toán của mình xét trên một dãy vùng lồi nhé.
+
+\section*{Mở rộng cho dãy vùng lồi}
+
+Ví dụ cho dạng dãy vùng lồi, tương tự như này. Các bạn tham khảo mà chỉnh sửa cho đúng.
+
+Giả sử robot phải đi qua một dãy vùng lồi đã được xác định trước từ graph search / region adjacency:
+\[
+    Q_{v_i} = \left\{x \in \mathbb{R}^{n_x} : A_{v_i}x \leq b_{v_i}\right\},
+    \qquad i=1,\ldots,M.
+\]
+
+Trong đó:
+\begin{itemize}
+    \item $A_{v_i} \in \mathbb{R}^{m_i \times n_x}$,
+    \item $b_{v_i} \in \mathbb{R}^{m_i}$,
+    \item các vùng $Q_{v_i}$ kề nhau, chia sẻ mặt hoặc đỉnh.
+\end{itemize}
+
+Hàm mục tiêu:
+\[
+\begin{aligned}
+    \min_{\{x_i(\cdot),u_i(\cdot),T_i\}} \quad
+    & \sum_{i=1}^{M} \int_{0}^{T_i}
+    \left[\ell(x_i(t),u_i(t)) + \mu_i \phi_{v_i}(x_i(t))\right] dt.
+\end{aligned}
+\]
+
+Rời rạc hoá của hàm mục tiêu:
+\[
+    \sum_{i=1}^{M}\sum_{k=0}^{N_i-1}
+    \left(
+        \ell(x_{i,k},u_{i,k})\Delta t_i
+        + \mu_i \sum_{j=1}^{m_i} -\log\left((b_{v_i})_j - (A_{v_i}x_{i,k})_j\right)
+    \right).
+\]
+
+Trong đó
+\[
+    \ell(x,u): \text{ cost gốc (energy, time, smoothness...)},
+\]
+\[
+    \mu_i > 0: \text{ barrier weight cho vùng } Q_{v_i}.
+\]
+
+\end{document}

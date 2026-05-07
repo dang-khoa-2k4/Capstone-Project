@@ -1,0 +1,69 @@
+\chapter{Phương pháp đề xuất}
+\label{ch:proposed_method}
+
+Trong chương này, chúng tôi trình bày chi tiết về hai hướng tiếp cận để giải quyết bài toán hoạch định chuyển động cho rô-bốt. Đầu tiên là mô hình bài toán, sau đó là chi tiết phương pháp lập kế hoạch chuyển động bằng Đồ thị các tập hợp lồi (Graph of Convex Sets - GCS), và cuối cùng là phương pháp cải tiến sử dụng bài toán Điều khiển Tối ưu (Optimal Control Problem - OCP) kết hợp với Multiple Shooting (MMS) và hàm cản logarit (log-barrier).
+
+\input{experiments/prb_statement}
+\input{experiments/cnx_decomp}
+
+\section{Hướng tiếp cận 1: Hoạch định chuyển động bằng Graph of Convex Sets (GCS)}
+\label{sec:gcs_approach}
+\input{experiments/GCS}
+\input{experiments/relaxation}
+\section{Hướng tiếp cận 2: Hoạch định chuyển động sử dụng Optimal Control và Multiple Shooting}
+\label{sec:ocp_mms_approach}
+
+Để khắc phục các hạn chế của hướng tiếp cận hình học, chúng tôi đề xuất mô hình hóa bài toán dưới dạng bài toán Điều khiển Tối ưu (OCP), sử dụng phương pháp Multiple Shooting và áp dụng hàm phạt Log-barrier để xử lý các ràng buộc an toàn, nhằm tránh hiện tượng rô-bốt đi xuyên qua biên của các vùng lồi.
+
+\subsection{Mô hình hóa bài toán}
+\label{subsec:problem_formulation}
+Giả sử rô-bốt cần di chuyển qua một dãy các vùng lồi $Q_{v_i}$ đã được xác định trước từ thuật toán tìm đường trên đồ thị (ví dụ như GCS gốc). Mỗi vùng lồi được biểu diễn bằng các bất đẳng thức tuyến tính:
+\[
+    Q_{v_i} = \left\{x \in \mathbb{R}^{n_x} : A_{v_i}x \leq b_{v_i}\right\}, \qquad i=1,\dots,M
+\]
+với $A_{v_i} \in \mathbb{R}^{m_i \times n_x}$ và $b_{v_i} \in \mathbb{R}^{m_i}$. Các vùng $Q_{v_i}$ nằm kề nhau, chia sẻ mặt hoặc đỉnh. Bài toán gốc yêu cầu quỹ đạo $x(t)$ không được vi phạm ranh giới của $Q_{v_i}$ trong khoảng thời gian $T_i$.
+
+\subsection{Biến quyết định và Rời rạc hóa (Multiple Shooting)}
+\label{subsec:decision_variables}
+Áp dụng Multiple Shooting, chúng ta rời rạc hóa thời gian trên mỗi đoạn $T_i$ thành $N_i$ khoảng với bước thời gian $\Delta t_i$. Các biến quyết định trong bài toán NLP (Nonlinear Programming) bao gồm:
+\begin{itemize}
+    \item Biến trạng thái tại các nút: $x_{i,k} \approx x_i(t_k)$ với $k=0,\dots,N_i$.
+    \item Tín hiệu điều khiển: $u_{i,k} \approx u_i(t_k)$ với $k=0,\dots,N_i-1$.
+    \item Thời gian di chuyển trong từng vùng (nếu thời gian là biến tự do): $T_i$ (do đó $\Delta t_i = T_i / N_i$).
+\end{itemize}
+
+\subsection{Ràng buộc động lực học}
+\label{subsec:dynamics_constraints}
+Động lực học liên tục $\dot{x}(t) = f(x(t), u(t))$ được chuyển hóa thành các ràng buộc nối điểm thông qua một hàm tích phân số học $\Phi$ (ví dụ: Runge-Kutta bậc 4):
+\[
+    x_{i, k+1} = \Phi(x_{i,k}, u_{i,k}, \Delta t_i), \qquad k=0,\dots,N_i-1
+\]
+Ngoài ra, cần có ràng buộc liên tục giữa hai vùng kề nhau:
+\[
+    x_{i, N_i} = x_{i+1, 0}, \qquad i=1,\dots,M-1
+\]
+
+\subsection{Ràng buộc vùng an toàn với Log-barrier}
+\label{subsec:log_barrier_constraints}
+Trong cách tiếp cận cứng (hard constraint), ta ép buộc:
+\[
+    A_{v_i} x_{i,k} \leq b_{v_i}
+\]
+Tuy nhiên, điều này thường dẫn đến cực tiểu cục bộ ở biên hoặc hiện tượng ``đi xuyên'' giữa các bước nhảy của bộ tích phân. Thay vì vậy, chúng tôi sử dụng \textbf{hàm cản logarit (log-barrier)} làm xấp xỉ trong. 
+Với mỗi bất đẳng thức $(A_{v_i} x)_j \leq (b_{v_i})_j$, ta định nghĩa hàm log-barrier:
+\[
+    \phi_{v_i}(x) = - \sum_{j=1}^{m_i} \log\left((b_{v_i})_j - (A_{v_i} x)_j\right)
+\]
+Thay vì đặt ràng buộc cứng, hàm $\phi_{v_i}(x)$ được cộng thẳng vào hàm mục tiêu với một trọng số $\mu_i > 0$. Khi $\mu_i \to \infty$, đường xấp xỉ tiến về biên vùng lồi, còn khi $\mu_i \to 0$, nó tiến về tâm giải tích (analytic center). Ta sẽ giảm dần $\mu_i$ trong quá trình lặp (từ $10^{-2}$ xuống $10^{-5}$) để ép quỹ đạo nằm sâu trong vùng an toàn mà không làm mất tính khả thi của bài toán.
+
+\subsection{Hàm mục tiêu}
+\label{subsec:objective_function}
+Hàm mục tiêu tổng quát của mô hình NLP kết hợp Log-barrier được biểu diễn như sau:
+\[
+    \min_{\{x_{i,k},u_{i,k},T_i\}} \quad \sum_{i=1}^{M}\sum_{k=0}^{N_i-1}
+    \left(
+        \ell(x_{i,k},u_{i,k})\Delta t_i
+        + \mu_i \sum_{j=1}^{m_i} -\log\left((b_{v_i})_j - (A_{v_i}x_{i,k})_j\right)
+    \right)
+\]
+Trong đó $\ell(x,u)$ là hàm chi phí gốc nhằm tối ưu hóa năng lượng, thời gian di chuyển, hoặc độ mượt của tín hiệu điều khiển. Tùy thuộc vào kịch bản (ví dụ: minimum time hoặc minimum energy), $\ell(x,u)$ có thể được định nghĩa cụ thể. Việc tích hợp đại lượng $\mu_i \phi_{v_i}(x)$ tạo ra một lực đẩy "mềm" giữ cho rô-bốt luôn di chuyển an toàn bên trong đồ thị các tập lồi.

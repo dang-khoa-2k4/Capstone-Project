@@ -24,33 +24,20 @@ học, trong khi Bezier GCS mặc dù yêu cầu chi phí tính toán cao hơn n
 tạo ra các quỹ đạo mượt mà, đảm bảo các ràng buộc vi phân liên tục $C^2$ và khả
 thi về mặt vật lý cho robot.
 
-Một đóng góp quan trọng của nghiên cứu này là việc xác nhận khả năng hội tụ của
-kỹ thuật nới lỏng lồi, khi các biến nhị phân trong thực nghiệm đều hội tụ về
-các giá trị nguyên 0 hoặc 1 mà không cần thông qua các bước hậu xử lý làm tròn
-phức tạp. Mặc dù trong phạm vi của báo cáo này, chúng tôi tập trung chủ yếu vào
-việc kiểm chứng hiệu suất và tính ổn định nội tại của thuật toán GCS dưới các
-cấu hình khác nhau mà chưa thực hiện so sánh trực tiếp với các phương pháp lập
-kế hoạch dựa trên lấy mẫu (như PRM hay RRT), nhưng các dữ liệu thực nghiệm thu
-được đã cung cấp một cơ sở định lượng vững chắc. Những số liệu này minh chứng
-rằng GCS là một hướng tiếp cận đầy tiềm năng, có khả năng tìm ra nghiệm tối ưu
-toàn cục trong không gian trạng thái liên tục, đặt nền móng quan trọng cho các
-nghiên cứu so sánh chuyên sâu hơn với các phương pháp truyền thống trong tương
-lai.
+Một đóng góp quan trọng của nghiên cứu này là việc đề xuất và triển khai thành công mô hình bài toán Điều khiển Tối ưu (OCP) kết hợp Multiple Shooting và hàm cản log-barrier trên nền tảng của GCS. Thay vì chỉ tạo ra quỹ đạo hình học như GCS nguyên bản, hướng tiếp cận đề xuất đã giải quyết triệt để vấn đề vi phạm biên (hiện tượng đi xuyên vùng) thông qua áp dụng hàm phạt logarit. Đồng thời, kỹ thuật Multiple Shooting cho phép chia nhỏ và tối ưu hóa động lực học hệ thống một cách trơn tru, đảm bảo quỹ đạo thu được vừa tối ưu về mặt hình học, vừa khả thi tuyệt đối về mặt vật lý. Mặc dù trong phạm vi của báo cáo này, chúng tôi tập trung chủ yếu vào hệ thống robot trong môi trường tĩnh, nhưng các dữ liệu thực nghiệm định lượng thu được đã minh chứng tính hiệu quả vượt trội của phương pháp đề xuất.
 
 \section{Hướng nghiên cứu trong tương lai}
 
-Dựa trên những kết quả thực nghiệm và các hạn chế còn tồn tại, nghiên cứu đề
-xuất các hướng phát triển tiếp theo nhằm tối ưu hóa hiệu năng và mở rộng khả
-năng ứng dụng của đồ án như sau:
+Dựa trên những kết quả thực nghiệm đạt được, nghiên cứu đề xuất các hướng phát triển tiếp theo nhằm tối ưu hóa hiệu năng và mở rộng khả năng ứng dụng của đồ án như sau:
 
 \begin{itemize}
-    \item \textbf{Tối ưu hóa hiệu suất tính toán:} Nghiên cứu sẽ tập trung vào việc cải thiện cấu trúc bài toán Lập trình nón bậc hai (Second-Order Cone Programming - SOCP) để giảm thiểu số lượng ràng buộc không cần thiết. Việc khai thác các bộ giải (solver) có khả năng tính toán song song và tối ưu hóa thời gian hội tụ sẽ giúp hệ thống đáp ứng tốt hơn các yêu cầu hoạch định quỹ đạo trong thời gian thực.
+    \item \textbf{Tối ưu hóa hiệu suất tính toán thời gian thực (Real-time MPC):} Nghiên cứu sẽ tập trung vào việc áp dụng phương pháp của đồ án trong mô hình Điều khiển Dự báo Mô hình (Model Predictive Control - MPC). Việc khai thác khả năng warm-start của Multiple Shooting sẽ giúp hệ thống đáp ứng tốt hơn các yêu cầu hoạch định quỹ đạo trực tuyến (online planning) cho robot.
 
-    \item \textbf{Nâng cao thuật toán phân hoạch không gian an toàn:} Để giảm bớt sự phụ thuộc vào các phương pháp phân hoạch đa giác đơn giản, nghiên cứu dự kiến sẽ tích hợp các kỹ thuật phân hoạch trực tiếp trong không gian cấu hình ($C$-space) như C-IRIS hoặc IRIS-NP. Điều này cho phép hệ thống xử lý các vật cản phi tuyến tính phức tạp và tự động hóa việc đặt các điểm mầm (seed points) một cách chiến lược.
+    \item \textbf{Mở rộng cho môi trường động (Dynamic Environments):} Khung làm việc hiện tại chủ yếu giải quyết bài toán tĩnh. Hướng đi tiếp theo là mở rộng đồ thị tập lồi theo cả trục thời gian (Spatiotemporal GCS) để nhận diện và lẩn tránh các vật cản di động.
 
-    \item \textbf{Đánh giá so sánh đối chứng:} Thực hiện các thực nghiệm so sánh quy mô lớn giữa khung làm việc GCS với các thuật toán dựa trên lấy mẫu (Sampling-based Planning) như RRT* và PRM. Các tiêu chí đánh giá sẽ bao gồm tính tối ưu toàn cục của quỹ đạo liên tục, tốc độ truy vấn trực tuyến và khả năng xử lý các ràng buộc vi phân cao chiều.
+    \item \textbf{Nâng cao thuật toán phân hoạch không gian an toàn:} Để xử lý các môi trường có vật thể phi tuyến tính phức tạp trong không gian đa chiều, nghiên cứu dự kiến sẽ tích hợp các kỹ thuật phân hoạch trực tiếp trong không gian cấu hình ($C$-space) như C-IRIS. Điều này cho phép mở rộng áp dụng hệ thống cho các cánh tay robot công nghiệp có số bậc tự do (DOF) lớn.
 
-    \item \textbf{Tích hợp kỹ thuật Multiple Shooting vào giai đoạn hậu xử lý:} Một hướng phát triển trọng tâm của nhóm là vận dụng phương pháp Multiple Shooting để tinh chỉnh quỹ đạo sau khi đã xác định được chuỗi vùng lồi tối ưu từ GCS. Về ý tưởng, hệ thống sẽ thiết lập các điểm bắn (shooting points) tại các ranh giới giữa các tập lồi, tận dụng tính chất chia để trị của Multiple Shooting để thực hiện tính toán song song các phân đoạn quỹ đạo cục bộ. Việc tối ưu hóa độc lập vị trí các điểm nối giữa các vùng lồi được hy vọng sẽ giúp giảm đáng kể tổng thời gian giải bài toán tổng thể, đồng thời đảm bảo quỹ đạo thu được vừa đạt độ trơn đủ lớn, vừa tối ưu về mặt hình học.
+    \item \textbf{Cải tiến hàm phạt Log-barrier:} Đánh giá thêm các dạng hàm phạt hoặc các phương pháp interior-point nâng cao nhằm giảm số lần lặp (iterations) cần thiết khi điều chỉnh trọng số $\mu$, qua đó tối ưu thêm chi phí tính toán của bài toán NLP.
 \end{itemize}
 
 \newpage
