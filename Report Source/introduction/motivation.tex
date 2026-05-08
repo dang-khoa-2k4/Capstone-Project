@@ -19,19 +19,24 @@ Việc đưa ra các quyết định tối ưu trong thời gian thực là mộ
 \label{fig:robotics_examples}
 \end{figure}
 
-Tuy nhiên, việc giải quyết đồng thời các bài toán kết hợp này vẫn là một thách thức mở. Trong thực tế, các phương pháp hiện nay thường phải dựa vào sự can thiệp thủ công của con người hoặc chấp nhận các nghiệm dưới mức tối ưu.
+Hai ví dụ trên cho thấy một thách thức chung của bài toán hoạch định chuyển động cho robot: hệ thống phải đồng thời xác định \textbf{đường đi hình học khả thi} trong môi trường chứa vật cản và tối ưu hóa \textbf{quỹ đạo liên tục theo thời gian} thỏa mãn các ràng buộc động lực học của hệ. Sự giao thoa giữa hai yêu cầu này khiến bài toán mang bản chất hỗn hợp rời rạc--liên tục và trở nên cực kỳ khó giải trong trường hợp tổng quát.
 
-Về mặt thuật toán, việc lựa chọn phương pháp lập kế hoạch chuyển động buộc các nhà nghiên cứu phải đánh đổi giữa nhiều yếu tố mâu thuẫn nhau, bao gồm số chiều của không gian trạng thái, các ràng buộc động học–động lực học và tính đầy đủ của thuật toán.
+Về mặt kỹ thuật, việc lựa chọn phương pháp lập kế hoạch buộc các nhà nghiên cứu phải đánh đổi giữa nhiều yếu tố mâu thuẫn nhau. Ba nhóm phương pháp chính hiện nay đều có những hạn chế riêng khi đối mặt với bài toán đầy đủ:
 
 \begin{itemize}
 
-\item \textbf{Tối ưu hóa quỹ đạo:} Các phương pháp này có ưu thế trong việc xử lý động lực học của robot và các bài toán có không gian trạng thái nhiều chiều. Tuy nhiên, khi môi trường chứa nhiều vật cản khiến bài toán trở nên phi lồi, chúng thường dễ rơi vào \textbf{cực tiểu cục bộ}, dẫn đến việc không tìm được quỹ đạo tránh va chạm \cite{DiehlEtAl2006}.
+\item \textbf{Phương pháp dựa trên đồ thị (ví dụ: A*, Dijkstra):} Các thuật toán này đảm bảo tính đầy đủ theo độ phân giải và có nền tảng lý thuyết vững chắc. Tuy nhiên, quỹ đạo thu được thường có dạng đa giác (zigzag), thiếu tính mượt mà, và không khai thác được cấu trúc liên tục của không gian trạng thái~\cite{LaValle2006}.
 
-\item \textbf{Các phương pháp lập kế hoạch dựa trên lấy mẫu:} Để khắc phục hạn chế trên, cộng đồng robot học thường sử dụng các phương pháp lấy mẫu như RRT hoặc PRM nhờ vào tính “đầy đủ theo xác suất” (probabilistic completeness). Tuy nhiên, cái giá phải trả là các quỹ đạo thu được thường \textbf{kém tối ưu}, và việc áp đặt các \textbf{ràng buộc vi phân liên tục} lên các mẫu rời rạc vẫn là một bài toán rất khó \cite{KavrakiEtAl1996}.
+\item \textbf{Phương pháp dựa trên lấy mẫu (ví dụ: RRT, PRM):} Nhờ khám phá không gian ngẫu nhiên, nhóm này đạt được tính đầy đủ theo xác suất và hoạt động được trong không gian nhiều chiều. Tuy nhiên, quỹ đạo thu được thường \textbf{kém tối ưu}, và việc áp đặt các \textbf{ràng buộc vi phân liên tục} (kinodynamic constraints) vào không gian lấy mẫu rời rạc vẫn là một bài toán khó~\cite{KavrakiEtAl1996}.
 
+\item \textbf{Tối ưu hóa quỹ đạo trực tiếp (ví dụ: Direct Multiple Shooting):} Nhóm phương pháp này xử lý tốt các ràng buộc động lực học và cho quỹ đạo chất lượng cao. Tuy nhiên, khi sự hiện diện của vật cản làm cho ràng buộc an toàn hình học $x(t) \in \mathcal{C}_{\mathrm{free}}$ trở thành phi lồi, bộ giải dễ rơi vào \textbf{cực tiểu cục bộ} và không tìm được quỹ đạo tránh va chạm~\cite{DiehlEtAl2006}.
 
 \end{itemize}
 
-\textbf{Lập trình lồi hỗn hợp số nguyên (Mixed-Integer Convex Programming – MICP)} và đặc biệt là cách tiếp cận \textbf{Đồ thị các tập hợp lồi (Graph of Convex Sets - GCS)} đã nổi lên như một hướng tiếp cận đầy hứa hẹn nhằm thu hẹp khoảng cách giữa hai nhóm phương pháp trên. GCS cho phép diễn đạt bài toán chuyển động dưới dạng các tập lồi, kết hợp được tính đầy đủ của các thuật toán dựa trên đồ thị với khả năng đảm bảo \textbf{tính tối ưu toàn cục}. Tuy vậy, các cách tiếp cận GCS thuần túy dựa trên hình học thường tồn tại hạn chế trong việc sinh ra quỹ đạo mượt mà và dễ gặp hiện tượng rô-bốt ``đi xuyên'' (vi phạm) qua biên của các vùng không gian an toàn tại các điểm chuyển tiếp do chưa xử lý triệt để bài toán động lực học theo thời gian.
+Khuôn khổ \textbf{Đồ thị các tập hợp lồi (Graph of Convex Sets -- GCS)}~\cite{MarcucciEtAl2023GCS} đã nổi lên như một hướng tiếp cận đầy hứa hẹn nhằm thu hẹp khoảng cách giữa các nhóm phương pháp trên.
+GCS phân hoạch không gian tự do thành một họ hữu hạn các vùng lồi, mã hóa bài toán chọn đường đi thành bài toán luồng mạng nhị phân trên đồ thị, và áp dụng kỹ thuật nới lỏng phối cảnh (perspective cone relaxation) để đảm bảo \textbf{tính tối ưu toàn cục}.
+Cách tiếp cận GCS-Bézier sử dụng đường cong Bézier để tham số hóa quỹ đạo và áp đặt các ràng buộc về vận tốc, gia tốc thông qua tính chất bao lồi của đường cong.
+Tuy vậy, mô hình này chủ yếu xử lý các ràng buộc ở cấp độ hình học và có thể gặp hiện tượng vi phạm biên vùng an toàn tại các điểm chuyển tiếp khi phương trình động lực học của hệ chưa được mô hình hóa đầy đủ.
 
-Mục tiêu của nghiên cứu này là khắc phục các hạn chế trên. Thay vì chỉ tìm quỹ đạo hình học, chúng tôi đề xuất mở rộng GCS thành một bài toán \textbf{Điều khiển tối ưu (Optimal Control Problem - OCP)} và giải quyết thông qua phương pháp \textbf{Multiple Shooting}. Đồng thời, để đảm bảo an toàn tuyệt đối và ngăn chặn hiện tượng đi xuyên biên, chúng tôi tích hợp thêm \textbf{hàm phạt logarit (log-barrier)} vào hàm mục tiêu. Cách tiếp cận này hứa hẹn mang lại một quỹ đạo tối ưu toàn cục, khả thi về mặt động lực học và tuân thủ nghiêm ngặt các giới hạn không gian, bảo đảm hiệu suất và tính an toàn cao cho hệ thống rô-bốt.
+Nhằm khắc phục hạn chế này, nghiên cứu đề xuất mở rộng GCS thành một bài toán \textbf{Điều khiển Tối ưu (Optimal Control Problem -- OCP)} kết hợp phương pháp \textbf{Multiple Shooting} để rời rạc hóa động lực học trực tiếp, và \textbf{hàm cản logarit (log-barrier)} để đảm bảo quỹ đạo luôn nằm sâu trong miền nội của các vùng an toàn.
+Hai hướng tiếp cận này---GCS-Bézier cho hoạch định hình học nhanh và OCP-DMS cho hoạch định động lực học đầy đủ---tạo thành cặp phương pháp bổ sung cho nhau mà luận văn này trình bày và đánh giá.
