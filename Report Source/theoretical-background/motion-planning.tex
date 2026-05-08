@@ -1,34 +1,217 @@
-\section{Sinh quỹ đạo Động lực học (Kinodynamic)}\label{sec:kinodynamic_theory}Mục này trình bày các công thức toán học để sinh ra các quỹ đạo khả thi về mặt động lực học (kinodynamically feasible). Khác với lập kế hoạch đường đi hình học, vốn chỉ xem xét các cấu hình không va chạm trong không gian làm việc, lập kế hoạch chuyển động (kinodynamic) tính đến các ràng buộc vi phân của hệ thống, chẳng hạn như các giới hạn về vận tốc, gia tốc và độ giật (jerk). Chúng tôi tận dụng các đường cong Bézier làm cơ chế tham số hóa quỹ đạo, phương pháp này đặc biệt thuận lợi cho khuôn khổ Đồ thị các Tập lồi (GCS) nhờ vào các tính chất lồi của nó.\subsection{Mô hình hóa Kinodynamic}Xét một hệ thống robot với sự tiến triển trạng thái được chi phối bởi một tập hợp các phương trình vi phân thường (ODEs):\begin{equation}\dot{\mathbf{x}}(t) = f(\mathbf{x}(t), \mathbf{u}(t)), \quad \mathbf{x}(t) \in \mathcal{X}, \mathbf{u}(t) \in \mathcal{U}\end{equation}trong đó $\mathbf{x}(t) \in \mathbb{R}^n$ đại diện cho vector trạng thái (thường bao gồm vị trí, vận tốc và gia tốc), và $\mathbf{u}(t) \in \mathbb{R}^m$ biểu thị các tín hiệu điều khiển đầu vào. Mục tiêu là tính toán một quỹ đạo $\sigma(t): [0, T] \to \mathcal{X}$ sao cho tối thiểu hóa một phiếm hàm chi phí cụ thể trong khi thỏa mãn:\begin{enumerate}\item \textbf{Điều kiện biên:} Các trạng thái khởi đầu và đích đến $\mathbf{x}(0) = \mathbf{x}_{start}$ và $\mathbf{x}(T) = \mathbf{x}_{goal}$.\item \textbf{Ràng buộc an toàn:} $\sigma(t) \in \mathcal{X}_{free}$ với mọi $t$, đảm bảo tránh va chạm.\item \textbf{Giới hạn động lực học:} Các ràng buộc bất đẳng thức trên các đạo hàm bậc cao nhằm đảm bảo tính khả thi vật lý:\begin{equation}|\dot{\sigma}(t)| \leq v_{max}, \quad |\ddot{\sigma}(t)| \leq a_{max}, \quad |\dddot{\sigma}(t)| \leq j_{max}\end{equation}\end{enumerate}\subsection{Các ràng buộc về độ trơn và tính liên tục}Trong khuôn khổ GCS, một quỹ đạo hoàn chỉnh được cấu thành từ nhiều đoạn Bézier ghép nối (piecewise). Để đảm bảo chuyển động trơn tru qua các ranh giới của các tập lồi kề nhau, các ràng buộc liên tục phải được áp đặt tại các điểm chuyển tiếp. Gọi $r_A(t)$ được xác định bởi các điểm điều khiển $\{a_0, \dots, a_n\}$ và $r_B(t)$ được xác định bởi $\{b_0, \dots, b_n\}$ là hai đoạn liên tiếp.\begin{itemize}\item \textbf{Liên tục $C^0$ (Vị trí):} Đảm bảo đường đi được kết nối liền mạch.\begin{equation}a_n = b_0\end{equation}\item \textbf{Liên tục $C^1$ (Vận tốc):} Đảm bảo vận tốc liên tục, ngăn chặn các xung gia tốc vô hạn.
+\section{Sinh Quỹ đạo Kinodynamic}\label{sec:kinodynamic_theory}
+
+Lập kế hoạch chuyển động hình học (geometric motion planning) tìm kiếm một đường đi
+không va chạm trong không gian cấu hình của robot mà không xét đến các đặc tính vật lý
+của hệ thống.
+Tuy nhiên, trong thực tế, robot là một hệ cơ học mà trạng thái của nó chỉ có thể tiến triển
+theo thời gian theo các phương trình vi phân xác định được dẫn dắt bởi các đầu vào cơ cấu
+chấp hành.
+Một đường đi không va chạm về mặt hình học vẫn có thể không khả thi về mặt vật lý nếu nó
+đòi hỏi, chẳng hạn, sự thay đổi tức thời của vận tốc hoặc các lực vượt quá giới hạn bão hòa
+của cơ cấu chấp hành.
+Lập kế hoạch chuyển động kinodynamic mở rộng bài toán hình học bằng cách yêu cầu quỹ đạo
+được lập kế hoạch phải đồng thời tránh vật cản, thỏa mãn các ràng buộc vi phân do động lực
+học hệ thống áp đặt, và tối ưu hóa một tiêu chí hiệu năng do người dùng chỉ định.
+
+Mục này xây dựng bài toán lập kế hoạch kinodynamic dưới dạng toán học chặt chẽ
+(Mục~\ref{subsec:kinodynamic_problem}), giới thiệu tham số hóa quỹ đạo đa thức bằng
+đường cong Bézier như một kỹ thuật để đưa bài toán về dạng hữu hạn chiều
+(Mục~\ref{subsec:bezier_parameterization}), và trình bày các ràng buộc liên tục đảm bảo
+chuyển động trơn qua các điểm chuyển tiếp giữa các đoạn quỹ đạo
+(Mục~\ref{subsec:continuity_constraints}).
+
+\subsection{Bài toán Lập kế hoạch Kinodynamic}\label{subsec:kinodynamic_problem}
+
+Xét một hệ thống robot có trạng thái $x(t) \in \mathcal{X} \subseteq \mathbb{R}^{n_x}$
+và đầu vào điều khiển $u(t) \in \mathcal{U} \subseteq \mathbb{R}^{n_u}$ tiến triển theo
+phương trình vi phân thường
 \begin{equation}
-    a_n - a_{n-1} = b_1 - b_0
+    \dot{x}(t) = f\!\left(x(t),\, u(t)\right), \quad t \in [0, T],
+    \label{eq:kinodynamic_dynamics}
+\end{equation}
+trong đó $f \colon \mathbb{R}^{n_x} \times \mathbb{R}^{n_u} \to \mathbb{R}^{n_x}$ là ánh xạ
+động lực học của hệ và $T > 0$ là độ dài chân trời lập kế hoạch, có thể được cố định trước
+hoặc được coi là biến tối ưu.
+Vector trạng thái thường mã hóa các vị trí và vận tốc suy rộng của robot, và tùy theo
+mô hình động lực học có thể bao gồm thêm các đạo hàm bậc cao hơn.
+
+Một quỹ đạo kinodynamic là một cặp $\left(x(\cdot), u(\cdot)\right)$ xác định trên $[0,T]$
+thỏa mãn phương trình động lực học~\eqref{eq:kinodynamic_dynamics} cùng với các yêu cầu sau.
+
+\begin{enumerate}
+    \item \textbf{Điều kiện biên.}
+          Quỹ đạo phải xuất phát từ trạng thái đầu được chỉ định và đến được vùng đích mong muốn:
+          \begin{equation}
+              x(0) = x_{\mathrm{start}}, \qquad x(T) \in \mathcal{X}_{\mathrm{goal}},
+              \label{eq:boundary_conditions}
+          \end{equation}
+          trong đó $\mathcal{X}_{\mathrm{goal}} \subseteq \mathcal{X}$ là tập đích.
+
+    \item \textbf{Ràng buộc an toàn.}
+          Quỹ đạo trạng thái phải nằm trong vùng không có vật cản
+          $\mathcal{X}_{\mathrm{free}} \subseteq \mathcal{X}$ tại mọi thời điểm:
+          \begin{equation}
+              x(t) \in \mathcal{X}_{\mathrm{free}}, \quad \forall\, t \in [0, T].
+              \label{eq:safety_constraint}
+          \end{equation}
+
+    \item \textbf{Giới hạn cơ cấu chấp hành và động học.}
+          Đầu vào điều khiển phải nằm trong tập khả thi của cơ cấu chấp hành:
+          \begin{equation}
+              u(t) \in \mathcal{U}, \quad \forall\, t \in [0, T].
+              \label{eq:control_constraint}
+          \end{equation}
+          Trong nhiều bài toán thực tế, $\mathcal{U}$ được đặc trưng bởi các giới hạn tường minh
+          lên vận tốc, gia tốc và độ giật dọc theo quỹ đạo,
+          ví dụ\ $\|\dot{x}(t)\| \le v_{\max}$, $\|\ddot{x}(t)\| \le a_{\max}$
+\end{enumerate}
+
+Mục tiêu là tìm một quỹ đạo tối thiểu hóa phiếm hàm chi phí có dạng
+\begin{equation}
+    J\!\left(x(\cdot), u(\cdot)\right)
+    = \int_{0}^{T} L\!\left(x(t), u(t)\right) \mathrm{d}t + E\!\left(x(T)\right),
+    \label{eq:kinodynamic_cost}
+\end{equation}
+trong đó $L$ là running cost phạt, chẳng hạn, nỗ lực điều khiển hoặc độ lệch so với
+quỹ đạo tham chiếu, và $E$ là terminal cost.
+
+Có hai khó khăn cấu trúc phân biệt bài toán này với bài toán hình học thuần túy.
+Thứ nhất, ràng buộc an toàn~\eqref{eq:safety_constraint} phải được thỏa mãn liên tục
+trên toàn bộ khoảng $[0, T]$, không chỉ tại một tập hữu hạn các điểm rời rạc,
+và $\mathcal{X}_{\mathrm{free}}$ nói chung là phi lồi do sự hiện diện của vật cản.
+Thứ hai, phiếm hàm chi phí~\eqref{eq:kinodynamic_cost} và ràng buộc động lực
+học~\eqref{eq:kinodynamic_dynamics} có tính chất vô hạn chiều, vì các biến quyết định
+$x(\cdot)$ và $u(\cdot)$ là các hàm theo thời gian.
+Để giải bài toán này bằng phương pháp số, cần phải đưa nó về dạng bài toán hữu hạn chiều
+bằng cách chọn một tham số hóa quỹ đạo phù hợp.
+
+\subsection{Tham số hóa Quỹ đạo bằng Đường cong Bézier}\label{subsec:bezier_parameterization}
+
+Một hướng tiếp cận tự nhiên để tham số hóa hữu hạn chiều là biểu diễn quỹ đạo dưới dạng
+đa thức với các hệ số đóng vai trò là biến quyết định.
+Trong số các biểu diễn đa thức, đường cong Bézier đặc biệt phù hợp với lập kế hoạch
+kinodynamic vì các tính chất hình học và giải tích của chúng cho phép áp đặt các ràng buộc
+an toàn, độ trơn và tính khả thi động học trực tiếp dưới dạng các điều kiện đại số trên
+các hệ số.
+
+\subsubsection{Định nghĩa}
+
+Một đường cong Bézier bậc $d$ trên khoảng tham số $[0,1]$ được xác định bởi
+$d+1$ \emph{điểm điều khiển} $\gamma_0, \ldots, \gamma_d \in \mathbb{R}^{n}$
+thông qua các đa thức cơ sở Bernstein.
+Đa thức Bernstein thứ $k$ bậc $d$ được định nghĩa là
+\begin{equation}
+    \beta_{k,d}(s) := \binom{d}{k} s^{k}(1-s)^{d-k},
+    \quad k = 0, \ldots, d, \quad s \in [0,1].
+    \label{eq:bernstein}
+\end{equation}
+Theo định lý nhị thức, các đa thức này không âm và phân hoạch đơn vị:
+$\sum_{k=0}^{d} \beta_{k,d}(s) = 1$ với mọi $s \in [0,1]$.
+Do đó, với mỗi $s$ cố định, các giá trị $\{\beta_{k,d}(s)\}_{k=0}^{d}$ tạo thành một
+tập hệ số tổ hợp lồi.
+Đường cong Bézier được định nghĩa là trung bình có trọng số tương ứng của các điểm điều khiển:
+\begin{equation}
+    \gamma(s) := \sum_{k=0}^{d} \beta_{k,d}(s)\,\gamma_k,
+    \quad s \in [0,1].
+    \label{eq:bezier_curve}
 \end{equation}
 
-\item \textbf{Liên tục $C^2$ (Gia tốc):} Đảm bảo việc tác động lực/mô-men xoắn diễn ra liên tục, điều này rất quan trọng để giảm thiểu hao mòn cơ khí và độ giật (jerk).
-\begin{equation}
-    (a_n - 2a_{n-1} + a_{n-2}) = (b_2 - 2b_1 + b_0)
-\end{equation}
-\end{itemize}Bằng cách áp đặt các ràng buộc đẳng thức này tại các cạnh của đồ thị, chúng ta tạo ra một quỹ đạo trơn toàn cục tuân thủ các đặc tính vật lý cơ bản của robot.
+\subsubsection{Các tính chất liên quan đến lập kế hoạch quỹ đạo}
 
-\subsection{Cơ sở lý thuyết về đường cong Bézier}\label{sec:bezier_background}Để giải quyết bài toán lập kế hoạch kinodynamic bằng phương pháp số, việc tham số hóa các hàm quỹ đạo thông qua một số hữu hạn các biến quyết định là rất cần thiết. Để đạt được mục đích này, chúng tôi sử dụng các đường cong Bézier. Phần này nhắc lại định nghĩa và các tính chất cơ bản của họ đường cong này.Một đường cong Bézier được xây dựng dựa trên các đa thức Bernstein. Đa thức Bernstein thứ $k$ bậc $d$, với $k = 0, \dots, d$, được định nghĩa là:\begin{equation}\beta_{k,d}(s) := \binom{d}{k} s^k(1-s)^{d-k}, \quad s \in [0, 1]\end{equation}Lưu ý rằng các đa thức Bernstein bậc $d$ luôn không âm và theo định lý nhị thức, tổng của chúng bằng 1. Do đó, với mỗi $s \in [0, 1]$ cố định, các vô hướng $\{\beta_{k,d}(s)\}_{k=0}^d$ có thể được xem như các hệ số của một tổ hợp lồi. Các đường cong Bézier thu được bằng cách sử dụng các hệ số này để tổ hợp một tập hợp gồm $d+1$ điểm điều khiển $\gamma_k \in \mathbb{R}^n$ đã cho:\begin{equation}\gamma(s) := \sum_{k=0}^d \beta_{k,d}(s)\gamma_k\end{equation}Có thể dễ dàng kiểm chứng rằng các đường cong Bézier sở hữu các tính chất sau đây, vốn đóng vai trò thiết yếu đối với khuôn khổ GCS:\begin{itemize}\item \textbf{Giá trị điểm cuối (Endpoint values):} Đường cong $\gamma$ bắt đầu tại điểm điều khiển đầu tiên và kết thúc tại điểm điều khiển cuối cùng:\begin{equation}\gamma(0) = \gamma_0 \quad \text{và} \quad \gamma(1) = \gamma_d\end{equation}Tính chất này rất cần thiết cho việc thực thi các ràng buộc liên tục ($C^0$) khi ghép nối nhiều đoạn Bézier lại với nhau trong đồ thị.\item \textbf{Tính chất bao lồi (Convex hull property):} Đường cong $\gamma$ nằm hoàn toàn bên trong bao lồi của các điểm điều khiển của nó:
-\begin{equation}
-    \gamma(s) \in \text{conv}(\{\gamma_k\}_{k=0}^d), \quad \forall s \in [0, 1]
-\end{equation}
-Trong bối cảnh của GCS, nếu một vùng lồi $X_v$ đại diện cho một tập an toàn, việc đảm bảo tránh va chạm được quy về việc ràng buộc tất cả các điểm điều khiển phải nằm trong tập hợp đó:
-\begin{equation}
-     \gamma_k \in X_v, \quad \forall k \in \{0, \dots, d\} \implies \gamma(s) \in X_v
-\end{equation}
-Điều này cho phép chúng ta thực thi các ràng buộc an toàn liên tục thông qua một tập hợp hữu hạn các ràng buộc bao hàm tuyến tính.
+Ba tính chất của đường cong Bézier được khai thác trực tiếp trong lập kế hoạch quỹ đạo
+kinodynamic.
 
-\item \textbf{Đạo hàm (Hodograph):} Đạo hàm $\dot{\gamma}$ của đường cong $\gamma$ cũng là một đường cong Bézier, nhưng có bậc là $d-1$, với các điểm điều khiển được xác định bởi sai phân của các điểm kề nhau:
+\textbf{Nội suy điểm đầu cuối.}
+Đường cong đi qua chính xác điểm điều khiển đầu tiên và điểm điều khiển cuối cùng:
 \begin{equation}
-    \dot{\gamma}(s) = \sum_{k=0}^{d-1} \beta_{k,d-1}(s) \dot{\gamma}_k
+    \gamma(0) = \gamma_0, \qquad \gamma(1) = \gamma_d.
+    \label{eq:endpoint_interpolation}
 \end{equation}
-trong đó $\dot{\gamma}_k = d(\gamma_{k+1} - \gamma_k)$ với $k = 0, \dots, d-1$. Tương tự, các đạo hàm bậc cao hơn (gia tốc, độ giật) có thể được biểu diễn dưới dạng tổ hợp tuyến tính của các điểm điều khiển. Do đó, các ràng buộc động lực học (ví dụ: giới hạn vận tốc $|\dot{\gamma}(s)| \le v_{max}$) có thể được áp đặt dưới dạng các ràng buộc tuyến tính trên sai phân giữa các điểm điều khiển kề nhau, qua đó bảo toàn tính lồi của bài toán tối ưu hóa.
+Tính chất này cho phép áp đặt các điều kiện biên về vị trí và, thông qua công thức đạo hàm
+bên dưới, cả về vận tốc, dưới dạng các ràng buộc đẳng thức tuyến tính trên các điểm điều khiển.
 
-\item \textbf{Tích phân của hàm lồi:} Đối với một hàm lồi $f : \mathbb{R}^n \to \mathbb{R}$ (thường đại diện cho hàm chi phí trong lập kế hoạch chuyển động, chẳng hạn như năng lượng hoặc độ dài đường đi), tích phân dọc theo đường cong bị chặn bởi tổ hợp lồi của các giá trị hàm tại các điểm điều khiển:
+\textbf{Tính chất bao lồi.}
+Toàn bộ đường cong nằm bên trong bao lồi của các điểm điều khiển của nó:
 \begin{equation}
-    \int_0^1 f(\gamma(s))ds \le \frac{1}{d+1} \sum_{k=0}^d f(\gamma_k)
-    \label{eq:integral_property}
+    \gamma(s) \in \operatorname{conv}\!\left(\{\gamma_k\}_{k=0}^{d}\right),
+    \quad \forall\, s \in [0,1].
+    \label{eq:convex_hull}
 \end{equation}
-Bất đẳng thức này cung cấp một cận trên lồi cho chi phí tích phân, tạo điều kiện thuận lợi cho việc tối ưu hóa hiệu quả trong khuôn khổ bài toán quy hoạch lồi hỗn hợp số nguyên (mixed-integer convex programming) của GCS.
-\end{itemize}
+Suy ra rằng nếu tất cả $d+1$ điểm điều khiển nằm trong một tập lồi $\mathcal{S}$,
+thì $\gamma(s) \in \mathcal{S}$ với mọi $s$.
+Nguyên tắc bao hàm này chuyển đổi ràng buộc an toàn liên tục~\eqref{eq:safety_constraint}
+thành một tập hữu hạn các ràng buộc thuộc tập trên các điểm điều khiển, với điều kiện vùng
+an toàn có thể được xấp xỉ hoặc phân hoạch thành các tập lồi.
+
+\textbf{Công thức đạo hàm (Hodograph).}
+Đạo hàm của $\gamma$ theo tham số $s$ cũng là một đường cong Bézier bậc $d-1$,
+với các điểm điều khiển được tạo thành từ các sai phân hữu hạn bậc một của các điểm
+điều khiển ban đầu:
+\begin{equation}
+    \dot{\gamma}(s) = \sum_{k=0}^{d-1} \beta_{k,d-1}(s)\,\dot{\gamma}_k,
+    \qquad \dot{\gamma}_k = d\!\left(\gamma_{k+1} - \gamma_k\right).
+    \label{eq:bezier_derivative}
+\end{equation}
+Áp dụng đệ quy~\eqref{eq:bezier_derivative} cho phép tính gia tốc và các đạo hàm bậc cao
+hơn dưới dạng đường cong Bézier có bậc giảm dần, với các điểm điều khiển được biểu diễn
+dưới dạng tổ hợp tuyến tính của các $\gamma_k$ ban đầu.
+Do đó, các ràng buộc lên vận tốc và gia tốc dọc theo quỹ đạo --- chẳng hạn các giới hạn
+động học trong~\eqref{eq:control_constraint} --- quy về các ràng buộc bất đẳng thức tuyến
+tính trên các sai phân điểm điều khiển, và có thể được áp đặt đồng thời với tính chất bao lồi.
+
+\subsection{Ràng buộc Độ trơn tại Điểm chuyển tiếp}\label{subsec:continuity_constraints}
+
+Với các quỹ đạo trải dài qua nhiều vùng không gian làm việc có tính chất động học khác nhau,
+một đoạn Bézier duy nhất bậc vừa phải có thể không đủ linh hoạt.
+Biện pháp thực tế là sử dụng quỹ đạo \emph{Bézier từng đoạn} (piecewise Bézier) gồm $M$
+đoạn ghép nối đầu-đuôi.
+Gọi đoạn thứ $i$ là đường cong Bézier bậc $d$ được xác định bởi các điểm điều khiển
+$a^{(i)}_0, \ldots, a^{(i)}_d$, với $i = 1, \ldots, M$.
+Việc ghép nối các đoạn đảm bảo đường đi liên thông, nhưng cần thêm các điều kiện đại số
+tại mỗi điểm nối để đảm bảo tính khả vi của quỹ đạo tổng thể.
+
+\textbf{Liên tục $C^0$ (vị trí).}
+Điểm cuối của đoạn $i$ trùng với điểm đầu của đoạn $i+1$:
+\begin{equation}
+    a^{(i)}_d = a^{(i+1)}_0.
+    \label{eq:c0_continuity}
+\end{equation}
+
+\textbf{Liên tục $C^1$ (vận tốc).}
+Vận tốc ra của đoạn $i$ khớp với vận tốc vào của đoạn $i+1$,
+điều này theo~\eqref{eq:bezier_derivative} được dịch thành đẳng thức của các sai phân bậc
+một tại biên:
+\begin{equation}
+    a^{(i)}_d - a^{(i)}_{d-1} = a^{(i+1)}_1 - a^{(i+1)}_0.
+    \label{eq:c1_continuity}
+\end{equation}
+
+\textbf{Liên tục $C^2$ (gia tốc).}
+Gia tốc ra của đoạn $i$ khớp với gia tốc vào của đoạn $i+1$,
+được biểu diễn qua các sai phân bậc hai tại biên:
+\begin{equation}
+    a^{(i)}_d - 2a^{(i)}_{d-1} + a^{(i)}_{d-2}
+    = a^{(i+1)}_2 - 2a^{(i+1)}_1 + a^{(i+1)}_0.
+    \label{eq:c2_continuity}
+\end{equation}
+
+Các điều kiện~\eqref{eq:c0_continuity}--\eqref{eq:c2_continuity} là các ràng buộc đẳng thức
+tuyến tính trên các điểm điều khiển và do đó bảo toàn cấu trúc đại số của bài toán tối ưu.
+Việc yêu cầu liên tục $C^1$ hay $C^2$ phụ thuộc vào bậc của mô hình động lực học robot:
+mô hình tích phân đôi (double-integrator) chỉ cần $C^1$, trong khi mô hình có đầu vào mô-men
+xoắn tường minh thường đòi hỏi $C^2$ để tránh các lệnh lực xung tại điểm nối giữa các đoạn.
+
+Sau khi đặt tham số hóa Bézier từng đoạn, bài toán lập kế hoạch kinodynamic quy về bài toán
+tối ưu hữu hạn chiều: các biến quyết định là các điểm điều khiển $\{a^{(i)}_k\}$ và, khi áp
+dụng, chân trời $T$; hàm mục tiêu là phiếm hàm chi phí~\eqref{eq:kinodynamic_cost} được biểu
+diễn qua các điểm điều khiển; và các ràng buộc bao gồm điều kiện
+biên~\eqref{eq:boundary_conditions}, các ràng buộc an toàn suy từ tính chất bao
+lồi~\eqref{eq:convex_hull}, các giới hạn động học được áp đặt qua công thức đạo
+hàm~\eqref{eq:bezier_derivative}, và các điều kiện tại điểm
+nối~\eqref{eq:c0_continuity}--\eqref{eq:c2_continuity}.
+
+Cấu trúc này --- hàm mục tiêu tích phân, ràng buộc vi phân trên quỹ đạo, điều kiện biên cố
+định, và các ràng buộc bất đẳng thức trên đường --- chính xác là cấu trúc của một Bài toán
+Điều khiển Tối ưu (Optimal Control Problem, OCP).
+Mục tiếp theo hệ thống hóa mối liên hệ này và phát triển khung OCP làm nền tảng cho phương
+pháp tối ưu hóa quỹ đạo được áp dụng trong luận văn này.

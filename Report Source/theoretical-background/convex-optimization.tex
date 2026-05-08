@@ -160,6 +160,7 @@
 % optimum.
 
 \section{Giải tích Lồi và Tối ưu hóa}
+\label{sec:convex_analysis}
 
 \subsection{Tập Lồi (Convex Sets)}
 Trước khi thảo luận về các bài toán tối ưu hóa, chúng ta cần thiết lập các đối tượng hình học cơ bản được sử dụng trong công trình này. Một tập hợp $\mathcal{C} \subseteq \mathbb{R}^n$ được định nghĩa là \textit{lồi} (convex) nếu, với bất kỳ hai điểm nào thuộc tập hợp, đoạn thẳng nối chúng nằm trọn vẹn bên trong tập hợp đó.
@@ -204,25 +205,25 @@ Khi một tập lồi $\mathcal{C}$ được mô tả dưới dạng nón tiêu 
 \end{equation}
 Một ý nghĩa thực tiễn quan trọng nằm ở bao đóng (closure) của tập này, $\text{cl}(\widetilde{\mathcal{C}}) = \{(x, y) \mid y \geq 0, Ax + by \in \mathcal{K}\}$. Bao đóng này mở rộng định nghĩa để bao gồm cả biên nơi $y=0$, điều này rất quan trọng trong việc mô hình hóa các ràng buộc logic trong quy hoạch nguyên-hỗn hợp.
 
-Đối với một tập compact $\mathcal{C}$, khi vô hướng $y$ tiến dần về 0, tập tỉ lệ $y\mathcal{C}$ sẽ co liên tục về gốc tọa độ. Do đó, trong giới hạn khi $y=0$, điều kiện $(x, 0) \in \text{cl}(\widetilde{\mathcal{C}})$ ngụ ý rằng $x$ bắt buộc phải là vector không (giả sử $\mathcal{C}$ chứa gốc tọa độ và bị chặn). Hành vi hình học này hoạt động hiệu quả như một công tắc logic (logical switch):
+Đối với một tập compact $\mathcal{C}$, khi vô hướng $y$ tiến dần về 0, tập tỉ lệ $y\mathcal{C}$ sẽ co liên tục về gốc tọa độ. Do đó, trong giới hạn khi $y=0$, điều kiện $(x, 0) \in \text{cl}(\widetilde{\mathcal{C}})$ ngụ ý rằng $x$ bắt buộc phải là vector không (giả sử $\mathcal{C}$ chứa gốc tọa độ và bị chặn). Hành vi hình học này hoạt động hiệu quả như một công tắc logic:
 \begin{itemize}
 \item Khi $y > 0$, biến $x$ bị ràng buộc trong phiên bản tỉ lệ của tập $\mathcal{C}$.
 \item Khi $y = 0$, biến $x$ bị ép về gốc tọa độ ($x=0$).
 \end{itemize}
 Tính chất này được khai thác trực tiếp trong ứng dụng của chúng tôi đối với Bài toán Đường đi Ngắn nhất trên Đồ thị các Tập Lồi (GCS). Trong mô hình Quy hoạch Lồi Nguyên-Hỗn hợp (MICP), biến kích hoạt nhị phân cho một cạnh đóng vai trò là hệ số tỉ lệ $y$. Khi một cạnh không hoạt động ($y=0$), các đóng góp trạng thái liên quan bị ép về 0, và chi phí---được mô hình hóa qua hàm phối cảnh---sẽ tự nhiên triệt tiêu. Hàm phối cảnh $\tilde{\ell}_e$ được định nghĩa để trả về 0 khi cả $y=0$ và các biến trạng thái bằng 0, đảm bảo rằng các thành phần không hoạt động sẽ không phát sinh chi phí trong hàm mục tiêu tối ưu.
 
-\subsubsection{Nón Đối ngẫu (Dual Cones)}
-Khái niệm thiết yếu thứ hai là \textit{nón đối ngẫu}. Đối với một nón lồi $\mathcal{K} \subseteq \mathbb{R}^n$, nón đối ngẫu $\mathcal{K}^*$ bao gồm tất cả các vector tạo thành một tích vô hướng không âm với mọi vector trong $\mathcal{K}$:
-\begin{equation}
-\mathcal{K}^* := \{y \in \mathbb{R}^n \mid x^\top y \geq 0, \forall x \in \mathcal{K}\}.
-\label{eq:dual_cone}
-\end{equation}
-Một tính chất cơ bản là $\mathcal{K}^*$ luôn luôn lồi, bất kể $\mathcal{K}$ có lồi hay không. Chúng ta thường gặp ba lớp nón cụ thể, tất cả đều là \textit{tự đối ngẫu} (tức là $\mathcal{K}^* = \mathcal{K}$):
-\begin{enumerate}
-\item \textbf{Orthant không âm} (Non-negative orthant): $\mathbb{R}^n_+ = \{x \in \mathbb{R}^n \mid x_i \geq 0\}$.
-\item \textbf{Nón bậc hai} (Second-order cone hay Lorentz cone): $\mathcal{Q}^n = \{(t, x) \in \mathbb{R} \times \mathbb{R}^{n-1} \mid \|x\|_2 \leq t\}$.
-\item \textbf{Nón bán xác định dương} (Positive semidefinite cone): $\mathcal{S}^n_+ = \{X \in \mathcal{S}^n \mid X \succeq 0\}$.
-\end{enumerate}
+% \subsubsection{Nón Đối ngẫu (Dual Cones)}
+% Khái niệm thiết yếu thứ hai là \textit{nón đối ngẫu}. Đối với một nón lồi $\mathcal{K} \subseteq \mathbb{R}^n$, nón đối ngẫu $\mathcal{K}^*$ bao gồm tất cả các vector tạo thành một tích vô hướng không âm với mọi vector trong $\mathcal{K}$:
+% \begin{equation}
+% \mathcal{K}^* := \{y \in \mathbb{R}^n \mid x^\top y \geq 0, \forall x \in \mathcal{K}\}.
+% \label{eq:dual_cone}
+% \end{equation}
+% Một tính chất cơ bản là $\mathcal{K}^*$ luôn luôn lồi, bất kể $\mathcal{K}$ có lồi hay không. Chúng ta thường gặp ba lớp nón cụ thể, tất cả đều là \textit{tự đối ngẫu} (tức là $\mathcal{K}^* = \mathcal{K}$):
+% \begin{enumerate}
+% \item \textbf{Orthant không âm} (Non-negative orthant): $\mathbb{R}^n_+ = \{x \in \mathbb{R}^n \mid x_i \geq 0\}$.
+% \item \textbf{Nón bậc hai} (Second-order cone hay Lorentz cone): $\mathcal{Q}^n = \{(t, x) \in \mathbb{R} \times \mathbb{R}^{n-1} \mid \|x\|_2 \leq t\}$.
+% \item \textbf{Nón bán xác định dương} (Positive semidefinite cone): $\mathcal{S}^n_+ = \{X \in \mathcal{S}^n \mid X \succeq 0\}$.
+% \end{enumerate}
 
 \subsection{Hàm Lồi (Convex Functions)}
 Một hàm số $f: \mathcal{D} \to \mathbb{R}$ là \textit{lồi} (convex) nếu miền xác định $\mathcal{D} \subseteq \mathbb{R}^n$ là một tập lồi và nếu, với mọi $x, y \in \mathcal{D}$ và $\theta \in [0, 1]$, bất đẳng thức sau được thỏa mãn:
@@ -231,7 +232,7 @@ f(\theta x + (1-\theta)y) \leq \theta f(x) + (1-\theta)f(y).
 \end{equation}
 Về mặt hình học, đoạn thẳng nối bất kỳ hai điểm nào trên đồ thị của hàm số đều nằm phía trên hoặc thuộc đồ thị đó. Một hàm số được gọi là \textit{lồi chặt} (strictly convex) nếu bất đẳng thức này xảy ra dấu nhỏ hơn hẳn với $x \neq y$ và $\theta \in (0, 1)$. Ngược lại, $f$ là \textit{lõm} (concave) nếu $-f$ là lồi.
 
-Tính chất giải tích quan trọng nhất của hàm lồi trong tối ưu hóa là \textbf{bất kỳ cực tiểu địa phương nào cũng được đảm bảo là cực tiểu toàn cục}.
+Tính chất giải tích quan trọng nhất của hàm lồi trong tối ưu hóa là bất kỳ cực tiểu địa phương nào cũng được đảm bảo là cực tiểu toàn cục.
 
 \subsection{Các Bài toán Tối ưu hóa (Optimization Problems)}
 
@@ -246,7 +247,7 @@ Một \textbf{Chương trình Lồi (Convex Program - CP)} được thiết lậ
 \end{subequations}
 trong đó hàm mục tiêu $f$ và tập chấp nhận được (feasible set) $\mathcal{C}$ đều là lồi. Một điểm $x^{\text{opt}}$ là một \textit{nghiệm tối ưu} nếu nó thuộc tập chấp nhận được và $f(x^{\text{opt}}) \leq f(x)$ với mọi $x \in \mathcal{C}$.
 
-Mặc dù tính lồi về mặt lý thuyết không đảm bảo tính hiệu quả một cách tuyệt đối (ví dụ, kiểm tra tính không âm của đa thức là NP-hard mặc dù tập hợp này là một nón lồi), nhưng trong phạm vi luận văn này, chúng tôi sử dụng thuật ngữ `bài toán tối ưu lồi'' gần như đồng nghĩa với `bài toán tối ưu giải được một cách hiệu quả''. Phần lớn các bài toán CP thực tế có thể được giải một cách đáng tin cậy bằng các phương pháp điểm trong (interior-point methods).
+Mặc dù tính lồi về mặt lý thuyết không đảm bảo tính hiệu quả một cách tuyệt đối (ví dụ, kiểm tra tính không âm của đa thức là NP-khó mặc dù tập hợp này là một nón lồi), nhưng trong phạm vi luận văn này, chúng tôi sử dụng thuật ngữ ``bài toán tối ưu lồi'' gần như đồng nghĩa với ``bài toán tối ưu giải được một cách hiệu quả''. Phần lớn các bài toán CP thực tế có thể được giải một cách đáng tin cậy bằng các phương pháp điểm trong.
 
 \subsubsection{Quy hoạch Nón (Conic Optimization)}
 Một \textbf{Chương trình Nón (Conic Program - KP)} là một lớp con của CP với hàm mục tiêu tuyến tính và các ràng buộc được định nghĩa bởi một nón lồi $\mathcal{K}$:

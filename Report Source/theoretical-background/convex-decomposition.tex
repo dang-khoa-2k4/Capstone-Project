@@ -2,59 +2,82 @@
 \section{Phân hoạch Lồi}
 \label{sec:convex-decomposition}
 
-% This section provides an overview of convex decomposition, a fundamental technique used in computational geometry and physics simulations.
-Phần này cung cấp tổng quan về phân hoạch lồi, một kỹ thuật cơ bản được sử dụng trong hình học tính toán và mô phỏng vật lý.
+Phần này cung cấp tổng quan về phân hoạch lồi, một kỹ thuật cơ bản được sử dụng rộng rãi trong
+hình học tính toán, mô phỏng vật lý, và đặc biệt là lập kế hoạch chuyển động robot.
 
 \subsection{Định nghĩa}
 
-\textbf{Phân hoạch lồi (Convex Decomposition)} là quá trình chia một hình học phức tạp (ví dụ: đa giác hoặc đa diện không lồi) 
-thành một tập hợp các \textbf{vùng con lồi} sao cho hợp của các vùng này khôi phục lại toàn bộ hình ban đầu và 
-các vùng con không chồng lấn nhau, ngoại trừ biên chung.  
+\textbf{Phân hoạch lồi (Convex Decomposition)} là quá trình chia một hình học phức tạp (ví dụ:
+đa giác hoặc đa diện không lồi) thành một tập hợp các \textbf{vùng con lồi} sao cho hợp của các
+vùng này khôi phục lại toàn bộ hình ban đầu và các vùng con không chồng lấn nhau, ngoại trừ biên
+chung.
 
-Về mặt hình thức, với một miền hình học $P\subset\mathbb{R}^n$, 
-một \textit{phân hoạch lồi} của $P$ là tập hợp $\{P_1, P_2, \dots, P_k\}$ sao cho:
+Về mặt hình thức, với một miền hình học $P \subset \mathbb{R}^n$, một \textit{phân hoạch lồi} của
+$P$ là tập hợp $\{P_1, P_2, \dots, P_k\}$ sao cho:
 \[
-P = \bigcup_{i=1}^{k} P_i, \quad 
-P_i \cap P_j = \partial P_i \cap \partial P_j \ \text{với mọi } i \ne j,
+    P = \bigcup_{i=1}^{k} P_i,
+    \qquad
+    P_i \cap P_j = \partial P_i \cap \partial P_j \text{ với mọi } i \ne j,
 \]
-và mỗi $P_i$ là một tập lồi.  
-Mục tiêu là tìm tập phân hoạch này như là số lượng các vùng lồi tối thiểu, giảm thiểu phần chồng chéo hay chất lượng của vùng lồi được tạo ra (tránh quá "mảnh" hoặc "dài").
+và mỗi $P_i$ là một tập lồi.
+Mục tiêu là tìm phân hoạch này sao cho tối thiểu hóa số lượng các vùng lồi, giảm thiểu phần chồng
+chéo, hoặc tối ưu chất lượng hình học của các vùng lồi được tạo ra (tránh các vùng quá ``mảnh'' hoặc
+quá ``dài'').
 
 \subsection{Phân loại Phương pháp Phân hoạch Lồi}
 \label{sec:convex-decomposition-types}
 
-Trong lĩnh vực hình học tính toán và hoạch định chuyển động, các phương pháp phân hoạch lồi thường được chia thành hai loại chính: 
-\textbf{Phân hoạch Lồi Chính xác (Exact Convex Decomposition – ECD)} 
-và 
-\textbf{Phân hoạch Lồi Xấp xỉ (Approximate Convex Decomposition – ACD)}. 
-Sự khác biệt giữa hai loại này phản ánh sự đánh đổi cơ bản giữa \textit{tính chính xác hình học} và \textit{hiệu quả tính toán}.
+Trong lĩnh vực hình học tính toán và hoạch định chuyển động, các phương pháp phân hoạch lồi thường
+được chia thành hai loại chính:
+\textbf{Phân hoạch Lồi Chính xác (Exact Convex Decomposition~-- ECD)}
+và
+\textbf{Phân hoạch Lồi Xấp xỉ (Approximate Convex Decomposition~-- ACD)}.
+Sự khác biệt giữa hai loại này phản ánh sự đánh đổi cơ bản giữa \textit{tính chính xác hình học}
+và \textit{hiệu quả tính toán}.
 
-\subsubsection{Phân hoạch Lồi Chính xác (Exact Convex Decomposition – ECD)}
+\subsubsection{Phân hoạch Lồi Chính xác}
 
-Phân hoạch Lồi Chính xác (ECD) là quá trình chia một hình dạng không lồi thành các \textbf{thành phần con hoàn toàn lồi}, 
-không chồng lấn, sao cho hợp của chúng tái tạo lại chính xác hình dạng ban đầu. 
-Mục tiêu thường là tối thiểu hóa số lượng vùng lồi.  
+Phân hoạch Lồi Chính xác (ECD) là quá trình chia một hình dạng không lồi thành các \textbf{thành
+phần con hoàn toàn lồi}, không chồng lấn, sao cho hợp của chúng tái tạo lại chính xác hình dạng ban
+đầu.
+Mục tiêu thông thường là tối thiểu hóa số lượng vùng lồi.
 
 Tuy nhiên, ECD gặp hai thách thức lớn:
 \begin{itemize}
-    \item \textbf{Độ phức tạp tính toán cao:}  
-    Bài toán tìm phân hoạch lồi tối thiểu đã được chứng minh là NP-hard đối với đa giác có lỗ, 
+    \item \textbf{Độ phức tạp tính toán cao:}
+    Bài toán tìm phân hoạch lồi tối thiểu đã được chứng minh là NP-hard đối với đa giác có lỗ,
     nên không tồn tại thuật toán hiệu quả cho các trường hợp tổng quát.
-    \item \textbf{Tính khả dụng hạn chế:}  
-    Ngay cả khi tính toán được, ECD thường tạo ra số lượng vùng rất lớn, 
+    \item \textbf{Tính khả dụng hạn chế:}
+    Ngay cả khi tính toán được, ECD thường tạo ra số lượng vùng rất lớn,
     khiến việc lưu trữ, xử lý và tối ưu hóa tiếp theo trở nên tốn kém.
 \end{itemize}
-Do đó, các phương pháp ECD chủ yếu mang tính lý thuyết, dùng làm chuẩn so sánh, 
+Do đó, các phương pháp ECD chủ yếu mang tính lý thuyết và dùng làm chuẩn so sánh,
 trong khi hầu hết các ứng dụng thực tế trong robot và mô phỏng đều dựa vào các phương pháp xấp xỉ.
 
-\subsubsection{Phân hoạch Lồi Xấp xỉ (Approximate Convex Decomposition – ACD)}
+\subsubsection{Phân hoạch Lồi Xấp xỉ}
 
-Trước những giới hạn của ECD, các phương pháp \textbf{Phân hoạch Lồi Xấp xỉ (ACD)} được phát triển để đạt sự cân bằng giữa độ chính xác và hiệu quả.  
-ACD cho phép các thành phần không hoàn toàn lồi, mà chỉ “\textit{gần lồi}” trong một mức dung sai lõm $\tau$ do người dùng xác định hoặc chỉ bao phủ một phần không gian tự do.
+Trước những giới hạn của ECD, các phương pháp \textbf{Phân hoạch Lồi Xấp xỉ (ACD)} được phát triển
+để đạt sự cân bằng giữa độ chính xác và hiệu quả.
+ACD cho phép các thành phần không hoàn toàn lồi, mà chỉ ``gần lồi'' trong một mức dung sai lõm
+$\tau$ do người dùng xác định, hoặc chỉ bao phủ một phần không gian tự do.
 Triết lý cốt lõi của ACD là chấp nhận một \textbf{mức độ lõm nhỏ có kiểm soát} để đổi lấy:
 \begin{itemize}
-    \item \textbf{Hiệu quả tính toán cao hơn:} Các thuật toán ACD, chẳng hạn như phương pháp của Lien và Amato, chạy nhanh hơn nhiều so với ECD. \cite{LienAmato2006}
-    \item \textbf{Giảm mạnh số lượng vùng:} Cho phép biểu diễn hình dạng với ít vùng lồi hơn, đơn giản hơn và dễ xử lý hơn.
-    \item \textbf{Kiểm soát mức độ chi tiết:} Một số thuật toán ACD như phương pháp của Lien và Amatocho phép người dùng điều chỉnh tham số lõm $\tau$ để cân bằng giữa độ chính xác và số lượng vùng lồi. Hay đối với phương pháp Visibility Clique Cover (VCC), nó cho phép người dùng chọn chỉ số để thể hiện mức độ bao phủ của vùng lồi so với không gian tự do ban đầu. \cite{DeitsTedrake2023VCC}
-\end{itemize}  
+    \item \textbf{Hiệu quả tính toán cao hơn:}
+    Các thuật toán ACD, chẳng hạn như phương pháp của Lien và Amato~\cite{LienAmato2006},
+    chạy nhanh hơn đáng kể so với ECD.
+    \item \textbf{Giảm số lượng vùng:}
+    Cho phép biểu diễn hình dạng với ít vùng lồi hơn, đơn giản hơn và dễ xử lý hơn.
+    \item \textbf{Kiểm soát mức độ chi tiết:}
+    Một số thuật toán ACD, chẳng hạn như phương pháp của Lien và Amato, cho phép người dùng điều
+    chỉnh tham số lõm $\tau$ để cân bằng giữa độ chính xác và số lượng vùng lồi.
+    Đối với phương pháp Visibility Clique Cover (VCC)~\cite{DeitsTedrake2023VCC}, người dùng có
+    thể chọn chỉ số bao phủ thể hiện mức độ bao phủ của các vùng lồi so với không gian tự do ban đầu.
+\end{itemize}
 
+Do những ưu điểm trên, ACD được ưu tiên áp dụng trong hầu hết các hệ thống robot thực tế,
+bao gồm cả khuôn khổ được đề xuất trong luận văn này.
+Cụ thể, phương pháp ACD tạo ra một tập hợp các vùng lồi phủ không gian tự do, từ đó xây dựng đồ thị
+$\mathcal{G}$ cho bài toán GCS.
+Chất lượng của phân hoạch ảnh hưởng trực tiếp đến số lượng nút trong đồ thị và do đó đến độ phức
+tạp của bài toán tối ưu hóa~-- một phân hoạch tốt cần tạo ra đủ ít vùng để giữ cho bài toán gọn
+nhẹ, đồng thời đủ chi tiết để robot có thể đi qua các hành lang hẹp trong môi trường.

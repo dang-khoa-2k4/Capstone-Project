@@ -1,70 +1,134 @@
-% filepath: /home/dang-khoa/university/Capstone Project/Report Source/theoretical-background/convex-optimization.tex
 
-\section{Mixed-Integer Optimization}
+\section{Tối ưu hóa Nguyên-Hỗn hợp}
+\label{sec:mip_background}
 
-Mixed-integer optimization is the computational backbone of the techniques introduced in this thesis. Generally speaking, a \textbf{Mixed-Integer Program (MIP)} can be very hard to solve and the runtimes of a mixed-integer solver can grow very quickly (exponentially) with the problem size. However, this is the worst-case scenario, and a lot can be done to construct highly effective MIPs that can be solved quickly for most of (if not all) the instances that we encounter in practice. The goal of this section is twofold. First, we introduce the essential background on mixed-integer optimization: what an MIP is, how MIPs are classified, and what algorithms can be used to solve these problems. Secondly, we introduce the notions and the tools necessary to distinguish between efficient and inefficient MIPs.
+Tối ưu hóa nguyên-hỗn hợp là nền tảng tính toán của các kỹ thuật được giới thiệu trong luận văn này.
+Nhìn chung, một \textbf{Bài toán Quy hoạch Nguyên-Hỗn hợp (Mixed-Integer Program~-- MIP)} có thể rất khó
+giải và thời gian chạy của bộ giải nguyên-hỗn hợp có thể tăng rất nhanh (theo cấp số nhân) cùng kích thước
+bài toán.
+Tuy nhiên, đây là trường hợp xấu nhất; trên thực tế, có thể xây dựng các MIP hiệu quả cao
+được giải nhanh trong hầu hết các trường hợp mà chúng ta gặp phải.
+Mục tiêu của phần này là hai mặt: thứ nhất, giới thiệu các kiến thức nền tảng về tối ưu hóa
+nguyên-hỗn hợp (MIP là gì, cách phân loại MIP, và các thuật toán nào có thể dùng để giải chúng);
+thứ hai, giới thiệu các ký hiệu và công cụ cần thiết để phân biệt giữa các MIP hiệu quả và không hiệu quả.
 
-Two great sources for all the details about mixed-integer optimization are the classical book~\cite{wolsey1999} and the more recent book~\cite{conforti2014}.
+Hai nguồn tham khảo quan trọng cho tất cả các chi tiết về tối ưu hóa nguyên-hỗn hợp là cuốn sách
+cổ điển~\cite{wolsey1999} và cuốn sách gần đây hơn~\cite{conforti2014}.
 
-\subsection{Mixed-Integer Programs}
+\subsection{Bài toán Quy hoạch Nguyên-Hỗn hợp}
 
-An MIP is an optimization problem with continuous variables $x \in \mathbb{R}^n$ and discrete (integer) variables $y \in \mathbb{Z}^m$. Given an objective function $f : \mathbb{R}^{n+m} \to \mathbb{R}$ and a constraint set $\mathcal{S} \subseteq \mathbb{R}^{n+m}$, we can state a generic MIP as
+Một MIP là bài toán tối ưu hóa với các biến liên tục $x \in \mathbb{R}^n$ và các biến rời rạc
+(nguyên) $y \in \mathbb{Z}^m$.
+Cho trước một hàm mục tiêu $f : \mathbb{R}^{n+m} \to \mathbb{R}$ và một tập ràng buộc
+$\mathcal{S} \subseteq \mathbb{R}^{n+m}$, một MIP tổng quát có thể được phát biểu như sau:
 \begin{subequations}
-\label{eq:mip}
+\label{eq:mip_full}
 \begin{align}
-\text{minimize} \quad & f(x, y) \label{eq:mip_objective}\\
-\text{subject to} \quad & (x, y) \in \mathcal{S}, \label{eq:mip_constraint}\\
-& y \in \mathbb{Z}^m. \label{eq:mip_integer}
+\text{minimize} \quad & f(x, y) \label{eq:mip_full_obj}\\
+\text{subject to} \quad & (x, y) \in \mathcal{S}, \label{eq:mip_full_con}\\
+& y \in \mathbb{Z}^m. \label{eq:mip_full_int}
 \end{align}
 \end{subequations}
-(We explicitly state the constraint $y \in \mathbb{Z}^m$ since, if not specified otherwise, variables of optimization problems will always be assumed to be real valued.) We call the set
+(Ràng buộc $y \in \mathbb{Z}^m$ được phát biểu tường minh vì, nếu không có quy định khác, các biến của
+bài toán tối ưu luôn được giả định là có giá trị thực.)
+Chúng ta gọi tập hợp
 \[
 \mathcal{T} := \mathcal{S} \cap \mathbb{R}^n \times \mathbb{Z}^m
 \]
-the \textit{feasible set} of the MIP~\eqref{eq:mip} and its elements $(x, y) \in \mathcal{T}$ \textit{feasible solutions}. The MIP is \textit{feasible} if a feasible solution exists and \textit{infeasible} otherwise. A feasible solution $(x^{\text{opt}}, y^{\text{opt}})$ is \textit{optimal} if $f(x^{\text{opt}}, y^{\text{opt}}) \leq f(x, y)$ for all $(x, y) \in \mathcal{T}$. If an optimal solution exists, we denote with $f^{\text{opt}} := f(x^{\text{opt}}, y^{\text{opt}})$ the MIP optimal value.
+là \textit{tập chấp nhận được} (feasible set) của MIP~\eqref{eq:mip_full} và các phần tử
+$(x, y) \in \mathcal{T}$ là các \textit{nghiệm chấp nhận được}.
+Bài toán MIP là \textit{khả thi} nếu tồn tại nghiệm chấp nhận được và \textit{bất khả thi} trong
+trường hợp ngược lại.
+Một nghiệm chấp nhận được $(x^{\text{opt}}, y^{\text{opt}})$ là \textit{tối ưu} nếu
+$f(x^{\text{opt}}, y^{\text{opt}}) \leq f(x, y)$ với mọi $(x, y) \in \mathcal{T}$.
+Nếu nghiệm tối ưu tồn tại, ta ký hiệu $f^{\text{opt}} := f(x^{\text{opt}}, y^{\text{opt}})$
+là \textit{giá trị tối ưu} của MIP.
 
-If we discard constraint~\eqref{eq:mip_integer} from our MIP, we obtain the following optimization problem:
+Nếu bỏ ràng buộc~\eqref{eq:mip_full_int} khỏi MIP, ta thu được bài toán tối ưu sau:
 \begin{subequations}
-\label{eq:mip_relaxation}
+\label{eq:mip_relax}
 \begin{align}
 \text{minimize} \quad & f(x, y) \\
 \text{subject to} \quad & (x, y) \in \mathcal{S}.
 \end{align}
 \end{subequations}
-This problem is called the \textbf{relaxation} of the MIP. We denote an optimal solution of the relaxation as $(x^{\text{relax}}, y^{\text{relax}})$, and we let $f^{\text{relax}} := f(x^{\text{relax}}, y^{\text{relax}})$ be its optimal value. Observe that
+Bài toán này được gọi là \textbf{bài toán nới lỏng} (relaxation) của MIP.
+Ta ký hiệu nghiệm tối ưu của bài toán nới lỏng là $(x^{\text{relax}}, y^{\text{relax}})$
+và $f^{\text{relax}} := f(x^{\text{relax}}, y^{\text{relax}})$ là giá trị tối ưu của nó.
+Lưu ý rằng
 \[
 f^{\text{relax}} \leq f^{\text{opt}},
 \]
-since by discarding a constraint from an optimization (minimization) problem the optimal value can only decrease. As discussed below, the tightness of this inequality plays a central role in the efficiency of an MIP. Loosely speaking, an MIP is efficiently solvable if its relaxation can be solved quickly and the gap $f^{\text{opt}} - f^{\text{relax}} \geq 0$ is small.
+do việc bỏ một ràng buộc khỏi bài toán tối ưu (tối thiểu hóa) chỉ có thể làm giảm giá trị tối ưu.
+Như được thảo luận ở phần dưới, độ chặt của bất đẳng thức này đóng vai trò trung tâm trong tính hiệu
+quả của một MIP.
+Nói một cách ngắn gọn, một MIP có thể được giải hiệu quả nếu bài toán nới lỏng của nó có thể được giải
+nhanh và khoảng cách $f^{\text{opt}} - f^{\text{relax}} \geq 0$ là nhỏ.
 
-MIPs are classified according to the properties of the function $f$ and the set $\mathcal{S}$, which can significantly affect our ability of solving an MIP efficiently. Below we define the classes of MIPs that are most relevant for this thesis.
+Các MIP được phân loại theo các tính chất của hàm $f$ và tập $\mathcal{S}$,
+những yếu tố này có thể ảnh hưởng đáng kể đến khả năng giải MIP một cách hiệu quả.
+Dưới đây chúng ta định nghĩa các lớp MIP quan trọng nhất trong phạm vi luận văn này.
 
-\subsection{Mixed-Boolean Programs}
+\subsection{Bài toán Quy hoạch Nhị phân-Hỗn hợp}
 
-A \textbf{Mixed-Boolean Program (MBP)} is an MIP where the discrete variables can only take binary value: $y \in \{0, 1\}^m$. Equivalently, an MBP is a problem of the form of~\eqref{eq:mip} where
+Một \textbf{Bài toán Quy hoạch Nhị phân-Hỗn hợp (Mixed-Boolean Program~-- MBP)} là một MIP
+trong đó các biến rời rạc chỉ có thể nhận giá trị nhị phân: $y \in \{0, 1\}^m$.
+Tương đương với đó, một MBP là bài toán có dạng~\eqref{eq:mip_full} với
 \[
 \mathcal{S} \subset \mathbb{R}^n \times [0, 1]^m.
 \]
-All the MIPs that we will encounter in this thesis are, in fact, MBPs. However, the term MBP is unusual and, although technically our problems will be MBPs, we will still call them as MIPs.
+Tất cả các MIP mà chúng ta sẽ gặp trong luận văn này thực ra đều là các MBP.
+Tuy nhiên, thuật ngữ MBP không phổ biến và, mặc dù về mặt kỹ thuật các bài toán của chúng ta là MBP,
+chúng ta vẫn gọi chúng là MIP cho nhất quán với quy ước của lĩnh vực.
 
-\subsection{Mixed-Integer Convex Programs}
+\subsection{Bài toán Quy hoạch Lồi Nguyên-Hỗn hợp}
 
-If the objective function $f$ and the constraint set $\mathcal{S}$ are convex, we call problem~\eqref{eq:mip} a \textbf{Mixed-Integer Convex Program (MICP)}. MICPs are a fundamental class of MIPs since their relaxations are convex optimization problems, which (in most of the cases) can be solved very quickly. To emphasize the convexity assumption, we call the relaxation of an MICP \textit{convex relaxation}. Using the Branch-and-Bound (BB) algorithm, most MICPs can be reliably solved to global optimality, although the algorithm might take a long time.
+Nếu hàm mục tiêu $f$ và tập ràng buộc $\mathcal{S}$ đều là lồi, ta gọi bài toán~\eqref{eq:mip_full}
+là \textbf{Bài toán Quy hoạch Lồi Nguyên-Hỗn hợp (Mixed-Integer Convex Program~-- MICP)}.
+MICP là một lớp cơ bản của MIP vì các bài toán nới lỏng của chúng là các bài toán tối ưu hóa lồi,
+vốn trong hầu hết các trường hợp có thể được giải rất nhanh.
+Để nhấn mạnh giả thiết tính lồi, ta gọi bài toán nới lỏng của một MICP là \textit{nới lỏng lồi}
+(convex relaxation).
+Sử dụng thuật toán Nhánh-và-Cận (Branch-and-Bound~-- BB), hầu hết các MICP có thể được giải một cách
+đáng tin cậy đến mức tối ưu toàn cục, mặc dù thuật toán có thể mất thời gian đáng kể.
 
-In contrast to the class of MICPs, we will occasionally call \textbf{Mixed-Integer Non-Convex Program (MINCP)} an MIP where the objective function $f$ and/or the constraint set $\mathcal{S}$ are nonconvex. Most MINCPs are intractable; the main exceptions are very small MINCPs where the feasible set $\mathcal{T}$ can be finely discretized and searched exhaustively.
+Trái ngược với lớp MICP, chúng ta gọi \textbf{Bài toán Quy hoạch Phi-lồi Nguyên-Hỗn hợp
+(Mixed-Integer Non-Convex Program~-- MINCP)} là một MIP trong đó hàm mục tiêu $f$ và/hoặc tập ràng buộc
+$\mathcal{S}$ là không lồi.
+Hầu hết các MINCP đều không thể giải được trong thời gian thực tế; ngoại lệ chính là các MINCP
+rất nhỏ trong đó tập chấp nhận được $\mathcal{T}$ có thể được rời rạc hóa mịn và tìm kiếm vét cạn.
 
-\subsection{Mixed-Integer Conic Programs}
+\subsection{Bài toán Quy hoạch Nón Nguyên-Hỗn hợp}
 
-If the objective function $f$ is linear and the constraint set $\mathcal{S}$ is a closed convex set in conic form, then problem~\eqref{eq:mip} is called \textbf{Mixed-Integer Conic Program (MIKP)}. The subclasses of this family of problems are classified as follows:
+Nếu hàm mục tiêu $f$ là tuyến tính và tập ràng buộc $\mathcal{S}$ là một tập lồi đóng dưới dạng nón,
+bài toán~\eqref{eq:mip_full} được gọi là \textbf{Bài toán Quy hoạch Nón Nguyên-Hỗn hợp
+(Mixed-Integer Conic Program~-- MIKP)}.
+Các lớp con của nhóm bài toán này được phân loại như sau:
 
 \begin{itemize}
-    \item \textbf{Mixed-Integer Linear Program (MILP)} when the set $\mathcal{S}$ is a polyhedron,
-    \item \textbf{Mixed-Integer Second-Order Cone Program (MISOCP)} when $\mathcal{S}$ is convex quadratic,
-    \item \textbf{Mixed-Integer Semidefinite Program (MISDP)} when $\mathcal{S}$ is a spectrahedron.
+    \item \textbf{Quy hoạch Tuyến tính Nguyên-Hỗn hợp (Mixed-Integer Linear Program~-- MILP)}
+    khi $\mathcal{S}$ là một đa diện (polyhedron).
+    \item \textbf{Quy hoạch Nón Bậc hai Nguyên-Hỗn hợp (Mixed-Integer Second-Order Cone Program~-- MISOCP)}
+    khi $\mathcal{S}$ là tập lồi bậc hai.
+    \item \textbf{Quy hoạch Bán xác định Nguyên-Hỗn hợp (Mixed-Integer Semidefinite Program~-- MISDP)}
+    khi $\mathcal{S}$ là một spectrahedron.
 \end{itemize}
 
-The relaxations of these problems are named in the natural way. For example, we call \textit{linear relaxation} the relaxation of an MILP.
+Các bài toán nới lỏng của chúng được đặt tên theo cách tương tự; ví dụ, bài toán nới lỏng của một MILP
+được gọi là \textit{nới lỏng tuyến tính} (linear relaxation).
 
-We could say that MILPs play a more important role in mixed-integer optimization than LPs play in convex optimization. The first reason for this is geometric. Polyhedra are the simplest shape that can enclose finite sets of points. Therefore, as we will also see in the next chapter, they are a natural candidate to model the discrete side of an MIP. The second reason is algorithmic. The simplex algorithm for linear optimization can be integrated in the BB procedure more efficiently than the interior-point algorithm used for more general conic programs.
+MILP đóng vai trò đặc biệt quan trọng trong tối ưu hóa nguyên-hỗn hợp, quan trọng hơn cả vai trò
+của LP trong tối ưu hóa lồi, vì hai lý do.
+Lý do thứ nhất mang tính hình học: các đa diện là hình dạng đơn giản nhất có thể bao quanh một tập
+hữu hạn các điểm, và do đó là ứng viên tự nhiên để mô hình hóa phần rời rạc của một MIP.
+Lý do thứ hai mang tính thuật toán: thuật toán đơn hình (simplex) cho tối ưu tuyến tính có thể
+được tích hợp vào thủ tục BB hiệu quả hơn so với thuật toán điểm trong được dùng cho các chương trình
+nón tổng quát hơn.
 
-A \textbf{Mixed-Integer Quadratic Program (MIQP)} is an MIP of the form~\eqref{eq:mip} with $f$ quadratic and $\mathcal{S}$ polyhedral. These problems are representable as MISOCPs but, similar to MILPs, they can be solved more efficiently using specialized BB methods that leverage the polyhedral constraint set. Having said this, nowadays also MISOCPs and MISDPs can be solved quite effectively even with freely available solvers (see, e.g., Pajarito~\cite{lubin2018}).
+Ngoài ra, một \textbf{Bài toán Quy hoạch Toàn phương Nguyên-Hỗn hợp (Mixed-Integer Quadratic
+Program~-- MIQP)} là một MIP có dạng~\eqref{eq:mip_full} với $f$ là hàm bậc hai và $\mathcal{S}$ là
+đa diện.
+Các bài toán này có thể được biểu diễn dưới dạng MISOCP, nhưng tương tự như MILP, chúng có thể được
+giải hiệu quả hơn bằng các phương pháp BB chuyên biệt khai thác tính đa diện của tập ràng buộc.
+Ngày nay, các MISOCP và MISDP cũng có thể được giải khá hiệu quả ngay cả với các bộ giải mã nguồn mở
+(xem, ví dụ, Pajarito~\cite{lubin2018}).

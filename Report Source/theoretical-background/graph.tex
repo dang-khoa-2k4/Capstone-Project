@@ -1,185 +1,272 @@
-% % ref: Discrete Mathematics and Its Applications by Kenneth Rosen
-% % ref: Combinatorial Optimization: Theory and Algorithms
-% \section{Graph Theory and the Shortest Path Problem}
-
-% \subsection{Graph Theory Fundamentals}
-
-% \subsubsection{Basic Definitions and Concepts}
-
-% Formally, a graph is defined as an ordered pair $G = (\mathcal{V}, \mathcal{E})$, comprising a set of vertices $\mathcal{V}$ and a set of edges $\mathcal{E}$, where each edge connects a pair of vertices. The structural classification of the graph depends on the ordering of these pairs: unordered pairs $\{u, w\}$ denote an undirected graph, whereas ordered pairs $(u, w)$ characterize a directed graph. In the context of optimization, the graph is typically augmented with a cost function $c: \mathcal{E} \rightarrow \mathbb{R}$, assigning a real-valued weight to each edge.
-
-% Key topological properties include the vertex degree, which counts incident edges; in directed graphs, this is distinguished into in-degree ($\text{deg}^-$) and out-degree ($\text{deg}^+$). Connectivity is described via paths—finite sequences of distinct vertices and edges—where the path length is the aggregate cost of its constituent edges. A cycle is defined as a path that originates and terminates at the same vertex. Optimization problems generally operate on a search domain defined by subgraphs $H = (W, F)$, formed by subsets of vertices $W \subseteq \mathcal{V}$ and edges $F \subseteq \mathcal{E}$ that maintain incidence relationships.
-
-% \subsubsection{Combinatorial Optimization on Graphs}
-
-% Combinatorial optimization problems on graphs generally seek a substructure that minimizes an objective function subject to validity constraints. For a weighted graph $G = (\mathcal{V}, \mathcal{E})$ and a set of feasible subgraphs $\mathcal{H}$, the problem is to identify a subgraph $H = (W, F) \in \mathcal{H}$ that minimizes the cumulative weight of its components. This is formally expressed as:
-
-% \begin{align}
-% \text{minimize} \quad & \sum_{v \in W} c_v + \sum_{e \in F} c_e \tag{1.1a} \\
-% \text{subject to} \quad & H=(W, F) \in \mathcal{H}. \tag{1.1b}
-% \end{align}
-
-% To utilize standard mathematical programming techniques, such as Branch and Bound, the problem is transformed into an Integer Linear Programming (ILP) formulation. This involves parameterizing the search space using incidence vectors $\mathbf{y}^H \in \{0, 1\}^{|\mathcal{V} \cup \mathcal{E}|}$, where binary variables indicate the inclusion of specific vertices or edges in the solution. Geometrically, the set of valid subgraphs corresponds to a polytope $\mathcal{Y}$ in Euclidean space. The intersection of this polytope with the integer grid, $\mathcal{Y} \cap \{0, 1\}^{|\mathcal{V} \cup \mathcal{E}|}$, yields the incidence vectors of feasible subgraphs. Consequently, the discrete optimization problem is recast as a linear optimization over an integer domain:
-
-% \begin{align}
-% \text{minimize} \quad & \sum_{v \in \mathcal{V}} c_v y_v + \sum_{e \in \mathcal{E}} c_e y_e \tag{1.2a} \\
-% \text{subject to} \quad & \mathbf{y} \in \mathcal{Y} \cap \{0, 1\}^{|\mathcal{V} \cup \mathcal{E}|}. \tag{1.2b}
-% \end{align}
-
-% This formulation allows for the application of convex analysis, ensuring that the optimal solution to the algebraic model corresponds exactly to the optimal substructure in the original graph problem.
-
-% \subsection{The Shortest Path Problem (SPP)}
-
-% \subsubsection{Definition and Classical Algorithms}
-
-% The Shortest Path Problem (SPP) on a weighted graph $G=(\mathcal{V}, \mathcal{E})$ involves identifying a path $P$ between a source $s$ and a destination $t$ such that the summation of edge weights is minimized. If $P$ comprises a sequence of edges $e_1, \ldots, e_k$, the objective is to minimize $\sum_{i=1}^{k} c_{e_i}$.
-
-% Classical approaches to solving the SPP vary based on edge weight characteristics. Dijkstra's algorithm employs a greedy strategy suitable for graphs with non-negative weights ($c_e \ge 0$). For graphs containing negative edge weights, provided no negative cycles exist, the Bellman-Ford algorithm is utilized, albeit with higher computational complexity. The Floyd-Warshall algorithm extends this to the all-pairs shortest path problem, accommodating negative edges but remaining sensitive to negative cycles.
-
-% \subsubsection{Network Flow Formulation for the Shortest Path Problem}
-
-% The Shortest Path Problem on a directed graph $G = (\mathcal{V}, \mathcal{E})$ with non-negative edge costs $c_{uv} \ge 0$ can be rigorously modeled as a Minimum Cost Flow problem involving a single unit of flow. We define binary decision variables $x_{uv} \in \{0, 1\}$ for each edge $(u, v) \in \mathcal{E}$, where $x_{uv} = 1$ indicates the edge is part of the optimal path. The optimization model is formulated as follows:
-
-% \begin{subequations}
-% \begin{align}
-% \text{minimize} \quad & \sum_{(u, v) \in \mathcal{E}} c_{uv} x_{uv} \label{eq:spp_obj} \\
-% \text{subject to} \quad & \sum_{v \in \mathcal{V}^+(u)} x_{uv} - \sum_{v \in \mathcal{V}^-(u)} x_{vu} =
-% \begin{cases}
-% 1 & \text{if } u = s \\
-% -1 & \text{if } u = t \\
-% 0 & \text{otherwise}
-% \end{cases}, \quad \forall u \in \mathcal{V} \label{eq:flow_conservation} \\
-% & \sum_{v \in \mathcal{V}^-(u)} x_{vu} \le 1, \quad \forall u \in \mathcal{V} \setminus \{s, t\} \label{eq:node_capacity} \\
-% & x_{uv} \ge 0, \quad \forall (u, v) \in \mathcal{E} \label{eq:non_negativity}
-% \end{align}
-% \end{subequations}
-
-% Here, $\mathcal{V}^+(u)$ and $\mathcal{V}^-(u)$ denote the sets of successors and predecessors of node $u$, respectively. The constraints in this formulation enforce specific structural properties. Equation \eqref{eq:flow_conservation} represents flow conservation (Kirchhoff's law), ensuring that a net flow of one unit leaves the source $s$, enters the target $t$, and is conserved at all intermediate nodes. Equation \eqref{eq:node_capacity} imposes a node capacity constraint, restricting the inflow at any intermediate vertex to unity, thereby enforcing a simple path structure where no vertex is revisited. Given non-negative costs, cycles are inherently suboptimal, rendering explicit cycle-elimination constraints unnecessary.
-
-% A significant advantage of this formulation lies in the algebraic properties of the constraint matrix derived from \eqref{eq:flow_conservation}. This node-arc incidence matrix exhibits Total Unimodularity (TUM). According to combinatorial optimization theory, if the constraint matrix is TUM and the right-hand side vector is integral, every basic feasible solution of the Linear Programming (LP) relaxation is guaranteed to be integral~\cite{Ahuja1993}. Consequently, despite the continuous non-negativity constraints in \eqref{eq:non_negativity}, the problem can be solved efficiently using standard LP algorithms to yield a valid binary path, obviating the need for computationally intensive integer programming methods.
-
-
-
+% =========================================================
 \section{Lý thuyết Đồ thị và Bài toán Đường đi Ngắn nhất}
+\label{sec:graph_theory}
+% =========================================================
 
 \subsection{Cơ sở Lý thuyết Đồ thị}
+\label{subsec:graph_fundamentals}
 
-\subsubsection{Các định nghĩa và khái niệm cơ bản}
+\subsubsection{Các định nghĩa cơ bản}
 
-Một cách hình thức, một đồ thị được định nghĩa là một cặp có thứ tự
-$G = (\mathcal{V}, \mathcal{E})$, bao gồm một tập các đỉnh $\mathcal{V}$ và một
-tập các cạnh $\mathcal{E}$, trong đó mỗi cạnh nối một cặp đỉnh. Việc phân loại
-cấu trúc của đồ thị phụ thuộc vào tính có thứ tự của các cặp này: các cặp không
-có thứ tự $\{u, w\}$ biểu diễn đồ thị vô hướng, trong khi các cặp có thứ tự
-$(u, w)$ đặc trưng cho đồ thị có hướng. Trong bối cảnh tối ưu hóa, đồ thị thường
-được mở rộng bằng một hàm chi phí
-$c: \mathcal{E} \rightarrow \mathbb{R}$, gán một trọng số thực cho mỗi cạnh.
+Lý thuyết đồ thị cung cấp ngôn ngữ toán học để biểu diễn các quan hệ cấu trúc.
+Dưới đây là hệ thống định nghĩa được sử dụng xuyên suốt chương này.
 
-Các tính chất tô pô quan trọng bao gồm bậc của đỉnh, là số cạnh liên thuộc với
-đỉnh đó; trong đồ thị có hướng, khái niệm này được phân biệt thành bậc vào
-($\text{deg}^-$) và bậc ra ($\text{deg}^+$). Tính liên thông được mô tả thông qua
-các đường đi—là các dãy hữu hạn gồm các đỉnh và cạnh phân biệt—trong đó độ dài
-đường đi được xác định bằng tổng chi phí của các cạnh cấu thành. Một chu trình
-được định nghĩa là một đường đi bắt đầu và kết thúc tại cùng một đỉnh. Các bài
-toán tối ưu thường được xét trên một miền tìm kiếm được xác định bởi các đồ thị
-con $H = (W, F)$, hình thành từ các tập con của đỉnh $W \subseteq \mathcal{V}$
-và các cạnh $F \subseteq \mathcal{E}$, đồng thời bảo toàn các quan hệ liên thuộc.
+\begin{definition}[Đồ thị có trọng số]
+\label{def:graph}
+Một \emph{đồ thị có trọng số} là bộ ba $G = (\mathcal{V}, \mathcal{E}, c)$, trong đó
+$\mathcal{V}$ là tập hữu hạn các \emph{đỉnh} (vertices),
+$\mathcal{E}$ là tập các \emph{cạnh} (edges), và
+$c: \mathcal{E} \to \mathbb{R}$ là \emph{hàm trọng số}.
+Tùy theo định nghĩa của $\mathcal{E}$, đồ thị được phân loại như sau:
+\begin{enumerate}
+    \item[(i)] \textbf{Đồ thị vô hướng}: mỗi cạnh là một cặp không có thứ tự,
+          $\{u, w\} \in \mathcal{E}$, $u \neq w$;
+    \item[(ii)] \textbf{Đồ thị có hướng}: mỗi cạnh là một cặp có thứ tự,
+          $(u, w) \in \mathcal{E} \subseteq \mathcal{V} \times \mathcal{V}$.
+\end{enumerate}
+Khi hàm trọng số không liên quan, ta viết gọn $G = (\mathcal{V}, \mathcal{E})$.
+\end{definition}
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{theoretical-background/image/graph_based.png}
+    \caption[Đồ thị vô hướng và đồ thị có hướng có trọng số]{%
+        Minh họa \textbf{(trái)} đồ thị vô hướng và \textbf{(phải)} đồ thị
+        có hướng có trọng số. Mũi tên thể hiện chiều cạnh; số trên cạnh là
+        giá trị $c(e)$.}
+    \label{fig:graph_undirected_directed}
+\end{figure}
+
+\begin{definition}[Bậc đỉnh trong đồ thị có hướng]
+\label{def:degree}
+Với $v \in \mathcal{V}$ trong đồ thị có hướng $G = (\mathcal{V}, \mathcal{E})$,
+\emph{bậc ra} và \emph{bậc vào} của $v$ được định nghĩa lần lượt là
+\begin{equation}
+    \mathrm{deg}^+(v)
+    = \bigl|\{w \in \mathcal{V} \mid (v,w) \in \mathcal{E}\}\bigr|,
+    \qquad
+    \mathrm{deg}^-(v)
+    = \bigl|\{u \in \mathcal{V} \mid (u,v) \in \mathcal{E}\}\bigr|.
+\label{eq:vertex_degree}
+\end{equation}
+\end{definition}
+
+\begin{definition}[Đường đi, Chi phí, và Chu trình]
+\label{def:path_cycle}
+Cho $G = (\mathcal{V}, \mathcal{E}, c)$. Một \emph{đường đi} (path) từ $v_0$
+đến $v_k$ là dãy xen kẽ hữu hạn
+\begin{equation}
+    P = \bigl(v_0,\, e_1,\, v_1,\, e_2,\, \ldots,\, e_k,\, v_k\bigr),
+    \quad
+    e_i = (v_{i-1}, v_i) \in \mathcal{E},
+\label{eq:path_def}
+\end{equation}
+trong đó tất cả các đỉnh $v_0, v_1, \ldots, v_k$ là \emph{phân biệt}.
+\emph{Chi phí của đường đi} được xác định là
+\begin{equation}
+    c(P) \;=\; \sum_{i=1}^{k} c(e_i).
+\label{eq:path_cost}
+\end{equation}
+Một \emph{chu trình} (cycle) là đường đi thỏa $v_0 = v_k$ với $k \geq 1$.
+\end{definition}
+
+\begin{definition}[Đồ thị con]
+\label{def:subgraph}
+Bộ đôi $H = (\mathcal{W}, \mathcal{F})$ là một \emph{đồ thị con} của
+$G = (\mathcal{V}, \mathcal{E})$ nếu
+\begin{equation}
+    \mathcal{W} \subseteq \mathcal{V},
+    \quad
+    \mathcal{F} \subseteq \mathcal{E},
+    \quad
+    (u,w) \in \mathcal{F}
+    \;\Rightarrow\;
+    u,\, w \in \mathcal{W}.
+\label{eq:subgraph_def}
+\end{equation}
+\end{definition}
+
+Các bài toán tối ưu hóa tổ hợp thường được đặt trong khuôn khổ: tìm một
+đồ thị con $H \in \mathcal{H}$ trong một lớp khả thi $\mathcal{H}$ sao cho
+tối thiểu hóa một hàm chi phí liên quan.
+
+% ---------------------------------------------------------
 \subsubsection{Tối ưu hóa tổ hợp trên đồ thị}
+\label{subsubsec:combo_opt}
+% ---------------------------------------------------------
 
-Các bài toán tối ưu hóa tổ hợp trên đồ thị thường nhằm tìm một cấu trúc con sao
-cho hàm mục tiêu đạt giá trị nhỏ nhất, đồng thời thỏa mãn các ràng buộc hợp lệ.
-Với một đồ thị có trọng số $G = (\mathcal{V}, \mathcal{E})$ và một tập các đồ thị
-con khả thi $\mathcal{H}$, bài toán là xác định một đồ thị con
-$H = (W, F) \in \mathcal{H}$ sao cho tổng trọng số của các thành phần của nó là
-nhỏ nhất. Bài toán này được biểu diễn hình thức như sau:
-\begin{align}
-\text{tối thiểu hóa} \quad & \sum_{v \in W} c_v + \sum_{e \in F} c_e \tag{1.1a} \\
-\text{với điều kiện} \quad & H=(W, F) \in \mathcal{H}. \tag{1.1b}
-\end{align}
+Cho đồ thị $G = (\mathcal{V}, \mathcal{E}, c)$ và lớp đồ thị con khả thi
+$\mathcal{H}$. Bài toán tối ưu hóa tổ hợp tổng quát là
+\begin{equation}
+\begin{aligned}
+    \min_{(\mathcal{W},\mathcal{F}) \in \mathcal{H}}
+    \quad
+    & \sum_{v \in \mathcal{W}} c_v
+      +
+      \sum_{e \in \mathcal{F}} c_e.
+\end{aligned}
+\label{eq:combo_opt}
+\end{equation}
 
-Để có thể áp dụng các kỹ thuật lập trình toán học tiêu chuẩn, chẳng hạn như
-Branch-and-Bound, bài toán được chuyển đổi sang dạng Quy hoạch Tuyến tính
-Nguyên (Integer Linear Programming -- ILP). Quá trình này bao gồm việc tham số
-hóa không gian tìm kiếm bằng các vectơ liên thuộc
-$\mathbf{y}^H \in \{0,1\}^{|\mathcal{V} \cup \mathcal{E}|}$, trong đó các biến nhị
-phân biểu thị việc một đỉnh hoặc một cạnh cụ thể có được chọn vào nghiệm hay
-không. Về mặt hình học, tập các đồ thị con hợp lệ tương ứng với một đa diện
-$\mathcal{Y}$ trong không gian Euclid. Giao của đa diện này với lưới số nguyên,
-$\mathcal{Y} \cap \{0,1\}^{|\mathcal{V} \cup \mathcal{E}|}$, tạo thành các vectơ
-liên thuộc của các đồ thị con khả thi. Do đó, bài toán tối ưu rời rạc ban đầu
-được tái biểu diễn thành một bài toán tối ưu tuyến tính trên miền nguyên:
-\begin{align}
-\text{tối thiểu hóa} \quad &
-\sum_{v \in \mathcal{V}} c_v y_v + \sum_{e \in \mathcal{E}} c_e y_e \tag{1.2a} \\
-\text{với điều kiện} \quad &
-\mathbf{y} \in \mathcal{Y} \cap \{0,1\}^{|\mathcal{V} \cup \mathcal{E}|}. \tag{1.2b}
-\end{align}
+Để áp dụng các kỹ thuật lập trình toán học như Branch-and-Bound, bài toán được
+chuyển sang dạng \emph{Quy hoạch Tuyến tính Nguyên}
+(Integer Linear Programming, ILP) bằng cách tham số hóa qua
+\emph{vectơ liên thuộc} (incidence vector)
+\begin{equation}
+    \mathbf{y}
+    = \bigl(y_v\bigr)_{v \in \mathcal{V}}
+      \oplus
+      \bigl(y_e\bigr)_{e \in \mathcal{E}}
+    \;\in\; \{0,1\}^{|\mathcal{V}|+|\mathcal{E}|},
+    \quad
+    y_v = \mathbf{1}[v \in \mathcal{W}],
+    \quad
+    y_e = \mathbf{1}[e \in \mathcal{F}].
+\label{eq:incidence_vec}
+\end{equation}
+Về mặt hình học, tập các đồ thị con hợp lệ tương ứng với tập điểm nguyên trong
+một đa diện $\mathcal{Y} \subseteq [0,1]^{|\mathcal{V}|+|\mathcal{E}|}$.
+Bài toán~\eqref{eq:combo_opt} được tái biểu diễn là
+\begin{equation}
+\begin{aligned}
+    \min_{\mathbf{y}} \quad
+    & \mathbf{c}^{\top} \mathbf{y} \\
+    \mathrm{s.t.} \quad
+    & \mathbf{y} \;\in\; \mathcal{Y} \cap \{0,1\}^{|\mathcal{V}|+|\mathcal{E}|},
+\end{aligned}
+\label{eq:ilp_general}
+\end{equation}
+trong đó $\mathbf{c} \in \mathbb{R}^{|\mathcal{V}|+|\mathcal{E}|}$ là vectơ
+chi phí ghép từ $\{c_v\}_{v \in \mathcal{V}}$ và $\{c_e\}_{e \in \mathcal{E}}$.
+Với các lớp bài toán đặc biệt—điển hình là bài toán dòng mạng—ma trận ràng buộc
+của $\mathcal{Y}$ sở hữu tính chất Hoàn toàn Đơn mô, khiến bài toán nới
+lỏng LP của~\eqref{eq:ilp_general} tự động có nghiệm nguyên.
 
-Cách phát biểu này cho phép áp dụng các công cụ của phân tích lồi, đồng thời đảm
-bảo rằng nghiệm tối ưu của mô hình đại số tương ứng chính xác với cấu trúc con
-tối ưu của bài toán đồ thị ban đầu.
-
-\subsection{Bài toán Đường đi Ngắn nhất (SPP)}
+% =========================================================
+\subsection{Bài toán Đường đi Ngắn nhất}
+\label{subsec:spp}
+% =========================================================
 
 \subsubsection{Định nghĩa và các thuật toán cổ điển}
+\label{subsubsec:spp_def}
 
-Bài toán Đường đi Ngắn nhất (Shortest Path Problem -- SPP) trên một đồ thị có
-trọng số $G = (\mathcal{V}, \mathcal{E})$ nhằm xác định một đường đi $P$ từ đỉnh
-nguồn $s$ đến đỉnh đích $t$ sao cho tổng trọng số các cạnh là nhỏ nhất. Nếu $P$
-bao gồm một dãy các cạnh $e_1, \ldots, e_k$, mục tiêu là tối thiểu hóa
-$\sum_{i=1}^{k} c_{e_i}$.
+\begin{definition}[Bài toán Đường đi Ngắn nhất]
+\label{def:spp}
+Cho đồ thị có hướng có trọng số $G = (\mathcal{V}, \mathcal{E}, c)$,
+đỉnh nguồn $s \in \mathcal{V}$ và đỉnh đích $t \in \mathcal{V}$.
+Gọi $\mathcal{P}(s,t)$ là tập tất cả các đường đi từ $s$ đến $t$
+theo Định nghĩa~\ref{def:path_cycle}.
+\emph{Bài toán Đường đi Ngắn nhất} (Shortest Path Problem, SPP) là
+\begin{equation}
+    P^* \;=\; \argmin_{P\,\in\,\mathcal{P}(s,t)} c(P)
+            \;=\; \argmin_{P\,\in\,\mathcal{P}(s,t)}
+                  \sum_{e \in P} c(e).
+\label{eq:spp_def}
+\end{equation}
+\end{definition}
 
-Các phương pháp cổ điển để giải SPP phụ thuộc vào đặc tính của trọng số cạnh.
-Thuật toán Dijkstra sử dụng chiến lược tham lam và phù hợp với các đồ thị có
-trọng số không âm ($c_e \ge 0$). Đối với các đồ thị có cạnh mang trọng số âm,
-miễn là không tồn tại chu trình âm, thuật toán Bellman--Ford được sử dụng, mặc
-dù có độ phức tạp tính toán cao hơn. Thuật toán Floyd--Warshall mở rộng bài toán
-này cho trường hợp tìm đường đi ngắn nhất giữa mọi cặp đỉnh, cho phép tồn tại
-trọng số âm nhưng vẫn nhạy cảm với sự xuất hiện của các chu trình âm.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{theoretical-background/image/spp_example.png}
+    \caption[Ví dụ bài toán đường đi ngắn nhất]{%
+        Ví dụ bài toán đường đi ngắn nhất trên đồ thị có hướng có trọng số.
+        Đường đậm là đường đi tối ưu $P^*$; số trên mỗi cạnh là trọng số $c(e)$.}
+    \label{fig:spp_example}
+\end{figure}
 
-\subsubsection{Mô hình dòng mạng cho Bài toán Đường đi Ngắn nhất}
+Các thuật toán cổ điển giải SPP được phân loại theo tính chất của trọng số cạnh;
+Bảng~\ref{tab:spp_algorithms} tóm tắt điều kiện áp dụng và độ phức tạp tiệm cận.
 
-Bài toán Đường đi Ngắn nhất trên một đồ thị có hướng
-$G = (\mathcal{V}, \mathcal{E})$ với chi phí cạnh không âm $c_{uv} \ge 0$ có thể
-được mô hình hóa một cách chặt chẽ như một bài toán Dòng Chi phí Tối thiểu với
-một đơn vị dòng. Ta định nghĩa các biến quyết định nhị phân
-$x_{uv} \in \{0,1\}$ cho mỗi cạnh $(u,v) \in \mathcal{E}$, trong đó
-$x_{uv} = 1$ cho biết cạnh đó thuộc đường đi tối ưu. Mô hình tối ưu được phát
-biểu như sau:
+\begin{table}[htbp]
+\centering
+\caption{So sánh các thuật toán cổ điển cho bài toán đường đi ngắn nhất}
+\label{tab:spp_algorithms}
+\begin{tabular}{@{}llll@{}}
+\toprule
+\textbf{Thuật toán} & \textbf{Điều kiện trọng số} & \textbf{Độ phức tạp} & \textbf{Loại} \\
+\midrule
+Dijkstra
+    & $c_e \geq 0$
+    & $\mathcal{O}\bigl((|\mathcal{V}|+|\mathcal{E}|)\log|\mathcal{V}|\bigr)$
+    & Đơn nguồn \\
+Bellman--Ford
+    & $c_e \in \mathbb{R}$, NNWC
+    & $\mathcal{O}(|\mathcal{V}||\mathcal{E}|)$
+    & Đơn nguồn \\
+Floyd--Warshall
+    & $c_e \in \mathbb{R}$, NNWC
+    & $\mathcal{O}(|\mathcal{V}|^3)$
+    & Đa nguồn \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ---------------------------------------------------------
+\subsubsection{Mô hình dòng mạng cho bài toán đường đi ngắn nhất}
+\label{subsubsec:spp_network_flow}
+% ---------------------------------------------------------
+
+SPP trên đồ thị có hướng $G = (\mathcal{V}, \mathcal{E})$ với $c_{uv} \geq 0$
+được mô hình hóa như bài toán \emph{Dòng Chi phí Tối thiểu} với một đơn vị dòng.
+Định nghĩa biến quyết định nhị phân $x_{uv} \in \{0,1\}$ cho mỗi
+$(u,v) \in \mathcal{E}$, trong đó $x_{uv} = 1$ khi và chỉ khi cạnh $(u,v)$
+thuộc đường đi tối ưu. Bài toán ILP tương ứng là:
 \begin{subequations}
+\label{eq:spp_ilp}
 \begin{align}
-\text{minimize} \quad & \sum_{(u, v) \in \mathcal{E}} c_{uv} x_{uv} \label{eq:spp_obj} \\
-\text{subject to} \quad & \sum_{v \in \mathcal{V}^+(u)} x_{uv} - \sum_{v \in \mathcal{V}^-(u)} x_{vu} =
-\begin{cases}
-1 & \text{if } u = s \\
--1 & \text{if } u = t \\
-0 & \text{otherwise}
-\end{cases}, \quad \forall u \in \mathcal{V} \label{eq:flow_conservation} \\
-& \sum_{v \in \mathcal{V}^-(u)} x_{vu} \le 1, \quad \forall u \in \mathcal{V} \setminus \{s, t\} \label{eq:node_capacity} \\
-& x_{uv} \ge 0, \quad \forall (u, v) \in \mathcal{E} \label{eq:non_negativity}
+    \min_{\mathbf{x}} \quad
+    & \sum_{(u,v) \in \mathcal{E}} c_{uv}\, x_{uv}
+    \label{eq:spp_obj} \\
+    \mathrm{s.t.} \quad
+    & \sum_{w \in \mathcal{V}^+(u)} x_{uw}
+      -
+      \sum_{w \in \mathcal{V}^-(u)} x_{wu}
+      =
+      \begin{cases}
+          \phantom{-}1  & \text{nếu } u = s,   \\
+          -1            & \text{nếu } u = t,   \\
+          \phantom{-}0  & \text{còn lại},
+      \end{cases}
+      \quad \forall\, u \in \mathcal{V}
+    \label{eq:spp_flow_conservation} \\
+    & \sum_{w \in \mathcal{V}^-(u)} x_{wu} \leq 1,
+      \quad \forall\, u \in \mathcal{V} \setminus \{s,t\}
+    \label{eq:spp_node_capacity} \\
+    & x_{uv} \geq 0,
+      \quad \forall\, (u,v) \in \mathcal{E}.
+    \label{eq:spp_nonneg}
 \end{align}
 \end{subequations}
+Ký hiệu $\mathcal{V}^+(u) = \{w \mid (u,w) \in \mathcal{E}\}$ và
+$\mathcal{V}^-(u) = \{w \mid (w,u) \in \mathcal{E}\}$ lần lượt là tập đỉnh kế
+tiếp và đỉnh tiền nhiệm của $u$.
 
-Ở đây, $\mathcal{V}^+(u)$ và $\mathcal{V}^-(u)$ lần lượt ký hiệu tập các đỉnh kế
-tiếp (successors) và các đỉnh tiền nhiệm (predecessors) của đỉnh $u$. Các ràng
-buộc trong mô hình này đảm bảo những tính chất cấu trúc cụ thể. Phương trình
-\eqref{eq:flow_conservation} biểu diễn điều kiện bảo toàn dòng (định luật
-Kirchhoff), đảm bảo rằng một đơn vị dòng rời khỏi đỉnh nguồn $s$, đi vào đỉnh
-đích $t$, và được bảo toàn tại tất cả các đỉnh trung gian. Ràng buộc
-\eqref{eq:node_capacity} áp đặt giới hạn dung lượng nút, giới hạn dòng đi vào
-mỗi đỉnh trung gian không vượt quá một đơn vị, qua đó đảm bảo cấu trúc đường đi
-đơn, trong đó không có đỉnh nào bị ghé thăm nhiều hơn một lần. Với chi phí
-không âm, các chu trình luôn là không tối ưu, do đó không cần thiết phải bổ sung
-các ràng buộc loại bỏ chu trình một cách tường minh.
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1\textwidth]{theoretical-background/image/flow_conver.png}
+    \caption[Điều kiện bảo toàn dòng Kirchhoff]{%
+        Minh họa điều kiện bảo toàn dòng
+        (Phương trình~\eqref{eq:spp_flow_conservation})
+        tại \textbf{(a)} đỉnh nguồn $s$,
+        \textbf{(b)} đỉnh trung gian, và
+        \textbf{(c)} đỉnh đích $t$.}
+    \label{fig:flow_conservation}
+\end{figure}
 
-Một ưu điểm quan trọng của cách mô hình hóa này nằm ở các tính chất đại số của
-ma trận ràng buộc thu được từ~\eqref{eq:flow_conservation}. Ma trận liên thuộc
-đỉnh-cạnh này có tính \textit{hoàn toàn đơn mô} (Total Unimodularity--TUM).
-Theo lý thuyết tối ưu hóa tổ hợp, nếu ma trận ràng buộc là TUM và vectơ vế phải
-là nguyên, thì mọi nghiệm khả thi cơ sở của bài toán thư giãn Quy hoạch Tuyến
-tính (LP) đều được đảm bảo là nguyên~\cite{AhujaMagnantiOrlin1993}. Do đó, mặc dù chỉ áp đặt
-các ràng buộc không âm liên tục trong~\eqref{eq:non_negativity}, bài toán vẫn có
-thể được giải hiệu quả bằng các thuật toán LP tiêu chuẩn để thu được một đường
-đi nhị phân hợp lệ, mà không cần đến các phương pháp lập trình nguyên có chi phí
-tính toán cao.
+Ràng buộc~\eqref{eq:spp_flow_conservation} thể hiện \emph{định luật bảo toàn
+dòng Kirchhoff}: một đơn vị dòng rời $s$, đến $t$, và được bảo toàn tại các
+đỉnh trung gian. Ràng buộc~\eqref{eq:spp_node_capacity} giới hạn dòng vào mỗi
+đỉnh trung gian không vượt quá một đơn vị, đảm bảo cấu trúc \emph{đường đi
+đơn giản} (không có đỉnh lặp). Với $c_{uv} \geq 0$, chu trình luôn không tối ưu
+nên không cần ràng buộc loại trừ chu trình tường minh.
+
+Ưu điểm then chốt của mô hình~\eqref{eq:spp_ilp} nằm ở tính chất đại số của
+ma trận ràng buộc thu được từ~\eqref{eq:spp_flow_conservation}.
+Ma trận liên thuộc đỉnh-cung (node-arc incidence matrix) này sở hữu tính chất
+\emph{Hoàn toàn Đơn mô}.
+Theo lý thuyết tối ưu hóa tổ hợp, nếu ma trận ràng buộc là TU và vế phải là
+nguyên, thì mọi nghiệm khả thi cơ sở của bài toán nới lỏng LP đều là
+nguyên~\cite{AhujaMagnantiOrlin1993}.
+Do đó, mặc dù chỉ đặt ràng buộc $x_{uv} \geq 0$ trong~\eqref{eq:spp_nonneg},
+bài toán LP nới lỏng của~\eqref{eq:spp_ilp} vẫn cho nghiệm nhị phân hợp lệ,
+mà không cần sử dụng các phương pháp lập trình nguyên tốn kém.

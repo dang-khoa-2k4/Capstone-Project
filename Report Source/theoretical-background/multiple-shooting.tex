@@ -1,31 +1,204 @@
-\section{Phương pháp Multiple Shooting}
+% \section{Phương pháp Multiple Shooting}
+% \label{sec:multiple_shooting}
+
+% Để giải quyết bài toán OCP trên máy tính, người ta thường sử dụng các phương pháp rời rạc hóa (discretization methods) để chuyển OCP vô hạn chiều về bài toán quy hoạch phi tuyến (NLP) hữu hạn chiều. Trong số đó, Multiple Shooting \cite{BockPlitt1984_Multiple_Shooting} là một trong những phương pháp trực tiếp (direct methods) phổ biến và hiệu quả nhất, đặc biệt phù hợp để kết hợp với các bài toán có sự phân chia không gian rõ rệt như GCS.
+
+% Thay vì tích phân động lực học từ trạng thái ban đầu $x_0$ đến cuối như phương pháp Single Shooting (dễ gây ra bất ổn định số học và cực tiểu cục bộ), phương pháp Multiple Shooting chia khoảng thời gian $[t_0, t_f]$ thành $N$ khoảng nhỏ (shooting intervals) tại các nút thời gian:
+% \[ t_0 < t_1 < t_2 < \dots < t_N = t_f \]
+
+% Tại mỗi nút $k \in \{0, 1, \dots, N-1\}$, tín hiệu điều khiển $u(t)$ thường được xấp xỉ bằng một hàm đơn giản, ví dụ như hằng số từng khúc (piecewise constant) $u(t) = u_k$ với $t \in [t_k, t_{k+1})$. Cùng với đó, phương pháp đặt thêm các biến trạng thái nhân tạo (artificial state variables) $s_k$ đóng vai trò là điểm xuất phát (initial value) cho việc giải phương trình vi phân trên từng khoảng $[t_k, t_{k+1}]$.
+
+% Giả sử quỹ đạo tích phân thu được trên đoạn $[t_k, t_{k+1}]$ bắt đầu từ trạng thái $s_k$ với tín hiệu điều khiển $u_k$ là:
+% \[ x(t_{k+1}; s_k, u_k) = s_k + \int_{t_k}^{t_{k+1}} f(x(\tau), u_k) d\tau \]
+
+% Để đảm bảo quỹ đạo liên tục trên toàn bộ đoạn $[t_0, t_f]$, Multiple Shooting yêu cầu thêm các ràng buộc nối điểm (continuity constraints hay matching conditions) tại các nút giao:
+% \[ s_{k+1} - x(t_{k+1}; s_k, u_k) = 0, \quad k = 0, 1, \dots, N-1 \]
+
+% Dưới dạng NLP, bài toán OCP rời rạc hóa trở thành:
+% \begin{align}
+%     \min_{s, u} \quad & \sum_{k=0}^{N-1} l_k(s_k, u_k) + E(s_N) \\
+%     \text{subject to:} \quad & s_0 = x_{in} \\
+%     & s_{k+1} = \Phi(s_k, u_k), \quad k = 0, \dots, N-1 \\
+%     & s_k \in \mathcal{X}, \quad u_k \in \mathcal{U}
+% \end{align}
+% Trong đó $\Phi(s_k, u_k) = x(t_{k+1}; s_k, u_k)$ là kết quả của bộ tích phân số học (numerical integrator).
+
+% Phương pháp Multiple Shooting mang lại nhiều ưu điểm vượt trội:
+% \begin{enumerate}
+%     \item \textbf{Độ ổn định cao:} Do chia nhỏ khoảng thời gian tích phân, phương pháp giảm thiểu hiện tượng khuếch đại sai số số học.
+%     \item \textbf{Khả năng khai thác cấu trúc thưa (sparsity):} Các ràng buộc nối điểm chỉ liên kết các biến ở hai nút liền kề, tạo ra ma trận Jacobian dạng thưa, giúp các thuật toán giải NLP (như SQP hay Interior Point) hoạt động rất nhanh.
+%     \item \textbf{Khởi tạo dễ dàng:} Cho phép khởi tạo (warm-start) các biến trạng thái $s_k$ bằng một quỹ đạo tham khảo hình học (ví dụ: lấy từ kết quả của GCS).
+% \end{enumerate}
+
+
+\section{Phương pháp Bắn Nhiều Lần Trực tiếp}
 \label{sec:multiple_shooting}
 
-Để giải quyết bài toán OCP trên máy tính, người ta thường sử dụng các phương pháp rời rạc hóa (discretization methods) để chuyển OCP vô hạn chiều về bài toán quy hoạch phi tuyến (NLP) hữu hạn chiều. Trong số đó, Multiple Shooting \cite{BockPlitt1984_Multiple_Shooting} là một trong những phương pháp trực tiếp (direct methods) phổ biến và hiệu quả nhất, đặc biệt phù hợp để kết hợp với các bài toán có sự phân chia không gian rõ rệt như GCS.
+Phương pháp Bắn Nhiều Lần Trực tiếp (Direct Multiple Shooting~-- DMS) bắt đầu bằng cách chia
+horizon thời gian $[0,T]$ thành nhiều shooting intervals:
+\begin{equation}
+0=t_0<t_1<\cdots<t_N=T.
+\label{eq:shooting_grid}
+\end{equation}
+Trên mỗi khoảng $[t_i,t_{i+1}]$, điều khiển được tham số hóa cục bộ.
+Ví dụ đơn giản nhất là điều khiển hằng từng đoạn:
+\begin{equation}
+u(t)=q_i,
+\qquad t\in[t_i,t_{i+1}],
+\label{eq:piecewise_control_mms}
+\end{equation}
+trong đó $q_i$ là tham số điều khiển của đoạn thứ $i$.
 
-Thay vì tích phân động lực học từ trạng thái ban đầu $x_0$ đến cuối như phương pháp Single Shooting (dễ gây ra bất ổn định số học và cực tiểu cục bộ), phương pháp Multiple Shooting chia khoảng thời gian $[t_0, t_f]$ thành $N$ khoảng nhỏ (shooting intervals) tại các nút thời gian:
-\[ t_0 < t_1 < t_2 < \dots < t_N = t_f \]
+Khác với phương pháp bắn đơn (single shooting), phương pháp DMS không chỉ dùng một trạng thái đầu
+duy nhất để tích phân xuyên suốt toàn bộ horizon.
+Thay vào đó, tại mỗi shooting node $t_i$, ta giới thiệu một biến trạng thái độc lập
+\begin{equation}
+s_i \approx x(t_i),
+\label{eq:shooting_node}
+\end{equation}
+được gọi là \textit{shooting state} hay \textit{shooting node}.
+Mỗi đoạn được tích phân độc lập từ trạng thái đầu cục bộ $s_i$; cụ thể, trên đoạn $[t_i,t_{i+1}]$,
+ta giải bài toán giá trị đầu cục bộ
+\begin{equation}
+\begin{cases}
+\dot{x}_i(t)=f(x_i(t),q_i),
+\qquad t\in[t_i,t_{i+1}],\\
+x_i(t_i)=s_i.
+\end{cases}
+\label{eq:local_ivp_mms}
+\end{equation}
 
-Tại mỗi nút $k \in \{0, 1, \dots, N-1\}$, tín hiệu điều khiển $u(t)$ thường được xấp xỉ bằng một hàm đơn giản, ví dụ như hằng số từng khúc (piecewise constant) $u(t) = u_k$ với $t \in [t_k, t_{k+1})$. Cùng với đó, phương pháp đặt thêm các biến trạng thái nhân tạo (artificial state variables) $s_k$ đóng vai trò là điểm xuất phát (initial value) cho việc giải phương trình vi phân trên từng khoảng $[t_k, t_{k+1}]$.
+Nghiệm của bài toán giá trị đầu này tạo ra một đoạn quỹ đạo cục bộ
+\[
+x_i(t;s_i,q_i),
+\]
+trong đó ký hiệu sau dấu chấm phẩy nhấn mạnh rằng đoạn quỹ đạo phụ thuộc vào trạng thái đầu đoạn
+$s_i$ và tham số điều khiển $q_i$.
+Trạng thái cuối thu được sau khi tích phân đoạn thứ $i$ được viết dưới dạng ánh xạ điểm cuối
+(endpoint map):
+\begin{equation}
+F_i(s_i,q_i)
+:=
+x_i(t_{i+1};s_i,q_i).
+\label{eq:endpoint_map_mms}
+\end{equation}
 
-Giả sử quỹ đạo tích phân thu được trên đoạn $[t_k, t_{k+1}]$ bắt đầu từ trạng thái $s_k$ với tín hiệu điều khiển $u_k$ là:
-\[ x(t_{k+1}; s_k, u_k) = s_k + \int_{t_k}^{t_{k+1}} f(x(\tau), u_k) d\tau \]
+Nếu chỉ tạo ra các đoạn cục bộ như trên thì ta chưa có một quỹ đạo toàn cục hợp lệ, vì các đoạn
+có thể bị đứt tại các shooting node.
+Do đó, phương pháp DMS áp thêm các ràng buộc nối khớp, còn gọi là ràng buộc liên tục (continuity
+constraints) hay ràng buộc sai lệch (defect constraints):
+\begin{equation}
+s_{i+1}-F_i(s_i,q_i)=0,
+\qquad i=0,\ldots,N-1.
+\label{eq:defect_constraint_mms}
+\end{equation}
 
-Để đảm bảo quỹ đạo liên tục trên toàn bộ đoạn $[t_0, t_f]$, Multiple Shooting yêu cầu thêm các ràng buộc nối điểm (continuity constraints hay matching conditions) tại các nút giao:
-\[ s_{k+1} - x(t_{k+1}; s_k, u_k) = 0, \quad k = 0, 1, \dots, N-1 \]
+Với cách xây dựng này, vector biến tối ưu trong phương pháp DMS có dạng
+\begin{equation}
+w=(s_0,q_0,s_1,q_1,\ldots,s_{N-1},q_{N-1},s_N).
+\label{eq:mms_decision_vector}
+\end{equation}
+Trong đó, các $s_i$ là các trạng thái tại các shooting node, còn các $q_i$ là các tham số điều khiển
+cục bộ.
+Bài toán OCP sau đó được biến thành một bài toán quy hoạch phi tuyến (NLP) có dạng
+\begin{equation}
+\begin{aligned}
+\underset{s,\,q}{\text{minimize}}
+\quad &
+\sum_{i=0}^{N-1} l_i(s_i,q_i)+E(s_N)
+\\
+\text{subject to}
+\quad &
+s_0-x_0=0,
+\qquad \text{(giá trị đầu)}
+\\
+&
+s_{i+1}-F_i(s_i,q_i)=0,
+\qquad i=0,\ldots,N-1,
+\qquad \text{(defect / continuity)}
+\\
+&
+\text{các ràng buộc trạng thái, điều khiển, và điều kiện cuối nếu có.}
+\end{aligned}
+\label{eq:mms_nlp_general}
+\end{equation}
+Ở đây $l_i(s_i,q_i)$ là chi phí cục bộ trên đoạn $[t_i,t_{i+1}]$, thường thu được bằng cách
+xấp xỉ tích phân của chi phí chạy (running cost) trên đoạn đó:
+\begin{equation}
+l_i(s_i,q_i)
+\approx
+\int_{t_i}^{t_{i+1}}
+L(x_i(t;s_i,q_i),q_i)\,dt.
+\label{eq:local_cost_mms}
+\end{equation}
 
-Dưới dạng NLP, bài toán OCP rời rạc hóa trở thành:
-\begin{align}
-    \min_{s, u} \quad & \sum_{k=0}^{N-1} l_k(s_k, u_k) + E(s_N) \\
-    \text{subject to:} \quad & s_0 = x_{in} \\
-    & s_{k+1} = \Phi(s_k, u_k), \quad k = 0, \dots, N-1 \\
-    & s_k \in \mathcal{X}, \quad u_k \in \mathcal{U}
-\end{align}
-Trong đó $\Phi(s_k, u_k) = x(t_{k+1}; s_k, u_k)$ là kết quả của bộ tích phân số học (numerical integrator).
+Một điểm quan trọng của phương pháp DMS là các trạng thái $s_i$ được phép là biến tối ưu độc lập
+trong quá trình lặp của solver.
+Nói cách khác, ở các bước lặp trung gian của NLP, các đoạn quỹ đạo chưa nhất thiết phải nối liên
+tục với nhau; chỉ tại nghiệm cuối cùng, khi các defect constraints được thỏa mãn, ta mới thu được
+một quỹ đạo hợp lệ của hệ động lực học.
+Vì vậy, DMS thuộc nhóm \textit{phương pháp đồng thời} (simultaneous methods): mô phỏng và tối ưu
+hóa được thực hiện đồng thời trong cùng một bài toán NLP.
 
-Phương pháp Multiple Shooting mang lại nhiều ưu điểm vượt trội:
-\begin{enumerate}
-    \item \textbf{Độ ổn định cao:} Do chia nhỏ khoảng thời gian tích phân, phương pháp giảm thiểu hiện tượng khuếch đại sai số số học.
-    \item \textbf{Khả năng khai thác cấu trúc thưa (sparsity):} Các ràng buộc nối điểm chỉ liên kết các biến ở hai nút liền kề, tạo ra ma trận Jacobian dạng thưa, giúp các thuật toán giải NLP (như SQP hay Interior Point) hoạt động rất nhanh.
-    \item \textbf{Khởi tạo dễ dàng:} Cho phép khởi tạo (warm-start) các biến trạng thái $s_k$ bằng một quỹ đạo tham khảo hình học (ví dụ: lấy từ kết quả của GCS).
-\end{enumerate}
+% Cách làm này mang lại một số lợi ích quan trọng.
+% Thứ nhất, do horizon được chia thành nhiều đoạn ngắn, tính phi tuyến và độ nhạy của tích phân không
+% bị tích lũy toàn bộ từ đầu đến cuối như trong phương pháp bắn đơn.
+% Thứ hai, solver có thể sử dụng thông tin khởi tạo cho cả trạng thái và điều khiển, thay vì chỉ khởi
+% tạo điều khiển.
+% Thứ ba, các hệ bất ổn định hoặc có tính phi tuyến mạnh thường được xử lý ổn định hơn, vì sai lệch
+% trên một đoạn không tự động lan truyền qua toàn bộ horizon trước khi optimizer có cơ hội điều chỉnh.
+% Thứ tư, cấu trúc block thưa (block sparse) của các ràng buộc defect có thể được khai thác bởi các
+% thuật toán NLP hiện đại, đặc biệt là các phương pháp kiểu SQP.
+
+Trong thực tế, ánh xạ điểm cuối $F_i(s_i,q_i)$ hiếm khi có biểu thức giải tích đóng; nó thường
+được tính bằng một bộ tích phân số, chẳng hạn như Runge--Kutta.
+Nếu chuẩn hóa mỗi shooting interval về biến thời gian cục bộ $\tau \in [0,1]$ với độ dài đoạn
+$\Delta_i = t_{i+1} - t_i$, động lực học cục bộ có thể được viết lại thành
+\begin{equation}
+\frac{dx_i}{d\tau}(\tau)
+=
+\Delta_i f(x_i(\tau),u_i(\tau)),
+\qquad \tau\in[0,1],
+\label{eq:normalized_local_dynamics}
+\end{equation}
+với
+\begin{equation}
+x_i(0)=s_i.
+\label{eq:normalized_initial_state}
+\end{equation}
+Khi đó endpoint map là
+\begin{equation}
+F_i(s_i,q_i,\Delta_i)=x_i(1).
+\label{eq:normalized_endpoint_map}
+\end{equation}
+
+Ví dụ, với một sơ đồ Runge--Kutta tổng quát, bước tích phân từ $t_i$ đến $t_{i+1}$ có thể được
+viết dưới dạng
+\begin{equation}
+x_{i+1}
+=
+x_i+\sum_{j=1}^{s} b_j K_j,
+\label{eq:rk_update}
+\end{equation}
+trong đó
+\begin{equation}
+K_j
+=
+h\,f\left(
+x_i+\sum_{m=1}^{j-1}a_{jm}K_m,\,
+u_i
+\right),
+\qquad j=1,\ldots,s.
+\label{eq:rk_stages}
+\end{equation}
+Ở đây $h$ là bước thời gian, còn $a_{jm}$ và $b_j$ là các hệ số của sơ đồ Runge--Kutta.
+Trong phương pháp DMS, Runge--Kutta chỉ đóng vai trò là công cụ tính ánh xạ điểm cuối trên từng
+đoạn; chính các ràng buộc defect mới là thành phần buộc các ánh xạ điểm cuối ghép lại thành một
+quỹ đạo động lực học hợp lệ.
+
+Tóm lại, phương pháp Bắn Nhiều Lần Trực tiếp là cầu nối giữa OCP liên tục theo thời gian và NLP
+hữu hạn chiều.
+Phương pháp chia quỹ đạo thành nhiều đoạn động lực học cục bộ, tích phân từng đoạn bằng một bộ
+tích phân số, rồi ghép các đoạn lại bằng defect constraints.
+Nhờ vậy, bài toán vẫn giữ được cấu trúc động lực học của OCP gốc, nhưng được viết dưới dạng hữu
+hạn chiều đủ rõ ràng để giải bằng các bộ giải quy hoạch phi tuyến (nonlinear programming solvers).

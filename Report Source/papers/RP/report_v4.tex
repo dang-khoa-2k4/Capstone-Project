@@ -329,41 +329,118 @@ Ràng buộc \eqref{eq:defect} nói rằng exit state của vùng $v$ phải đ�
 s_{i+1}=x_i(t_{i+1};s_i,q_i)
 \]
 
-\section{Ràng buộc an toàn hình học: đoạn local phải nằm trong vùng lồi tương ứng}
 
-Nếu vùng $v$ được kích hoạt, ta muốn local trajectory của nó nằm hoàn toàn trong vùng an toàn tương ứng:
+\section{Ràng buộc an toàn hình học và vai trò của log-barrier}
+
+Nếu vùng $v$ được kích hoạt, điều kiện mong muốn ở mức continuous time là local trajectory của vùng đó nằm trong vùng lồi tương ứng:
 \begin{equation}
 x_v(\tau)\in Q_v,
 \qquad \forall \tau\in[0,1],
-\quad \text{khi } p_v=1.
+\quad \text{khi }p_v=1.
 \label{eq:region_constraint}
 \end{equation}
+Vì $Q_v$ là vùng an toàn, nếu mỗi local segment nằm trong vùng được gán cho nó thì quỹ đạo toàn cục nằm trong hợp các safe regions đã chọn. Tuy nhiên, điều kiện \eqref{eq:region_constraint} là một ràng buộc continuous-time. Khi đưa vào solver hữu hạn chiều, ta không thể kiểm tra trực tiếp mọi $\tau\in[0,1]$ nếu không có một transcription đặc biệt cho ràng buộc liên tục.
 
-Ý nghĩa của \eqref{eq:region_constraint} là:
-\begin{itemize}
-    \item ta không còn phải viết trực tiếp tránh obstacle ở mọi thời điểm,
-    \item nhưng vì $Q_v$ là vùng an toàn, nếu mỗi local segment nằm trong vùng được gán cho nó thì toàn bộ quỹ đạo sẽ nằm trong hợp của các safe regions đã chọn,
-    \item do đó quỹ đạo toàn cục collision-free theo continuous time.
-\end{itemize}
+Trong bản formulation cũ, điều kiện an toàn thường được xấp xỉ bằng cách kiểm tra tại một số mesh points hoặc ``red points''. Cách làm này có ý nghĩa như một kiểm tra rời rạc, nhưng không nên xem nó là cơ chế bảo đảm an toàn chính. Lý do là một tập hữu hạn điểm kiểm tra có thể bỏ sót vi phạm xảy ra giữa hai điểm liên tiếp. Trong ngôn ngữ multiple shooting, đây chính là hiện tượng local trajectory được sinh bởi tích phân động lực học có thể ``đi xuyên biên'' trong một shooting interval, sau đó quay lại vùng lồi trước khi chạm điểm kiểm tra tiếp theo.
 
-Tuy nhiên, ở dạng hiện tại, \eqref{eq:region_constraint} mới chỉ là điều kiện continuous-time mong muốn, chứ chưa phải một dạng có thể đưa vào solver.
+Vì vậy, trong formulation mới, trọng tâm của safety được chuyển từ việc chỉ áp hard constraints tại các red points sang việc thêm một thành phần \emph{log-barrier} vào local running cost. Với mỗi vùng lồi được mô tả bởi
+\begin{equation}
+Q_v=\{x\in\mathbb R^{n_x}: A_vx\le b_v\},
+\label{eq:polytope_region}
+\end{equation}
+log-barrier sẽ phạt rất mạnh khi trạng thái tiến sát một mặt biên của $Q_v$. Nhờ đó, optimizer có động lực giữ local trajectory nằm sâu hơn bên trong vùng lồi, thay vì chỉ vừa đủ thỏa mãn điều kiện tại một vài điểm rời rạc.
 
-Đối với framework hiện tại, một hiện thực hữu hạn chiều tự nhiên của \eqref{eq:region_constraint} là dùng \textbf{sampling trên một lưới hữu hạn}. Cụ thể, chia miền chuẩn hóa $[0,1]$ của vùng $v$ thành $M_v$ khoảng con
-\[
-0=\tau_{v,0}<\tau_{v,1}<\cdots<\tau_{v,M_v}=1,
-\]
-và trước hết chỉ kiểm tra điều kiện an toàn tại các điểm lưới $\tau_{v,0},\dots,\tau_{v,M_v}$. Vì local trajectory $x_v(\cdot)$ đã được sinh bởi local IVP \eqref{eq:local_ivp} và bị ràng buộc bởi defect constraint \eqref{eq:defect}, ta có thể ép điều kiện an toàn bằng cách yêu cầu trạng thái tại các mesh points này đều nằm trong $Q_v$.
+Các hard constraints tại một số điểm evaluation vẫn có thể được giữ lại, nhưng vai trò của chúng cần được hiểu đúng. Chúng không còn là toàn bộ cơ chế safety, mà chủ yếu là điều kiện miền xác định và điều kiện số học để log-barrier hợp lệ. Cụ thể, nếu $\tau_{v,q}$ là các quadrature/evaluation points được dùng để tính chi phí, ta có thể yêu cầu
+\begin{equation}
+(b_v)_j-(A_vx_v(\tau_{v,q}))_j\ge \delta_{\log}>0,
+\qquad j=1,\dots,m_v,
+\quad q\in\mathcal I_v^{\mathrm{eval}}.
+\label{eq:barrier_domain_constraint}
+\end{equation}
+Tham số $\delta_{\log}$ là một ngưỡng dương nhỏ nhằm tránh $\log(0)$ hoặc log của số âm. Nếu vẫn dùng safety margin trong hiện thực, margin này nên được diễn giải là một hỗ trợ cho numerical stability và feasibility của barrier, không phải là trung tâm của phương pháp.
 
-Nếu $Q_v$ là một polytope
-\[
-Q_v=\{x\in\mathbb R^{n_x}:A_vx\le b_v\},
-\]
-thì
-\[
-A_vx_v(\tau_{v,k})\le b_v-\varepsilon_v,
-\qquad k=0,\dots,M_v,
-\]
-với $\varepsilon_v>0$ là safety margin.
+Nếu cần giữ ký hiệu $\mathcal S_v^{\mathrm{safe}}$, trong báo cáo này ta định nghĩa lại nó là tập các điều kiện miền xác định của log-barrier tại các điểm evaluation:
+\begin{equation}
+\mathcal S_v^{\mathrm{safe}}:=
+\left\{
+(b_v)_j-(A_vx_v(\tau_{v,q}))_j\ge \delta_{\log}
+:\ j=1,\dots,m_v,\ q\in\mathcal I_v^{\mathrm{eval}}
+\right\}.
+\label{eq:safe_set_redefined}
+\end{equation}
+Cách viết này tránh hiểu nhầm rằng $\mathcal S_v^{\mathrm{safe}}\le 0$ là một sampling certificate đủ để bảo đảm continuous-time safety. Nó chỉ là phần kiểm tra hữu hạn điểm để đảm bảo các giá trị log-barrier được tính trong miền hợp lệ.
+
+\section{Kiến thức nền tảng về log-barrier}
+
+\subsection{Bất đẳng thức tuyến tính và slack}
+
+Xét một polytope tổng quát
+\begin{equation}
+Q=\{x\in\mathbb R^n:Ax\le b\},
+\label{eq:generic_polytope}
+\end{equation}
+trong đó $A\in\mathbb R^{m\times n}$ và $b\in\mathbb R^m$. Gọi $a_j^\top$ là hàng thứ $j$ của $A$, mỗi bất đẳng thức của polytope có dạng
+\begin{equation}
+a_j^\top x\le b_j,\qquad j=1,\dots,m.
+\label{eq:single_halfspace}
+\end{equation}
+Ta định nghĩa slack của mặt biên thứ $j$ tại trạng thái $x$ là
+\begin{equation}
+s_j(x)=b_j-a_j^\top x.
+\label{eq:slack_generic}
+\end{equation}
+Điểm $x$ nằm trong miền trong của $Q$ khi và chỉ khi tất cả các slack đều dương:
+\begin{equation}
+s_j(x)>0,
+\qquad j=1,\dots,m.
+\label{eq:interior_slack}
+\end{equation}
+Ngược lại, nếu một slack bằng $0$ thì $x$ nằm trên biên tương ứng; nếu một slack âm thì $x$ đã nằm ngoài polytope theo bất đẳng thức đó.
+
+\subsection{Định nghĩa log-barrier}
+
+Log-barrier chuẩn của polytope \eqref{eq:generic_polytope} được định nghĩa bởi
+\begin{equation}
+\phi(x)=-\sum_{j=1}^{m}\log\bigl(b_j-a_j^\top x\bigr)
+= -\sum_{j=1}^{m}\log s_j(x).
+\label{eq:generic_log_barrier}
+\end{equation}
+Ta chứng minh trực tiếp rằng $\phi(x)$ chỉ xác định trên miền trong của polytope. Thật vậy, theo định nghĩa
+\begin{equation}
+\phi(x)=-\sum_{j=1}^{m}\log\bigl(s_j(x)\bigr),
+\end{equation}
+và hàm $\log(\cdot)$ chỉ xác định khi đối số dương. Do đó, nếu tồn tại $j$ sao cho $s_j(x)\le 0$ thì $\phi(x)$ không xác định. Ngược lại, nếu $s_j(x)>0$ với mọi $j$ thì mọi hạng trong tổng đều hữu hạn, suy ra $\phi(x)$ xác định. Hơn nữa, với mỗi $j$ cố định, ta có $\log(s_j(x))\to -\infty$ khi $s_j(x)\to 0^+$, nên
+\begin{equation}
+-\log(s_j(x))\to +\infty.
+\end{equation}
+Vì vậy, khi $x$ tiến sát một mặt biên của polytope, ít nhất một slack tiến về $0^+$ và giá trị barrier tăng không bị chặn; còn khi $x$ nằm sâu trong miền trong thì các slack lớn hơn, nên từng hạng $-\log(s_j(x))$ nhỏ hơn và tổng $\phi(x)$ giảm.
+
+Tính chất quan trọng này khiến log-barrier phù hợp để phạt trạng thái tiến sát biên. Thay vì chỉ báo vi phạm sau khi trạng thái đã vượt khỏi vùng, barrier tạo ra một chi phí tăng nhanh ngay khi trạng thái tiến gần biên từ phía trong.
+
+\subsection{Ý nghĩa trong optimal control}
+
+Với một optimal control problem có ràng buộc trạng thái
+\begin{equation}
+x(t)\in Q,
+\qquad t\in[0,T],
+\label{eq:ocp_state_in_Q}
+\end{equation}
+thay vì chỉ viết hard constraint $Ax(t)\le b$, ta có thể thêm barrier vào running cost:
+\begin{equation}
+\ell_{\mathrm{bar}}(x(t),u(t))
+=
+\ell(x(t),u(t))+\mu\,\phi(x(t)),
+\qquad \mu>0.
+\label{eq:bar_running_cost_generic}
+\end{equation}
+Hệ số $\mu$ điều chỉnh mức ảnh hưởng của barrier. Khi $\mu$ lớn, nghiệm bị đẩy xa biên mạnh hơn; khi $\mu$ nhỏ, nghiệm có thể tiến gần biên hơn để tối ưu các thành phần chi phí khác. Trong giai đoạn hiện tại, do chưa quan sát thấy nghiệm bị kéo về analytic center hoặc center của vùng lồi quá mạnh, formulation ưu tiên log-barrier chuẩn. Các biến thể như relaxed hoặc recentered log-barrier có thể được xem xét sau nếu xuất hiện vấn đề về infeasibility, độ lệch nghiệm quá lớn, hoặc cần một formulation trơn được mở rộng ra ngoài miền trong.
+
+\subsection{Liên hệ với hiện tượng đi xuyên biên trong multiple shooting}
+
+Trong direct multiple shooting, local trajectory trên mỗi vùng được sinh ra bằng cách tích phân động lực học từ shooting state $s_v^-$. Vì vậy, ngay cả khi entry state, exit state hoặc một vài mesh points nằm trong $Q_v$, phần trajectory giữa hai điểm kiểm tra vẫn có thể vượt ra ngoài vùng rồi quay lại. Đây là bản chất của inter-sample violation trong các phương pháp direct transcription.
+
+Khi log-barrier được cộng vào running cost tại nhiều quadrature/evaluation points bên trong shooting interval, việc tiến sát biên trở nên đắt hơn về mặt objective. Cơ chế này không biến một tập hữu hạn điểm evaluation thành một chứng chỉ continuous-time tuyệt đối, nhưng nó giảm đáng kể xu hướng ``đi xuyên biên'' vì optimizer không chỉ phải thỏa điểm đầu/cuối mà còn phải trả chi phí lớn nếu trajectory đi gần biên tại các điểm bên trong interval. Do đó, phương pháp mới không phụ thuộc duy nhất vào việc tăng số lượng red points, dù việc tăng số điểm evaluation vẫn có thể cải thiện khả năng kiểm soát hành vi giữa các điểm rời rạc.
+
 \section{Ràng buộc ghép nối giữa phần discrete và phần continuous}
 
 Phần này buộc network-flow path và local multiple-shooting segments khớp nhau.
@@ -408,79 +485,162 @@ y_{v\tau}=1 \Longrightarrow s_v^+=x^{\mathrm g}.
 
 Ý nghĩa: vùng đầu tiên trong chuỗi phải nhận đúng initial condition, còn vùng cuối cùng phải kết thúc ở goal state.
 
-\section{Hàm mục tiêu của mô hình}
 
-Trong phần còn lại của báo cáo, ta chọn running cost theo dạng
+\section{Ép phương pháp log-barrier vào hiện thực hiện tại}
+
+\subsection{Barrier của một vùng lồi}
+
+Với mỗi vùng $v\in V_r$, giả sử mô tả polytope của vùng là
+\begin{equation}
+Q_v=\{x\in\mathbb R^{n_x}:A_vx\le b_v\},
+\qquad A_v\in\mathbb R^{m_v\times n_x},\ b_v\in\mathbb R^{m_v}.
+\label{eq:region_polytope_log}
+\end{equation}
+Gọi $a_{v,j}^\top$ là hàng thứ $j$ của $A_v$. Slack của mặt biên thứ $j$ tại trạng thái $x$ là
+\begin{equation}
+s_{v,j}(x)=b_{v,j}-a_{v,j}^\top x.
+\label{eq:region_slack}
+\end{equation}
+Log-barrier của vùng $v$ được viết là
+\begin{equation}
+\phi_v(x)
+=
+-\sum_{j=1}^{m_v}\log\bigl((b_v)_j-(A_vx)_j\bigr)
+=
+-\sum_{j=1}^{m_v}\log\bigl(b_{v,j}-a_{v,j}^\top x\bigr).
+\label{eq:region_log_barrier}
+\end{equation}
+Hàm $\phi_v$ chỉ được evaluate khi mọi slack trong \eqref{eq:region_slack} dương. Do đó, các điều kiện \eqref{eq:barrier_domain_constraint} là cần thiết trong transcription số.
+
+\subsection{Running cost mới trong vùng}
+
+Trong phần còn lại của báo cáo, running cost gốc được chọn theo dạng
 \begin{equation}
 \ell\bigl(x(t),u(t)\bigr)
 :=
-w_L\,\|\dot q(t)\|^2 + w_E\,\|u(t)\|^2,
+w_L\,\|\dot q(t)\|^2+w_E\,\|u(t)\|^2,
 \qquad
 q(t):=\pi\bigl(x(t)\bigr),
 \qquad
 w_L,w_E>0.
 \label{eq:running_cost_choice}
 \end{equation}
-Ở đây, $q(t)$ là phần cấu hình hình học của trạng thái; nếu $x(t)$ bản thân đã là biến cấu hình thì có thể hiểu đơn giản là $q(t)=x(t)$. Thành phần $w_L\,\|\dot q(t)\|^2$ phạt độ lớn vận tốc dịch chuyển, còn thành phần $w_E\,\|u(t)\|^2$ phạt năng lượng điều khiển.
+Ở đây, $q(t)$ là phần cấu hình hình học của trạng thái; nếu $x(t)$ bản thân đã là biến cấu hình thì có thể hiểu $q(t)=x(t)$. Thành phần $w_L\|\dot q(t)\|^2$ phạt độ lớn vận tốc dịch chuyển, còn $w_E\|u(t)\|^2$ phạt độ lớn điều khiển.
 
-Ta đặt local cost trên mỗi vùng $v$ là
+Khi đưa log-barrier vào vùng $v$, running cost local trở thành
+\begin{equation}
+\ell_v^{\mathrm{bar}}(x,u)
+=
+\ell(x,u)+\mu_v\phi_v(x)
+=
+w_L\|\dot q\|^2+w_E\|u\|^2+
+\mu_v\phi_v(x),
+\label{eq:bar_running_cost_region}
+\end{equation}
+trong đó $\mu_v>0$ là trọng số barrier của vùng $v$. Thành phần phạt thời gian $a\Delta_v$ không bị thay thế bởi log-barrier; nó vẫn là một hạng riêng trong local cost để tạo áp lực giảm tổng thời gian.
+
+\subsection{Local cost mới trên miền chuẩn hóa}
+
+Với local trajectory $x_v(\tau)$, local control $u_v(\tau)$, thời lượng $\Delta_v$ và $q_v(\tau):=\pi(x_v(\tau))$, local cost mới được định nghĩa là
 \begin{equation}
 \begin{aligned}
-J_v(s_v^-,w_v,\Delta_v)
+J_v^{\mathrm{bar}}(s_v^-,w_v,\Delta_v)
 :={}& a\,\Delta_v \\
-& + \int_0^1 \Delta_v\left(
-w_L\,\left\|\frac{1}{\Delta_v}\frac{d q_v}{d\tau}(\tau)\right\|^2
-+
-w_E\,\|u_v(\tau)\|^2
-\right)\,d\tau,
+&+\int_0^1 \Delta_v\left(
+w_L\left\|\frac{1}{\Delta_v}\frac{dq_v}{d\tau}(\tau)\right\|^2
++w_E\|u_v(\tau)\|^2
++\mu_v\phi_v\bigl(x_v(\tau)\bigr)
+\right)d\tau .
 \end{aligned}
-\label{eq:local_cost}
+\label{eq:local_cost_barrier}
 \end{equation}
-trong đó $q_v(\tau):=\pi\bigl(x_v(\tau)\bigr)$ là phần cấu hình hình học của trạng thái local.
+Hệ số $\Delta_v$ xuất hiện vì đoạn thời gian thật của vùng $v$ được chuẩn hóa về $\tau\in[0,1]$. Nếu $t=t_v^-+\Delta_v\tau$, thì $dt=\Delta_v d\tau$. Do đó, mọi running cost tích lũy theo thời gian thật đều phải được nhân với Jacobian $\Delta_v$ khi viết trên miền chuẩn hóa.
 
-Khi đó objective toàn cục là
+Cần lưu ý rằng $\dot q(t)$ trong thời gian thật tương ứng với
 \begin{equation}
-\min \sum_{v\in V_r} p_v\,J_v(s_v^-,w_v,\Delta_v).
-\label{eq:global_cost}
+\dot q(t)=\frac{1}{\Delta_v}\frac{dq_v}{d\tau}(\tau).
+\label{eq:qdot_scaled}
+\end{equation}
+Vì vậy, hạng vận tốc trong \eqref{eq:local_cost_barrier} có dạng $\left\|(1/\Delta_v)dq_v/d\tau\right\|^2$, còn toàn bộ running cost vẫn được nhân với $\Delta_v$ do phép đổi biến thời gian.
+
+\subsection{Rời rạc hóa để hiện thực}
+
+Trong hiện thực số, tích phân trong \eqref{eq:local_cost_barrier} được xấp xỉ bằng quadrature hoặc bằng các điểm evaluation sinh ra trong quá trình tích phân RK4. Giả sử trong vùng $v$ có các điểm evaluation
+\begin{equation}
+\tau_{v,q},\qquad q\in\mathcal I_v^{\mathrm{eval}},
+\label{eq:evaluation_points}
+\end{equation}
+với trọng số quadrature $\omega_q$. Khi đó
+\begin{equation}
+\begin{aligned}
+\widehat J_v^{\mathrm{bar}}
+:={}& a\Delta_v \\
+&+\sum_{q\in\mathcal I_v^{\mathrm{eval}}}\omega_q\Delta_v
+\left[
+w_L\left\|\frac{1}{\Delta_v}\frac{dq_v}{d\tau}(\tau_{v,q})\right\|^2
++w_E\|u_v(\tau_{v,q})\|^2
++\mu_v\phi_v\bigl(x_v(\tau_{v,q})\bigr)
+\right].
+\end{aligned}
+\label{eq:discrete_barrier_cost}
+\end{equation}
+Barrier nên được evaluate tại nhiều điểm bên trong shooting interval, không chỉ tại entry state hoặc exit state. Nếu implementation đã dùng RK4, các intermediate stages của RK4 là các ứng viên tự nhiên để evaluate thêm barrier, vì chúng phản ánh trạng thái trung gian của local integration. Tăng số evaluation points giúp kiểm soát tốt hơn hành vi giữa hai điểm kiểm tra, nhưng đồng thời làm tăng chi phí tính toán và số hạng phi tuyến trong objective.
+
+Để \eqref{eq:discrete_barrier_cost} hợp lệ, với mọi điểm evaluation cần áp điều kiện miền xác định
+\begin{equation}
+(b_v)_j-(A_vx_v(\tau_{v,q}))_j\ge \delta_{\log}>0,
+\qquad
+j=1,\dots,m_v,
+\quad q\in\mathcal I_v^{\mathrm{eval}}.
+\label{eq:discrete_domain_barrier_again}
+\end{equation}
+Đây là domain/numerical constraint cho log-barrier. Nó không nên được diễn giải là một chứng chỉ an toàn continuous-time hoàn chỉnh.
+
+\subsection{Lựa chọn trọng số $\mu_v$}
+
+Trọng số $\mu_v$ quyết định mức độ optimizer bị phạt khi local trajectory tiến gần biên vùng lồi. Một cách thực nghiệm hợp lý là bắt đầu với $\mu_v$ tương đối lớn để đẩy nghiệm vào phía trong vùng lồi, sau đó giảm dần nếu muốn cho phép nghiệm tiến gần biên hơn nhằm giảm thời gian hoặc năng lượng. Các mức có thể thử trong giai đoạn đầu là $10^{-2}$, $10^{-3}$, $10^{-4}$ và $10^{-5}$, tùy theo scale của các hạng chi phí còn lại.
+
+Trong formulation hiện tại, ta ưu tiên log-barrier chuẩn vì mục tiêu chính là giảm hiện tượng đi xuyên biên giữa các shooting interval. Nếu về sau nghiệm bị kéo vào quá sâu trong vùng lồi, hoặc bài toán thường xuyên infeasible do yêu cầu slack dương quá nghiêm ngặt, khi đó có thể chuyển sang relaxed log-barrier hoặc recentered log-barrier.
+
+\section{Hàm mục tiêu của mô hình sau khi thêm log-barrier}
+
+\subsection{Objective dạng ý niệm}
+
+Sau khi thay local cost $J_v$ bằng $J_v^{\mathrm{bar}}$, objective toàn cục ở mức ý niệm là
+\begin{equation}
+\min \sum_{v\in V_r}p_v\,J_v^{\mathrm{bar}}(s_v^-,w_v,\Delta_v).
+\label{eq:global_cost_barrier_conceptual}
+\end{equation}
+Chỉ những vùng active mới đóng góp chi phí. Vì barrier cost nằm bên trong $J_v^{\mathrm{bar}}$, nó cũng chỉ áp dụng cho local trajectory của vùng được kích hoạt. Khi $p_v=0$, local block của vùng $v$ bị tắt theo logic on--off đã nêu ở phần perspective và không đóng góp vào objective.
+
+\subsection{Objective dạng epigraph}
+
+Dạng khuyến nghị cho solver là
+\begin{equation}
+\min \sum_{v\in V_r}\eta_v,
+\label{eq:global_cost_barrier_epigraph}
+\end{equation}
+trong đó $\eta_v$ là biến epigraph (tức một upper bound) cho chi phí local đã bao gồm log-barrier. Logic bật/tắt được viết là
+\begin{equation}
+p_v=1\Longrightarrow
+\eta_v\ge \widehat J_v^{\mathrm{bar}}(s_v^-,w_v,\Delta_v),
+\label{eq:rho_active_barrier}
+\end{equation}
+\begin{equation}
+p_v=0\Longrightarrow \eta_v=0.
+\label{eq:rho_inactive_barrier}
 \end{equation}
 
-Ý nghĩa của từng thành phần:
-\begin{itemize}
-    \item $a\Delta_v$: phạt thời lượng spent trong vùng $v$,
-    \item tích phân local: running cost của local segment,
-    \item hệ số $p_v$: chỉ những vùng thực sự được kích hoạt mới đóng góp vào objective.
-\end{itemize}
+Giải thích ngắn: bất đẳng thức $\eta_v\ge\widehat J_v^{\mathrm{bar}}$ đặt $\eta_v$ làm một upper bound (epigraph) của chi phí local; vì objective tối thiểu hoá tổng $\eta_v$, tại nghiệm tối ưu sẽ có $\eta_v=\widehat J_v^{\mathrm{bar}}$ khi vùng được kích hoạt. Việc dùng biến epigraph tách rời chi phí khỏi phần dynamics/on--off giúp trình bày và triển khai với solver dạng MINLP rõ ràng hơn.
 
-
-Hàm $J_v$ biểu diễn chi phí cục bộ của local trajectory segment trong vùng $v$. Thành phần $a\Delta_v$ dùng để phạt thời lượng của đoạn, còn thành phần tích phân biểu diễn running cost tích lũy dọc theo động lực học cục bộ. Do đã có hạng $a\Delta_v$, mô hình vẫn giữ được một áp lực trực tiếp lên tổng thời gian, trong khi running cost tập trung phạt độ dài chuyển động và độ lớn điều khiển.
-
-Do đoạn thời gian thật của vùng $v$ là $[t_v^-,t_v^+]$ với độ dài $\Delta_v=t_v^+-t_v^-$, ta chuẩn hóa nó về miền $\tau\in[0,1]$ bằng phép đổi biến
-\[
-t=t_v^-+\Delta_v\tau.
-\]
-Vì thế
-\[
-dt=\frac{dt}{d\tau}d\tau=\Delta_v\,d\tau.
-\]
-Nói cách khác, hệ số $\Delta_v$ xuất hiện như Jacobian của phép đổi biến thời gian từ biến thật $t$ sang biến chuẩn hóa $\tau$. Do đó, một tích phân running cost theo thời gian thật trên đoạn $v$,
-\[
-\int_{t_v^-}^{t_v^+}\ell(x(t),u(t))\,dt,
-\]
-được viết lại dưới dạng
-\[
-\int_0^1 \Delta_v\left(
-w_L\,\left\|\frac{1}{\Delta_v}\frac{d q_v}{d\tau}(\tau)\right\|^2
-+
-w_E\,\|u_v(\tau)\|^2
-\right)\,d\tau.
-\]
+Với cách viết này, $\eta_v$ chứa chi phí thời gian, running cost động lực học, năng lượng điều khiển và log-barrier cost của vùng lồi. Nếu vùng không active, $\eta_v$ bị triệt tiêu và toàn bộ local block được neo về trạng thái off.
 
 \section{Formulation thô ban đầu của bài toán ghép}
 
 Gom các thành phần ý niệm lại, ta thu được formulation thô ban đầu sau:
 \begin{align}
 \min_{\substack{y,p,z,\\ \{s_v^-,s_v^+,w_v,\Delta_v\}_{v\in V_r}}}
-\quad & \sum_{v\in V_r} p_v\,J_v(s_v^-,w_v,\Delta_v)
+\quad & \sum_{v\in V_r} p_v\,J_v^{\mathrm{bar}}(s_v^-,w_v,\Delta_v)
 \label{eq:joint_problem_obj}\\
 \text{s.t.}\quad
 & \sum_{(\sigma,v)\in E} y_{\sigma v}=1,
@@ -509,8 +669,8 @@ u_v(\tau)=\mathcal U_v(\tau;w_v),
 & s_v^+ - F_v(s_v^-,w_v,\Delta_v)=0,
 \qquad \forall v\in V_r,
 \label{eq:joint_problem_defect}\\
-& x_v(\tau)\in Q_v,
-\qquad \forall \tau\in[0,1],\ \forall v\in V_r \text{ với } p_v=1,
+& \mathcal S_v^{\mathrm{safe}} \text{ trong } \eqref{eq:safe_set_redefined} \text{ được thỏa},
+\qquad \forall v\in V_r \text{ với } p_v=1,
 \label{eq:joint_problem_region}\\
 & y_{uv}=1 \Longrightarrow
 \begin{cases}
@@ -532,23 +692,23 @@ s_v^-=z_{uv},
 \end{align}
 
 
-Trong \eqref{eq:joint_problem_obj}--\eqref{eq:joint_problem_binary}, ràng buộc \eqref{eq:acyclicity} được thêm vào để giới hạn số cạnh đi ra từ mỗi vùng.
+Trong \eqref{eq:joint_problem_obj}--\eqref{eq:joint_problem_binary}, ràng buộc loại chu trình được giữ lại để giới hạn số cạnh đi ra từ mỗi vùng, qua đó tránh việc lời giải rời rạc tạo vòng lặp không cần thiết.
 
 \section{Perspective cho hình học lồi và động lực học}
 
 \subsection{Vấn đề của formulation}
-Nếu giữ nguyên bài toán \eqref{eq:joint_problem_obj}--\eqref{eq:joint_problem_binary} ở dạng trực tiếp, thì có ba vấn đề đại số dễ xuất hiện:
+Nếu dùng trực tiếp bài toán \eqref{eq:joint_problem_obj}--\eqref{eq:joint_problem_binary}, mô hình thường gặp ba vướng mắc chính:
 \begin{enumerate}
     \item objective kiểu
     \[
-    \sum_{v\in V_r} p_v\,J_v(s_v^-,w_v,\Delta_v)
+    \sum_{v\in V_r} p_v\,J_v^{\mathrm{bar}}(s_v^-,w_v,\Delta_v)
     \]
-    tạo cảm giác ``bật/tắt'' local cost, nhưng về mặt mô hình hóa lại trộn một biến nhị phân với một hàm chi phí local nói chung không lồi;
-    \item các biến continuous tại những vùng không được đi qua vẫn có thể tồn tại như các biến tự do nếu không có cơ chế deactivation rõ ràng;
-    \item nếu viết ghép nối theo kiểu tích nhị phân--liên tục, chẳng hạn $y_{uv}z_{uv}$, thì sẽ sinh ra các bilinear constraints không cần thiết.
+    nhìn trực quan như một cơ chế ``bật/tắt'' local cost, nhưng thực chất đang nhân biến nhị phân với một hàm local nói chung là phi lồi;
+    \item các biến continuous ở những vùng không được chọn có thể vẫn ``trôi tự do'' nếu không có cơ chế deactivation minh bạch;
+    \item nếu mô hình hóa ghép nối bằng tích nhị phân--liên tục (ví dụ $y_{uv}z_{uv}$), ta sẽ đưa thêm các bilinear constraints không cần thiết.
 \end{enumerate}
 
-Vì vậy, mô hình hóa được khuyến nghị là tách bài toán thành hai lớp:
+Vì vậy, cách viết ổn hơn là tách mô hình thành hai lớp:
 \begin{enumerate}
     \item \textbf{lớp hình học lồi/on--off}: dùng \emph{homogenization/perspective} cho các tập lồi gắn với đỉnh và cạnh;
     \item \textbf{lớp động lực học multiple shooting}: giữ riêng dưới dạng các ràng buộc phi tuyến được bật/tắt bằng indicator/disjunction, không cố ép chúng vào một perspective form khi bản thân chúng không lồi.
@@ -596,7 +756,7 @@ Khi đó:
     \item nếu $y_{uv}=0$ thì biến $z_{uv}$ bị ``triệt tiêu'' theo closure của homogenization và không còn là một biến tự do có ý nghĩa vật lý độc lập.
 \end{itemize}
 
-Perspective ở đây chỉ xử lý gọn phần \emph{membership} trên các tập lồi. Nó không tự động mã hóa các đẳng thức ghép nối $s_u^+=z_{uv}$ và $s_v^-=z_{uv}$; các equalities này vẫn phải được viết rõ dưới dạng on--off constraints gắn với $y_{uv}$.
+Perspective ở đây chỉ xử lý gọn phần \emph{membership} trên các tập lồi. Nó không tự động mã hóa các đẳng thức ghép nối $s_u^+=z_{uv}$ và $s_v^-=z_{uv}$; hai đẳng thức này vẫn phải được viết tường minh dưới dạng on--off constraints gắn với $y_{uv}$.
 
 \subsection{Bật/tắt local multiple-shooting block}
 Với mỗi vùng $v$, local multiple-shooting block vẫn phải giữ nguyên dưới dạng
@@ -611,7 +771,7 @@ s_v^+ - F_v(s_v^-,w_v,\Delta_v)=0.
 \end{equation}
 Khối \eqref{eq:ms-block-repeat} nói chung là \textbf{phi lồi}, vì $F_v$ là endpoint map sinh ra bởi tích phân một ODE và phụ thuộc phi tuyến vào các biến quyết định. Paper \emph{Motion Planning around Obstacles with Convex Optimization} cũng nhấn mạnh rằng nếu thêm continuous-time dynamics vào mô hình thì các equality constraints tương ứng trở nên nonconvex, ngay cả với linear control systems khi shape và timing cùng là biến quyết định \cite{marcucci2022}.
 
-Do đó, perspective \textbf{không} giải được phần này. Cách đúng là giữ nó như một \textbf{nonlinear dynamic block} và bật/tắt nó bằng indicator/disjunction.
+Do đó, perspective \textbf{không} thể thay thế phần này. Cách làm đúng là giữ nó như một \textbf{nonlinear dynamic block} và bật/tắt bằng indicator/disjunction.
 
 
 Với mỗi vùng $v\in V_r$, ta dùng logic sau:
@@ -622,12 +782,12 @@ p_v=1
 \Delta_v \ge \underline \Delta_v >0,\\
 \text{local IVP } \eqref{eq:local_ivp} \text{ được kích hoạt},\\
 s_v^+ - F_v(s_v^-,w_v,\Delta_v)=0,\\
-\mathcal S_v^{\mathrm{safe}}(s_v^-,w_v,\Delta_v)\le 0,\\
-\rho_v \ge \widehat J_v(s_v^-,w_v,\Delta_v),
+\mathcal S_v^{\mathrm{safe}} \text{ trong } \eqref{eq:safe_set_redefined} \text{ được thỏa},\\
+\eta_v \ge \widehat J_v^{\mathrm{bar}}(s_v^-,w_v,\Delta_v),
 \end{cases}
 \label{eq:active-vertex-block}
 \end{equation}
-trong đó $\rho_v$ là epigraph variable cho local dynamic cost trên vùng $v$, $\widehat J_v$ là một quadrature approximation của chi phí đó, còn $\mathcal S_v^{\mathrm{safe}}$ trong báo cáo này được hiểu trước hết như một sampling-based safety certificate trên một lưới hữu hạn, có thể được siết dần bằng adaptive refinement để xấp xỉ \eqref{eq:region_constraint}.
+trong đó $\eta_v$ là biến epigraph cho local cost trên vùng $v$, $\widehat J_v^{\mathrm{bar}}$ là một xấp xỉ quadrature của chi phí đã bao gồm log-barrier, còn $\mathcal S_v^{\mathrm{safe}}$ được hiểu là các điều kiện miền xác định của log-barrier tại các điểm evaluation/quadrature, như trong \eqref{eq:safe_set_redefined}.
 
 Ngược lại, khi vùng $v$ không được dùng, ta triệt tiêu toàn bộ block:
 \begin{equation}
@@ -635,7 +795,7 @@ p_v=0
 \Longrightarrow
 \begin{cases}
 \Delta_v = 0,\\
-\rho_v = 0,\\
+\eta_v = 0,\\
 s_v^- = 0,\\
 s_v^+ = 0,\\
 w_v = \bar w_v,
@@ -653,9 +813,9 @@ trong đó $s_v^\pm=0$ là lựa chọn off-state tương thích với \eqref{eq
 \subsection{Mô hình cuối}
 Không nên xem
 \[
-\sum_v p_v J_v(s_v^-,w_v,\Delta_v)
+\sum_v p_v J_v^{\mathrm{bar}}(s_v^-,w_v,\Delta_v)
 \]
-là formulation solver-ready cuối cùng. Sau khi chỉnh lại các điểm ở trên, framework khuyến nghị gồm bốn lớp:
+là formulation solver-ready cuối cùng. Sau khi chỉnh các điểm ở trên, mô hình nên được trình bày theo bốn lớp rõ ràng:
 \begin{enumerate}
     \item \textbf{lớp discrete path}:
     \begin{align*}
@@ -679,13 +839,13 @@ là formulation solver-ready cuối cùng. Sau khi chỉnh lại các điểm �
     \begin{cases}
     \text{local IVP } \eqref{eq:local_ivp},\\
     s_v^+ - F_v(s_v^-,w_v,\Delta_v)=0,\\
-    \mathcal S_v^{\mathrm{safe}}(s_v^-,w_v,\Delta_v)\le 0,\\
-    \rho_v \ge \widehat J_v(s_v^-,w_v,\Delta_v),
+    \mathcal S_v^{\mathrm{safe}} \text{ trong } \eqref{eq:safe_set_redefined} \text{ được thỏa},\\
+    \eta_v \ge \widehat J_v^{\mathrm{bar}}(s_v^-,w_v,\Delta_v),
     \end{cases}
     \\
     & p_v=0 \Longrightarrow
     \begin{cases}
-    \Delta_v=0,\ \rho_v=0,\\
+    \Delta_v=0,\ \eta_v=0,\\
     s_v^- = s_v^+ = 0,\\
     w_v=\bar w_v.
     \end{cases}
@@ -693,23 +853,23 @@ là formulation solver-ready cuối cùng. Sau khi chỉnh lại các điểm �
 \end{enumerate}
 Khi đó objective toàn cục được viết gọn hơn thành
 \begin{equation}
-\min \sum_{v\in V_r} \rho_v,
+\min \sum_{v\in V_r} \eta_v,
 \label{eq:recommended-clean-objective}
 \end{equation}
 trong đó:
 \begin{itemize}
-    \item $\rho_v$ chứa local dynamic cost của multiple-shooting segment trên vùng $v$;
+    \item $\eta_v$ chứa chi phí thời gian, local dynamic cost, energy cost và log-barrier cost của multiple-shooting segment trên vùng $v$;
     \item block chi phí này được bật/tắt bằng indicator/disjunction đồng bộ với activation variable $p_v$.
 \end{itemize}
 
 \paragraph{Kết luận}
-Perspective function được dùng để xử lý phần on--off convex của mô hình, đặc biệt là:
+Perspective function được dùng để xử lý phần on--off convex của mô hình, cụ thể là:
 \begin{itemize}
     \item triệt tiêu các biến continuous tại các vùng/cạnh không active,
     \item viết gọn các interface constraints trên các tập lồi giao nhau.
 \end{itemize}
 Ở đây, ``interface constraints'' là các ràng buộc ghép nối tại điểm chuyển tiếp giữa hai vùng liên tiếp, chẳng hạn điều kiện $z_{uv}\in Q_u\cap Q_v$ cùng với $s_u^+=z_{uv}$ và $s_v^-=z_{uv}$. Dùng perspective cho biến kết nối giúp biểu diễn gọn logic ``cạnh active thì điểm nối phải nằm trong phần giao, cạnh inactive thì biến kết nối bị triệt tiêu'', thay vì phải viết nhiều ràng buộc on--off rời rạc hoặc sinh thêm các tích nhị phân--liên tục không cần thiết.
-Tuy nhiên, perspective \textbf{không} loại bỏ được bản chất phi lồi của multiple shooting, cũng không thay thế cho cycle-elimination hay safety transcription hữu hạn chiều. Vì vậy, mô hình sau khi chỉnh đúng hơn nên được xem là một \textbf{mixed-integer nonlinear optimal-control framework} ở mức continuous time.
+Tuy nhiên, perspective \textbf{không} loại bỏ được bản chất phi lồi của multiple shooting, cũng không thay thế cho cycle-elimination, defect constraints hay các điều kiện miền xác định của log-barrier. Nói cách khác, sau khi chỉnh mô hình đúng cách, ta vẫn đang làm việc với một \textbf{mixed-integer nonlinear optimal-control framework} ở mức continuous time.
 
 \section{Phân loại bài toán}
 
@@ -754,6 +914,22 @@ T. Marcucci, M. Petersen, D. von Wrangel, and R. Tedrake,
 T. Marcucci,
 \newblock \emph{Graphs of Convex Sets with Applications to Optimal Control and Motion Planning},
 \newblock PhD thesis, Massachusetts Institute of Technology, 2024.
+
+
+\bibitem{schiela2008}
+A. Schiela,
+\newblock \emph{Barrier Methods for Optimal Control Problems with State Constraints},
+\newblock ZIB-Report 07-07, 2008.
+
+\bibitem{feller2015}
+C. Feller and C. Ebenbauer,
+\newblock \emph{Relaxed Logarithmic Barrier Function Based Model Predictive Control of Linear Systems},
+\newblock arXiv:1503.03314, 2015.
+
+\bibitem{elango2025}
+P. Elango, D. Luo, A. G. Kamath, S. Uzun, T. Kim, and B. Açıkmeşe,
+\newblock \emph{Continuous-time successive convexification for constrained trajectory optimization},
+\newblock Automatica, 180:112464, 2025.
 
 \end{thebibliography}
 
