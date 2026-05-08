@@ -1,67 +1,154 @@
-\section{Thiết kế thực nghiệm}
+% Tệp này được \input{} dưới \section{Thiết lập thực nghiệm} của Chương 5.
 
-Mục đích của các thực nghiệm này là kiểm chứng hiệu quả của phương pháp GCS trong bài toán lập kế hoạch quỹ đạo có ràng buộc động lực học. Chúng tôi tập trung đánh giá hai yếu tố cốt lõi: chất lượng của quá trình phân hoạch không gian tự do ($\mathcal{X}_{free}$) cũng như tác động của nó lên mức độ tối ưu của quỹ đạo chuyển động đầu ra trên môi trường 2D đơn giản và khả năng tối ưu hóa quỹ đạo toàn cục trong môi trường có mức độ phức tạp tổ hợp lớn.
+Mục đích của các thực nghiệm là kiểm chứng và so sánh hai hướng tiếp cận đã đề xuất ở Chương~\ref{ch:proposed_method}: hoạch định bằng \textbf{Graph of Convex Sets (GCS-Bezier)} và hoạch định bằng \textbf{OCP+Multiple Shooting kết hợp log-barrier (OCP+MMS)}. Chúng tôi tập trung đánh giá ba khía cạnh: (i) chất lượng phân hoạch không gian tự do và tác động của nó lên cả hai phương pháp, (ii) khả năng mở rộng tổ hợp khi số vùng lồi lớn, và (iii) vai trò của ràng buộc động lực phi tuyến — nơi GCS-Bezier với mô hình kinematic xấp xỉ bị hạn chế nhưng OCP+MMS xử lý trực tiếp.
 
-\subsection{Môi trường 2D đơn giản}
+\subsection{Môi trường phần cứng và phần mềm}
+\label{subsec:exp_environment}
 
-Chúng tôi xem xét một không gian làm việc hai chiều đơn giản với cấu hình bắt đầu $q_{0}$ và cấu hình kết thúc $q_{T}$ được xác định trước. Không gian tự do $\mathcal{X}_{free}$ được phân rã thành tập hợp các vùng lồi an toàn $\{Q_{i}\}_{i \in I}$ thông qua các thuật toán phân hoạch khác nhau để làm cơ sở cho việc thiết lập đồ thị.
+Toàn bộ thực nghiệm được thực hiện trên máy tính cá nhân với cấu hình: CPU AMD Ryzen 7 4800H @ 2.9~GHz, RAM 16~GB, hệ điều hành Ubuntu 24.04. Stack phần mềm cho từng pha của bài toán được liệt kê trong Bảng~\ref{tab:software_stack}.
 
-Trong kịch bản này, chúng tôi tập trung phân tích giai đoạn tiền xử lý không gian cấu hình. Chất lượng của các vùng lồi được tạo ra là yếu tố quyết định số lượng biến nguyên trong bài toán MICP, từ đó ảnh hưởng trực tiếp đến thời gian giải và tính tối ưu của quỹ đạo.
+\begin{table}[!htp]
+\centering
+\caption{Stack phần mềm cho hai phương pháp.}
+\label{tab:software_stack}
+\begin{tabular}{lll}
+\toprule
+\textbf{Pha} & \textbf{GCS / GCS-Bezier} & \textbf{OCP+MMS} \\
+\midrule
+Phân hoạch không gian & \multicolumn{2}{l}{ACD, IRIS, VCC (Drake / cài đặt riêng)} \\
+Pha rời rạc & Mosek (SOCP relaxation) & Gurobi (MILP top-$K$) \\
+Pha liên tục & Mosek & CasADi + IPOPT (NLP) \\
+Ngôn ngữ & Python (Drake) & Python \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\textbf{Mục tiêu:}
-Định lượng sự tác động của các thuật toán phân hoạch lồi khác nhau (ACD, VCC) so với phương pháp phân hoạch thủ công\footnote{Tức người dùng sẽ tự phân hoạch không gian tự do. Ở đây chúng tôi giả sử kết quả từ phân hoạch thủ công là kết quả tốt nhất để từ đó so sánh mức độ hiệu quả của các giải thuật còn lại.} (Manual) lên hiệu suất của bộ lập kế hoạch GCS.\\
+\subsection{Chỉ số đánh giá}
+\label{subsec:exp_metrics}
 
-\textbf{Mô tả kịch bản:}
-    Thiết lập một không gian làm việc 2D với các vật cản đa giác lồi được bố trí cố định. Cùng với đó thực hiện phân hoạch không gian tự do bằng ba phương pháp:
-    \begin{enumerate}
-        \item \textbf{Phân hoạch Thủ công:} Tạo ra số lượng vùng lồi tối thiểu bằng sự can thiệp của con người để làm chuẩn đối sánh.
-        \item \textbf{Phân hoạch Lồi Xấp xỉ (ACD):} Sử dụng thuật toán với mức dung sai $\tau = 0.0$ (tức các vùng lồi được tạo ra hoàn toàn lồi).
-        \item \textbf{Lớp phủ Clique Khả kiến (VCC):} Sử dụng VCC với mức độ phủ của tập các vùng lồi là $96\%$.
-    \end{enumerate}
+Để đảm bảo so sánh công bằng giữa hai phương pháp, chúng tôi sử dụng bốn nhóm chỉ số sau, được áp dụng đồng nhất trên tất cả các kịch bản.
 
+\paragraph{(A) Chi phí tính toán.}
+\begin{itemize}
+    \item $t_{\text{decomp}}$: thời gian phân hoạch không gian tự do thành các vùng lồi.
+    \item $t_{\text{discrete}}$: thời gian giải pha rời rạc — relaxation SOCP + làm tròn đối với GCS, MILP top-$K$ đối với OCP+MMS.
+    \item $t_{\text{continuous}}$: thời gian giải pha liên tục — SOCP cuối cùng đối với GCS, dãy NLP multiple shooting đối với OCP+MMS.
+    \item $t_{\text{total}} = t_{\text{decomp}} + t_{\text{discrete}} + t_{\text{continuous}}$.
+\end{itemize}
 
-\textbf{Thiết lập bài toán tối ưu:}
-Chúng tôi tập trung vào bài toán tối ưu hóa thời gian thực hiện (minimum-time problem) kết hợp với các ràng buộc động lực học chặt chẽ. Các tham số cấu hình hệ thống được thiết lập như sau:
+\paragraph{(B) Chất lượng quỹ đạo.}
+\begin{itemize}
+    \item $T_{\text{exec}}$: thời gian thực thi quỹ đạo.
+    \item $L = \int_{0}^{T_{\text{exec}}} \|\dot q(t)\|\,dt$: độ dài hình học.
+    \item $E_u = \int_{0}^{T_{\text{exec}}} \|u(t)\|^2\,dt$: chi phí điều khiển (chỉ khả dụng cho OCP+MMS, vì GCS-Bezier không có $u$ tường minh).
+    \item $J_{\text{jerk}} = \int_{0}^{T_{\text{exec}}} \|\dddot q(t)\|^2\,dt$: tích phân jerk, phản ánh độ trơn.
+\end{itemize}
+
+\paragraph{(C) An toàn.}
+\begin{itemize}
+    \item $d_{\min} = \min_t \min_v d\bigl(q(t),\,\partial Q_v\bigr)$ với $v$ là vùng đang chứa $q(t)$: khoảng cách tối thiểu giữa quỹ đạo và biên các vùng an toàn, lấy mẫu trên lưới mịn $10\times$ lưới rời rạc hóa.
+    \item $\rho_{\text{vio}}$: tỉ lệ thời gian quỹ đạo nằm ngoài hợp các vùng an toàn (đánh giá ex-post bằng hàm membership).
+\end{itemize}
+
+\paragraph{(D) Tính khả thi và tối ưu.}
+\begin{itemize}
+    \item Cho GCS: optimality gap của relaxation $\delta_{\text{relax}} = (C_{\text{round}} - C_{\text{relax}})/C_{\text{relax}}$.
+    \item Cho OCP+MMS: tỉ lệ NLP hội tụ trên $K$ đường đi ứng viên, và residual của ràng buộc defect cuối cùng $\|s_v^+ - F_v\|_\infty$.
+\end{itemize}
+
+\subsection{Các kịch bản thử nghiệm}
+\label{subsec:exp_scenarios}
+
+Chúng tôi thiết kế ba kịch bản với độ phức tạp tăng dần, mỗi kịch bản nhằm soi sáng một khía cạnh khác nhau của hai hướng tiếp cận:
+\begin{itemize}
+    \item \textbf{Kịch bản A — Môi trường 2D đơn giản} (mục~\ref{subsubsec:scenario_A}): tác động của thuật toán phân hoạch lên hiệu suất cuối cùng;
+    \item \textbf{Kịch bản B — Mê cung} (mục~\ref{subsubsec:scenario_B}): khả năng mở rộng tổ hợp khi số vùng lồi lên đến hàng trăm;
+    \item \textbf{Kịch bản C — Xe nonholonomic kiểu Dubins} (mục~\ref{subsubsec:scenario_C}): vai trò của ràng buộc động lực phi tuyến và giới hạn của xấp xỉ Bezier kinematic.
+\end{itemize}
+
+\subsubsection{Kịch bản A — Môi trường 2D đơn giản}
+\label{subsubsec:scenario_A}
+
+\textbf{Mục tiêu.}
+Định lượng tác động của các thuật toán phân hoạch lồi (ACD, VCC) so với phân hoạch thủ công\footnote{Tức người dùng tự phân hoạch không gian tự do; ở đây chúng tôi coi kết quả thủ công làm chuẩn đối sánh về số vùng tối thiểu.} (Manual) lên cả bộ lập kế hoạch GCS-Bezier và OCP+MMS.
+
+\textbf{Mô tả kịch bản.}
+Một không gian làm việc 2D với các vật cản đa giác lồi được bố trí cố định, cấu hình bắt đầu $q_{0}$ và cấu hình kết thúc $q_{T}$ được xác định trước. Không gian tự do $\mathcal{X}_{\text{free}}$ được phân rã thành tập các vùng lồi an toàn $\{Q_{i}\}_{i\in I}$ thông qua ba phương pháp:
 \begin{enumerate}
-    \item \textbf{Hàm mục tiêu và chi phí:} Sử dụng hàm chi phí thời gian $J_{t} = w_{t}T_{e}$ với trọng số $w_{t} = 1$.
-    \item \textbf{Tham số hóa quỹ đạo:} Quỹ đạo được mô hình hóa bằng các đường cong Bézier bậc $d = 6$.
-    \item \textbf{Ràng buộc liên tục:} Áp đặt độ liên tục cấp $C^{2}$ tại các điểm chuyển tiếp giữa các tập lồi.
-    \item \textbf{Giới hạn động lực học:} Vận tốc trên mỗi chiều bị giới hạn trong khoảng $\dot{q} \in [-1,1]$.
-    \item \textbf{Điều chuẩn và độ trơn:} Áp dụng điều chuẩn đạo hàm bậc hai với trọng số $\epsilon = 10^{-1}$.
+    \item \textbf{Phân hoạch thủ công:} tạo số vùng lồi tối thiểu bằng can thiệp của con người, làm chuẩn đối sánh.
+    \item \textbf{Phân hoạch lồi xấp xỉ (ACD):} dung sai $\tau = 0$ (các vùng lồi hoàn toàn).
+    \item \textbf{Lớp phủ clique khả kiến (VCC):} mức độ phủ $96\%$.
 \end{enumerate}
+Trên mỗi phân hoạch, chúng tôi giải bài toán tối ưu hóa thời gian thực hiện kết hợp với điều chuẩn đạo hàm bậc hai theo cả hai phương pháp đề xuất.
 
-Bằng cách giải bài toán nới lỏng lồi của SPP trong khung làm việc GCS, chúng tôi thu được quỹ đạo tối ưu không va chạm, đồng thời cung cấp cận sai số tối ưu (optimality gap) để chứng minh tính hiệu quả của phương pháp so với nghiệm tối ưu toàn cục.
+\subsubsection{Kịch bản B — Mê cung}
+\label{subsubsec:scenario_B}
 
-\textbf{Chỉ số đo lường:}
-\begin{enumerate}
-    \item \textbf{Hiệu quả phân hoạch:} Số lượng vùng lồi ($k$) và thời gian tính toán của thuật toán phân hoạch.
-    \item \textbf{Hiệu suất tối ưu hóa:} Thời gian giải bài toán MICP/SOCP.
-    \item \textbf{Chất lượng quỹ đạo:} Giá trị chi phí thời gian và giá trị tối ưu của hàm mục tiêu.
-\end{enumerate}
+\textbf{Mục tiêu.}
+Đánh giá khả năng mở rộng tổ hợp của hai phương pháp khi số vùng lồi tăng cao, đồng thời kiểm chứng tính ổn định thống kê qua nhiều lần sinh môi trường ngẫu nhiên.
 
-\subsection{Môi trường mê cung}
+\textbf{Mô tả kịch bản.}
+Mê cung kích thước $25 \times 25 = 625$ ô được sinh bằng thuật toán DFS ngẫu nhiên, sau đó loại bỏ ngẫu nhiên 100 bức tường để tạo ra các lộ trình đa dạng. Mỗi ô được mô hình hóa thành một tập an toàn lồi $Q_i$ với các cạnh hai chiều giữa các ô kề. Thực nghiệm được lặp lại trên 10 mê cung khác nhau để đảm bảo tính khách quan thống kê.
 
-Trong thực nghiệm này, chúng tôi mở rộng phạm vi kiểm chứng sang một môi trường có độ phức tạp tổ hợp cao hơn đáng kể: một mê cung lớn với cấu trúc hình học dày đặc.
+\subsubsection{Kịch bản C — Xe nonholonomic kiểu Dubins}
+\label{subsubsec:scenario_C}
 
-\textbf{Mục tiêu:}
-Minh họa khả năng của framework GCS trong môi trường có độ phức tạp tổ hợp lớn và khả năng kết hợp tối ưu hóa rời rạc với tối ưu hóa liên tục.
+\textbf{Mục tiêu.}
+Minh chứng vai trò của ràng buộc động lực phi tuyến trong OCP+MMS và làm rõ giới hạn của xấp xỉ Bezier kinematic dùng trong GCS-Bezier — đây là kịch bản trọng tâm để khẳng định đóng góp của hướng tiếp cận thứ hai.
 
-\textbf{Mô tả kịch bản:}
-    \textbf{Cấu trúc môi trường:} Mê cung kích thước $25 \times 25 = 625$ ô, sinh bằng thuật toán DFS ngẫu nhiên và loại bỏ ngẫu nhiên 100 bức tường. Mỗi ô được mô hình hóa thành một tập an toàn lồi $Q_i$ với các cạnh hai chiều giữa các ô kề nhau.
+\textbf{Mô hình động lực.}
+Xét một xe Dubins di chuyển trong mặt phẳng, có trạng thái $x = (p_x, p_y, \theta)^\top \in \mathbb{R}^2 \times S^1$ và điều khiển $u = (v, \omega)^\top$, với phương trình:
+\begin{equation}
+    \dot p_x = v\cos\theta,
+    \qquad
+    \dot p_y = v\sin\theta,
+    \qquad
+    \dot\theta = \omega.
+    \label{eq:dubins_dyn}
+\end{equation}
+Vận tốc thẳng bị giới hạn $v \in [v_{\min}, v_{\max}]$ với $v_{\min}>0$ (xe không lùi), và tốc độ góc lái $|\omega| \le \omega_{\max}$, mô hình hóa giới hạn vật lý của bánh trước.
 
-\textbf{Thiết lập bài toán tối ưu:}
-\begin{enumerate}
-    \item \textbf{Bậc đa thức và độ trơn:} Đường cong Bézier bậc $6$ với ràng buộc liên tục cấp $C^2$.
-    \item \textbf{Hàm mục tiêu:} Tối thiểu hóa thời gian kết hợp điều chuẩn đạo hàm bậc hai với $\epsilon = 10^{-1}$.
-    \item \textbf{Ràng buộc vi phân:} Vận tốc giới hạn trong $[-1,1]$, với $\dot{h}_{min} = 10^{-1}$.
-    \item \textbf{Điều kiện biên:} Vận tốc tại điểm đầu và cuối bằng $0$.
-    \item \textbf{Bộ giải:} Sử dụng \texttt{MosekSolver} để giải bài toán SOCP.
-\end{enumerate}
+\textbf{Mô tả kịch bản.}
+Không gian làm việc 2D kích thước $20 \times 20$ với 6--10 vật cản hình chữ nhật bố trí ngẫu nhiên trên 10 seed. Cấu hình khởi đầu và đích được chọn sao cho yêu cầu xe phải đổi hướng tổng cộng ít nhất $90^\circ$, đảm bảo ràng buộc $\omega_{\max}$ thực sự kích hoạt. Không gian tự do được phân hoạch bằng VCC trên không gian vị trí $(p_x, p_y)$; chiều $\theta$ không tham gia phân hoạch mà chỉ xuất hiện trong động lực nội bộ của OCP+MMS.
 
-\textbf{Chỉ số đo lường:}
-\begin{enumerate}
-    \item \textbf{Thời gian giải} ($t_{solve}$).
-    \item \textbf{Cận sai số tối ưu} ($\delta_{relax} = \frac{C_{round}-C_{relax}}{C_{relax}}$).
-    \item \textbf{Tổng chi phí thời gian} ($T$).
-    \item \textbf{Độ dài quỹ đạo hình học} ($L$).
-\end{enumerate}
+\textbf{Đánh giá đặc thù cho GCS-Bezier.}
+Vì GCS-Bezier tham số hóa quỹ đạo bằng đa thức Bezier trên $(p_x, p_y)$ mà không mô hình hóa $\theta$, chúng tôi suy ngược tốc độ góc từ nghiệm thu được bằng $\omega(t) = \dot\theta(t)$ với $\theta(t) = \arctan2\bigl(\dot p_y(t), \dot p_x(t)\bigr)$, sau đó đo tỉ lệ thời gian vi phạm $|\omega(t)| > \omega_{\max}$. Đây là chỉ số định lượng cho thấy quỹ đạo Bezier có thể đẹp về hình học nhưng không khả thi về động lực, trong khi OCP+MMS đảm bảo $|\omega(t)| \le \omega_{\max}$ trực tiếp như một ràng buộc của bài toán.
+
+\subsection{Tham số bài toán}
+\label{subsec:exp_parameters}
+
+Bảng~\ref{tab:exp_params} tóm tắt các tham số chính của hai phương pháp trên ba kịch bản. Trên cùng một kịch bản, các tham số chung của hàm mục tiêu được giữ giống nhau giữa hai phương pháp để đảm bảo so sánh công bằng.
+
+\begin{table}[!htp]
+\centering
+\caption{Tham số chính của các thực nghiệm.}
+\label{tab:exp_params}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lccc}
+\toprule
+\textbf{Tham số} & \textbf{Kịch bản A} & \textbf{Kịch bản B} & \textbf{Kịch bản C} \\
+\midrule
+Số chiều cấu hình & 2 & 2 & 3 \\
+Bậc Bezier (GCS) / liên tục $C^k$ & 6 / $C^2$ & 6 / $C^2$ & 6 / $C^2$ \\
+$M_v$ — số nút lưới mỗi vùng (OCP+MMS) & 10 & 5 & 15 \\
+$K$ — số đường đi ứng viên (OCP+MMS) & 5 & 20 & 10 \\
+$\mu_v$ ban đầu / cuối (log-barrier) & $10^{-2}$ / $10^{-5}$ & $10^{-2}$ / $10^{-5}$ & $10^{-2}$ / $10^{-5}$ \\
+Trọng số $w_t$ / $w_E$ & 1 / 0.1 & 1 / 0.1 & 1 / 0.1 \\
+Vận tốc tối đa $v_{\max}$ & 1 & 1 & 1 \\
+Tốc độ góc lái $\omega_{\max}$ & --- & --- & $\pi/2$ rad/s \\
+Số seed & 1 (cố định) & 10 & 10 \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\subsection{Phương pháp đối sánh}
+\label{subsec:exp_baselines}
+
+Mỗi kịch bản được giải bằng các baseline sau:
+\begin{itemize}
+    \item \textbf{Manual + GCS-Bezier} (chỉ Kịch bản A): chuẩn đối sánh về số vùng tối thiểu.
+    \item \textbf{Linear-GCS}: chỉ tối thiểu hóa độ dài hình học, dùng làm cận dưới về thời gian giải.
+    \item \textbf{Bezier-GCS}: phương pháp đề xuất hướng 1 của báo cáo này (mục~\ref{sec:gcs_approach}).
+    \item \textbf{OCP+MMS}: phương pháp đề xuất hướng 2 của báo cáo này (mục~\ref{sec:ocp_mms_approach}).
+\end{itemize}
+Trong Kịch bản C, do GCS-Bezier không mô hình hóa được ràng buộc $\omega_{\max}$ tường minh, baseline GCS-Bezier được giải với mô hình kinematic thuần và đánh giá vi phạm động lực ex-post như đã mô tả ở mục~\ref{subsubsec:scenario_C}.

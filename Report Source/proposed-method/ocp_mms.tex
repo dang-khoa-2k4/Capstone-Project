@@ -1,0 +1,443 @@
+\begin{figure}[!htp]
+\centering
+\begin{tikzpicture}[
+    stage/.style={draw, rounded corners=2pt, align=center,
+                  minimum height=14mm, minimum width=22mm, fill=blue!5,
+                  font=\small},
+    arrow/.style={->, >=stealth, thick}
+]
+\node[stage] (P0) at (0,0)    {Bài toán\\OCP gốc};
+\node[stage] (P1) at (3.2,0)  {Phân hoạch\\$Q\to\{Q_v\}$};
+\node[stage] (P2) at (6.4,0)  {Đồ thị\\$G=(V,E)$};
+\node[stage] (P3) at (9.6,0)  {MIOCP / MINLP\\hợp nhất};
+\node[stage] (P4) at (12.8,0) {Quỹ đạo\\$x^\star,\,u^\star$};
+
+\draw[arrow] (P0) -- (P1);
+\draw[arrow] (P1) -- (P2);
+\draw[arrow] (P2) -- (P3);
+\draw[arrow] (P3) -- (P4);
+
+\node[align=center, font=\scriptsize] at (0,-1.4)    {không gian tự do\\với vật cản};
+\node[align=center, font=\scriptsize] at (3.2,-1.4)  {ACD / IRIS / VCC};
+\node[align=center, font=\scriptsize] at (6.4,-1.4)  {kề $\Leftrightarrow Q_u\cap Q_v\neq\varnothing$};
+\node[align=center, font=\scriptsize] at (9.6,-1.4)  {network flow\\+ multiple shooting\\+ log-barrier};
+\node[align=center, font=\scriptsize] at (12.8,-1.4) {liên tục, an toàn,\\động lực hợp lệ};
+\end{tikzpicture}
+\caption[Quy trình tổng quan OCP+MMS]{Quy trình tổng quan của hướng tiếp cận OCP+MMS. Bắt đầu từ bài toán điều khiển tối ưu liên tục với ràng buộc hình học phi lồi, không gian tự do được phân hoạch thành một họ vùng lồi; cấu trúc kề giữa các vùng được mã hóa thành đồ thị có hướng; việc chọn đường đi rời rạc và tối ưu hóa quỹ đạo cục bộ được hợp nhất thành một bài toán MIOCP/MINLP duy nhất; nghiệm thu được là cặp quỹ đạo trạng thái và điều khiển tối ưu thỏa mãn đồng thời ràng buộc động lực học và an toàn.}
+\label{fig:ocp_mms_pipeline}
+\end{figure}
+
+\subsection{Bài toán gốc cần giải}
+\label{subsec:ocp_original}
+
+Điểm xuất phát của phương pháp đề xuất là bài toán điều khiển tối ưu (optimal control problem, OCP) liên tục theo thời gian. Xét một hệ động lực học có phương trình trạng thái
+\begin{equation}
+\dot x(t)=f(x(t),u(t)),
+\qquad t\in[0,T],
+\label{eq:ct_dyn}
+\end{equation}
+trong đó $x(t)\in\mathbb{R}^{n_x}$ là vector trạng thái, $u(t)\in\mathbb{R}^{n_u}$ là tín hiệu điều khiển, và $T>0$ là chân trời thời gian — có thể được ấn định trước hoặc đưa vào như một biến quyết định tự do.
+
+Cho trạng thái khởi đầu $x(0)=x^{\mathrm{s}}$, trạng thái đích $x(T)=x^{\mathrm{g}}$, không gian tự do $Q\subset\mathbb{R}^{n_x}$ (tức tập hợp các trạng thái không va chạm với bất kỳ vật cản nào), và tập điều khiển chấp nhận được $\mathcal{U}\subseteq\mathbb{R}^{n_u}$. Bài toán điều khiển tối ưu cần giải là
+\begin{align}
+\min_{T,\,x(\cdot),\,u(\cdot)}\quad
+& \Phi\bigl(x(T),T\bigr)+\int_0^T \ell\bigl(x(t),u(t)\bigr)\,dt
+\label{eq:orig_ocp_obj}\\
+\text{s.t.}\quad
+& \dot x(t)=f(x(t),u(t)), && t\in[0,T],
+\label{eq:orig_ocp_dyn}\\
+& x(0)=x^{\mathrm s},\qquad x(T)=x^{\mathrm g},
+\label{eq:orig_ocp_bc}\\
+& x(t)\in Q,\qquad u(t)\in \mathcal U, && \forall t\in[0,T].
+\label{eq:orig_ocp_path}
+\end{align}
+Trong hàm mục tiêu \eqref{eq:orig_ocp_obj}, số hạng $\Phi(x(T),T)$ là chi phí cuối (terminal cost) phản ánh chất lượng trạng thái tại thời điểm kết thúc, còn $\ell(x(t),u(t))$ là chi phí tức thời (running cost) được tích lũy dọc theo toàn bộ quỹ đạo. Ràng buộc \eqref{eq:orig_ocp_dyn} mô tả phương trình động lực học của hệ thống, \eqref{eq:orig_ocp_bc} là điều kiện biên tại hai đầu mút quỹ đạo, và \eqref{eq:orig_ocp_path} yêu cầu quỹ đạo phải nằm trong không gian tự do ở mọi thời điểm.
+
+Thách thức chính khi giải bài toán \eqref{eq:orig_ocp_obj}--\eqref{eq:orig_ocp_path} nằm ở ràng buộc $x(t)\in Q$: vì sự hiện diện của vật cản khiến $Q$ là tập phi lồi, bài toán trở thành phi lồi và NP-hard nói chung. Ý tưởng cốt lõi của phương pháp đề xuất là \emph{Phân hoạch} $Q$ thành một họ hữu hạn các vùng lồi, sau đó mã hóa bài toán chọn chuỗi vùng cần đi qua dưới dạng luồng mạng nhị phân (binary network flow) trên một đồ thị có hướng, đồng thời giải bài toán động lực học liên tục cục bộ trong từng vùng bằng kỹ thuật direct multiple shooting.
+
+\subsection{Phân hoạch không gian tự do và xây dựng đồ thị}
+\label{subsec:graph_construction}
+
+Giả sử không gian tự do $Q$ đã được Phân hoạch thành một họ hữu hạn các vùng lồi
+\[
+\mathcal{Q}:=\{Q_v\}_{v\in V_r},
+\qquad
+Q_v\subseteq Q \subset \mathbb{R}^{n_x},
+\]
+trong đó mỗi $Q_v$ là một tập lồi đóng, bị chặn, và không giao với bất kỳ vật cản nào. Bước Phân hoạch này có thể thực hiện bằng các kỹ thuật như ACD, VCC, hay IRIS như đã trình bày ở chương trước.
+
+Từ họ vùng lồi $\mathcal{Q}$, ta xây dựng một đồ thị có hướng $G=(V,E)$ để mã hóa cấu trúc liên thông giữa các vùng. Tập đỉnh $V=V_r\cup\{\sigma,\tau\}$ gồm một đỉnh $v\in V_r$ tương ứng với mỗi vùng lồi $Q_v$, cùng một đỉnh nguồn $\sigma$ (đại diện cho trạng thái xuất phát $x^{\mathrm{s}}$) và một đỉnh đích $\tau$ (đại diện cho trạng thái kết thúc $x^{\mathrm{g}}$). Tập cạnh $E=E_{rr}\cup E_s\cup E_t$ được phân thành ba loại.
+
+Hai vùng $Q_u$ và $Q_v$ được nối với nhau khi và chỉ khi chúng có phần giao không rỗng, tức là quỹ đạo có thể chuyển tiếp liên tục từ vùng này sang vùng kia:
+\begin{equation}
+E_{rr}:=\bigl\{(u,v)\in V_r\times V_r:\ Q_u\cap Q_v\neq \varnothing\bigr\}.
+\label{eq:adjacency_ocp}
+\end{equation}
+Điều kiện này đảm bảo tại điểm chuyển tiếp giữa hai đoạn quỹ đạo kề nhau, trạng thái của rô-bốt có thể thuộc về cả hai vùng cùng lúc — tức là không có bước nhảy gián đoạn. Các cạnh nối với nguồn và đích được thêm riêng dựa trên vị trí của trạng thái đầu và cuối:
+\begin{equation}
+E_s:=\bigl\{(\sigma,v):\ x^{\mathrm s}\in Q_v\bigr\},
+\qquad
+E_t:=\bigl\{(v,\tau):\ x^{\mathrm g}\in Q_v\bigr\}.
+\label{eq:boundary_edges_ocp}
+\end{equation}
+Mỗi đường đi từ $\sigma$ đến $\tau$ trên đồ thị $G$ tương ứng với một chuỗi vùng lồi có thể ghép nối liên tục mà quỹ đạo đi qua. Bài toán điều khiển tối ưu vì vậy quy về việc đồng thời chọn đường đi tốt nhất trên đồ thị và tìm quỹ đạo tối ưu trong từng vùng dọc theo đường đi đó.
+
+\subsection{Biến quyết định của mô hình}
+\label{subsec:decision_vars}
+
+Tương ứng với cấu trúc hỗn hợp rời rạc–liên tục của bài toán, ta chia biến quyết định thành ba lớp: biến nhị phân chọn đường đi, biến liên tục mô tả động lực học cục bộ, và biến liên kết tại điểm chuyển tiếp giữa các vùng.
+
+\subsubsection{Biến rời rạc: chọn đường đi trên đồ thị}
+
+Với mỗi cạnh $e=(u,v)\in E$, ta đặt biến nhị phân $y_{uv}\in\{0,1\}$, trong đó $y_{uv}=1$ có nghĩa là cạnh $(u,v)$ thuộc đường đi được chọn, và $y_{uv}=0$ nếu ngược lại. Với mỗi đỉnh vùng $v\in V_r$, ta đặt biến kích hoạt $p_v\in\{0,1\}$, trong đó $p_v=1$ khi và chỉ khi vùng $Q_v$ thực sự nằm trên đường đi được chọn, tức là quỹ đạo đi qua $Q_v$.
+
+Biến $p_v$ không độc lập: nó được xác định hoàn toàn bởi các biến cạnh thông qua điều kiện bảo toàn luồng
+\[
+p_v
+=\sum_{(u,v)\in E} y_{uv}
+=\sum_{(v,w)\in E} y_{vw},
+\qquad v\in V_r.
+\]
+Đẳng thức này cho thấy $p_v=1$ khi và chỉ khi có đúng một cạnh đi vào $v$ và đúng một cạnh đi ra khỏi $v$ được chọn — tức là $v$ nằm trên đường đi.
+
+\subsubsection{Biến liên tục cục bộ trên mỗi vùng}
+
+Với mỗi vùng $v\in V_r$, ta gắn một đoạn quỹ đạo cục bộ được tham số hóa trên miền thời gian chuẩn hóa $\tau\in[0,1]$. Bộ biến liên tục mô tả đoạn này gồm:
+\begin{align}
+& s_v^- \in \mathbb R^{n_x} && \text{: trạng thái tại thời điểm vào vùng } v \text{ (điểm bắn đầu),} \nonumber\\
+& s_v^+ \in \mathbb R^{n_x} && \text{: trạng thái tại thời điểm rời vùng } v \text{ (điểm cuối đoạn),} \nonumber\\
+& \Delta_v \ge 0 && \text{: thời lượng vật lý của đoạn quỹ đạo trong vùng } v, \nonumber\\
+& w_v \in \mathbb R^{m_v} && \text{: tham số hóa tín hiệu điều khiển trên vùng } v. \nonumber
+\end{align}
+
+Trong kỹ thuật direct multiple shooting, mỗi đoạn có một giá trị ban đầu riêng $s_v^-$ được tối ưu hóa đồng thời với các biến còn lại, thay vì tích phân tuần tự từ trạng thái ban đầu qua toàn bộ chân trời thời gian. Điều này giúp cho bài toán được song song hóa theo từng vùng và cải thiện tính ổn định số của quá trình tối ưu hóa. Tính liên tục của quỹ đạo tại điểm nối giữa các đoạn sẽ được đảm bảo thông qua các ràng buộc ghép nối ở mục sau.
+
+\subsubsection{Biến liên kết tại điểm chuyển tiếp giữa hai vùng}
+
+Với mỗi cạnh nội bộ $(u,v)\in E_{rr}$, ta đặt biến interface $z_{uv}\in\mathbb{R}^{n_x}$ đại diện cho trạng thái vật lý của rô-bốt tại khoảnh khắc chuyển từ vùng $Q_u$ sang vùng $Q_v$. Khi cạnh $(u,v)$ được chọn ($y_{uv}=1$), trạng thái này phải nằm trong phần giao $Q_u\cap Q_v$ — đảm bảo tính hợp lệ của điểm nối: $z_{uv}$ vừa là điểm cuối của đoạn trong $Q_u$, vừa là điểm đầu của đoạn trong $Q_v$, và đồng thời thuộc cả hai vùng an toàn.
+
+\subsection{Ràng buộc network flow cho phần rời rạc}
+\label{subsec:network_flow}
+
+Các ràng buộc network flow đảm bảo rằng tập hợp các cạnh được chọn tạo thành đúng một đường đi đơn giản (không có chu trình, không phân nhánh) từ đỉnh nguồn $\sigma$ đến đỉnh đích $\tau$.
+
+Đầu tiên, ta yêu cầu đúng một cạnh đi ra khỏi nguồn và đúng một cạnh đi vào đích:
+\begin{equation}
+\sum_{(\sigma,v)\in E} y_{\sigma v}=1,
+\qquad
+\sum_{(v,\tau)\in E} y_{v\tau}=1.
+\label{eq:source_sink_flow_ocp}
+\end{equation}
+Tiếp theo, bảo toàn luồng tại mỗi đỉnh vùng $v\in V_r$ đảm bảo số cạnh đi vào bằng số cạnh đi ra, đồng thời liên kết biến $p_v$ với các biến cạnh:
+\begin{equation}
+\sum_{(u,v)\in E} y_{uv}
+=
+\sum_{(v,w)\in E} y_{vw}
+=
+p_v.
+\label{eq:flow_balance_ocp}
+\end{equation}
+Cuối cùng, ràng buộc loại chu trình ngăn đường đi quay lại một vùng đã đi qua, tức là mỗi vùng xuất hiện tối đa một lần:
+\begin{equation}
+\sum_{e\in I_v^{\mathrm{out}}} y_e \le 1,
+\qquad \forall v\in V_r.
+\label{eq:acyclicity_ocp}
+\end{equation}
+Ký hiệu $I_v^{\mathrm{out}}$ là tập tất cả các cạnh đi ra khỏi đỉnh $v$. Ràng buộc \eqref{eq:acyclicity_ocp} đóng vai trò then chốt về mặt tính toán: nó loại trừ các vòng lặp vô tận trong không gian quyết định, khiến bài toán network flow có nghiệm hữu hạn.
+
+\subsection{Mô hình động lực học cục bộ theo direct multiple shooting}
+\label{subsec:local_dynamics}
+
+\subsubsection{Tham số hóa tín hiệu điều khiển trên từng vùng}
+
+Để đưa bài toán điều khiển tối ưu về dạng chương trình phi tuyến hữu hạn chiều (nonlinear program, NLP) có thể giải bằng các bộ giải số, tín hiệu điều khiển liên tục $u(\cdot)$ trên mỗi vùng $v$ được tham số hóa bởi một vector hữu hạn chiều $w_v$:
+\begin{equation}
+u_v(\tau)=\mathcal{U}_v(\tau;w_v),
+\qquad \tau\in[0,1].
+\label{eq:control_param_ocp}
+\end{equation}
+Lớp hàm $\mathcal{U}_v$ có thể là điều khiển hằng, piecewise constant, hay spline bậc thấp, tùy theo yêu cầu về tính mượt của quỹ đạo. Với cách tham số hóa này, bài toán tối ưu hóa hàm $u(\cdot)$ trong không gian hàm vô hạn chiều được rút gọn về bài toán tối ưu hóa vector $w_v$ hữu hạn chiều.
+
+\subsubsection{Bài toán giá trị đầu cục bộ trên từng vùng}
+
+Mỗi vùng $v\in V_r$ được gắn với một đoạn quỹ đạo tham số hóa trên miền chuẩn hóa $\tau\in[0,1]$. Việc chuẩn hóa thời gian này cho phép thời lượng $\Delta_v$ trở thành biến quyết định: thay vì tích phân trên khoảng thời gian vật lý $[0,\Delta_v]$ (biến động theo từng vùng), ta luôn tích phân trên $[0,1]$ cố định và đưa $\Delta_v$ vào như một hệ số tỉ lệ. Phương trình động lực học sau chuẩn hóa thành
+\begin{equation}
+\begin{cases}
+\dfrac{d x_v}{d\tau}(\tau)=\Delta_v\,f\bigl(x_v(\tau),u_v(\tau)\bigr), & \tau\in[0,1],\\[6pt]
+x_v(0)=s_v^-,\\[2pt]
+u_v(\tau)=\mathcal{U}_v(\tau;w_v).
+\end{cases}
+\label{eq:local_ivp_ocp}
+\end{equation}
+Hệ \eqref{eq:local_ivp_ocp} là bài toán giá trị đầu (initial value problem, IVP) với điều kiện ban đầu là biến bắn $s_v^-$. Nghiệm $x_v(\tau)$ của hệ này, khi được tích phân đến $\tau=1$, cho trạng thái cuối của đoạn trong vùng $v$; ta định nghĩa ánh xạ endpoint
+\begin{equation}
+F_v(s_v^-,w_v,\Delta_v):=x_v(1).
+\label{eq:Fv_ocp}
+\end{equation}
+
+\subsubsection{Ràng buộc defect của multiple shooting}
+
+Trong phương pháp direct multiple shooting, $s_v^+$ là biến độc lập đại diện cho trạng thái cuối đoạn trong vùng $v$, và không nhất thiết trùng với giá trị $F_v(s_v^-,w_v,\Delta_v)$ trong quá trình tối ưu hóa. Tính liên tục của quỹ đạo được áp đặt thông qua \emph{ràng buộc defect}:
+\begin{equation}
+s_v^+ - F_v(s_v^-,w_v,\Delta_v)=0,
+\qquad \forall v\in V_r.
+\label{eq:defect_ocp}
+\end{equation}
+Ràng buộc này yêu cầu điểm cuối của IVP tích phân từ $s_v^-$ phải khớp chính xác với biến đầu ra $s_v^+$. Tại nghiệm tối ưu, tất cả các ràng buộc defect đều bằng 0, và quỹ đạo tổng thể là liên tục hoàn toàn.
+
+\subsection{Ràng buộc an toàn hình học}
+\label{subsec:safety_constraints}
+
+Khi vùng $v$ được kích hoạt ($p_v=1$), đoạn quỹ đạo cục bộ trong vùng đó phải nằm hoàn toàn trong vùng an toàn $Q_v$:
+\begin{equation}
+x_v(\tau)\in Q_v,
+\qquad \forall \tau\in[0,1],
+\quad \text{khi } p_v=1.
+\label{eq:region_constraint_ocp}
+\end{equation}
+Đây là ràng buộc continuous-time vô hạn chiều — nó phải thỏa mãn tại mọi $\tau\in[0,1]$, không chỉ tại hữu hạn điểm rời rạc. Để đưa vào bộ giải số, ta cần xấp xỉ hoặc thay thế nó bằng một dạng hữu hạn chiều. Hai cách tiếp cận chính được trình bày dưới đây.
+
+\subsubsection{Cách 1: Xấp xỉ qua lưới hữu hạn điểm (hard constraint)}
+
+Cách tiếp cận trực tiếp nhất là kiểm tra ràng buộc an toàn tại $M_v+1$ điểm lưới trên $[0,1]$:
+\[
+0=\tau_{v,0}<\tau_{v,1}<\cdots<\tau_{v,M_v}=1.
+\]
+Giả sử $Q_v$ là polytope $Q_v=\{x\in\mathbb{R}^{n_x}:A_vx\le b_v\}$, điều kiện an toàn rời rạc hóa thành
+\[
+A_v x_v(\tau_{v,k})\le b_v-\varepsilon_v,
+\qquad k=0,\dots,M_v,
+\]
+với $\varepsilon_v>0$ là biên an toàn (safety margin). Cách này đơn giản và không thay đổi cấu trúc hàm mục tiêu, nhưng chỉ đảm bảo an toàn tại các điểm lưới; vi phạm giữa các điểm vẫn có thể xảy ra với bước lưới đủ thô.
+
+\subsubsection{Cách 2: Hàm cản logarit (log-barrier)}
+\label{subsubsec:log_barrier}
+
+Một hướng tiếp cận có nền tảng lý thuyết chắc hơn là sử dụng hàm cản logarit (log-barrier) — một kỹ thuật cổ điển trong tối ưu hóa điểm trong (interior-point optimization). Ý tưởng là thay ràng buộc cứng $A_v x \le b_v$ bằng một số hạng phạt trong hàm mục tiêu, số hạng này tiến về $+\infty$ khi quỹ đạo tiếp cận biên vùng lồi. Với polytope $Q_v = \{x : A_v x \le b_v\}$ có $m_v$ bất đẳng thức, ta định nghĩa hàm cản
+\begin{equation}
+\phi_v(x)
+= -\sum_{j=1}^{m_v}\log\bigl((b_v)_j-(A_v x)_j\bigr).
+\label{eq:log_barrier_def}
+\end{equation}
+Hàm $\phi_v$ xác định trên phần nội của $Q_v$ (nơi mọi $(b_v)_j-(A_vx)_j>0$) và thỏa mãn $\phi_v(x)\to+\infty$ khi $x$ tiến đến bất kỳ mặt biên nào của $Q_v$. Do đó, khi cộng $\phi_v$ vào hàm mục tiêu với trọng số $\mu_v>0$, bộ giải bị ``đẩy'' tự nhiên ra xa biên, giúp quỹ đạo nằm sâu trong vùng an toàn mà không cần ràng buộc tường minh. Bài toán OCP cục bộ trên vùng $v$ khi đó có dạng:
+\[
+\begin{aligned}
+    \min_{x(\cdot),\,u(\cdot)} \quad
+    & \int_{0}^{T_v}\!\bigl[\ell(x(t),u(t)) + \mu_v\,\phi_v(x(t))\bigr]\,dt \\
+    \text{s.t.} \quad
+    & \dot{x}(t) = f(x(t),u(t)),\quad
+      x(0) = x_v^{\mathrm{in}},\quad x(T_v) = x_v^{\mathrm{out}}.
+\end{aligned}
+\]
+
+Tham số $\mu_v$ điều chỉnh mức độ ``chặt'' của rào cản: khi $\mu_v$ lớn, quỹ đạo bị ép về gần tâm giải tích (analytic center) của $Q_v$; khi giảm $\mu_v$ dần về 0, quỹ đạo xấp xỉ nghiệm của bài toán gốc có ràng buộc cứng. Trong thực tế, ta giải một chuỗi bài toán với $\mu_v$ giảm dần (thường từ $10^{-2}$ đến $10^{-5}$), dùng nghiệm bài toán trước khởi tạo cho bài toán sau.
+
+Sau khi rời rạc hóa bằng multiple shooting với $N_v$ nút và bước thời gian $\Delta t = \Delta_v/N_v$, bài toán NLP trên một vùng trở thành:
+\begin{equation}
+\begin{aligned}
+    \min_{\{x_k,\,u_k\}_{k=0}^{N_v-1}} \quad
+    & \sum_{k=0}^{N_v-1}\!\left[
+        \ell(x_k,u_k)\,\Delta t
+        -\mu_v\sum_{j=1}^{m_v}\log\bigl((b_v)_j-(A_v x_k)_j\bigr)
+      \right] \\
+    \text{s.t.} \quad
+    & x_{k+1} = \Phi(x_k,u_k), \\
+    & x_0 = x_v^{\mathrm{in}}, \qquad x_{N_v} = x_v^{\mathrm{out}},
+\end{aligned}
+\label{eq:nlp_single_region}
+\end{equation}
+trong đó $\Phi(x_k,u_k)$ là bản đồ chuyển trạng thái thu được bằng cách tích phân phương trình \eqref{eq:ct_dyn} từ $x_k$ với điều khiển $u_k$ trong khoảng thời gian $\Delta t$. Lưu ý rằng điều kiện biên $x_{N_v}=x_v^{\mathrm{out}}$ được giữ nguyên là ràng buộc đẳng thức, không bị hàm cản thay thế — hàm cản chỉ tác động lên các ràng buộc bất đẳng thức xác định biên vùng lồi.
+
+\subsection{Ràng buộc ghép nối}
+\label{subsec:coupling_constraints}
+
+Các ràng buộc ghép nối liên kết phần rời rạc (đường đi trên đồ thị) với phần liên tục (động lực học cục bộ), đảm bảo rằng khi cạnh $(u,v)$ được chọn, đoạn quỹ đạo trong $Q_u$ và đoạn trong $Q_v$ khớp nhau tại điểm chuyển tiếp.
+
+\subsubsection{Ghép nối tại điểm chuyển tiếp giữa hai vùng kề nhau}
+
+Với mỗi cạnh nội bộ $(u,v)\in E_{rr}$, khi cạnh này được chọn ($y_{uv}=1$), biến interface $z_{uv}$ phải đồng thời là điểm cuối của đoạn trong $Q_u$ và điểm đầu của đoạn trong $Q_v$, đồng thời thuộc phần giao của hai vùng:
+\begin{equation}
+y_{uv}=1 \Longrightarrow
+\begin{cases}
+z_{uv}\in Q_u\cap Q_v,\\
+s_u^+=z_{uv},\\
+s_v^-=z_{uv}.
+\end{cases}
+\label{eq:edge_coupling_ocp}
+\end{equation}
+Điều kiện $z_{uv}\in Q_u\cap Q_v$ đảm bảo điểm nối nằm trong vùng an toàn của cả hai vùng liền kề, trong khi hai đẳng thức $s_u^+=z_{uv}$ và $s_v^-=z_{uv}$ thiết lập tính liên tục của quỹ đạo tại điểm này.
+
+\subsubsection{Điều kiện biên tại nguồn và đích}
+
+Khi cạnh từ nguồn $(\sigma,v)\in E_s$ được chọn, điểm vào của đoạn quỹ đạo đầu tiên phải khớp với trạng thái xuất phát:
+\[
+y_{\sigma v}=1 \Longrightarrow s_v^-=x^{\mathrm s},
+\qquad \forall(\sigma,v)\in E_s.
+\]
+Tương tự, khi cạnh đến đích $(v,\tau)\in E_t$ được chọn, điểm ra của đoạn quỹ đạo cuối cùng phải khớp với trạng thái kết thúc:
+\[
+y_{v\tau}=1 \Longrightarrow s_v^+=x^{\mathrm g},
+\qquad \forall(v,\tau)\in E_t.
+\]
+Hai nhóm ràng buộc trên, kết hợp với \eqref{eq:edge_coupling_ocp}, đảm bảo rằng chuỗi đoạn quỹ đạo cục bộ tạo thành một quỹ đạo liên tục hoàn chỉnh từ $x^{\mathrm{s}}$ đến $x^{\mathrm{g}}$.
+
+\subsection{Hàm mục tiêu}
+\label{subsec:objective_ocp}
+
+Ta chọn chi phí tức thời có dạng
+\begin{equation}
+\ell\bigl(x(t),u(t)\bigr)
+:=
+w_L\,\|\dot q(t)\|^2 + w_E\,\|u(t)\|^2,
+\qquad
+q(t):=\pi\bigl(x(t)\bigr),
+\label{eq:running_cost_choice_ocp}
+\end{equation}
+trong đó $\pi:\mathbb{R}^{n_x}\to\mathbb{R}^{n_q}$ là phép chiếu lấy phần cấu hình hình học của trạng thái, $\dot q(t)$ là vận tốc hình học, và $w_L,w_E>0$ là các trọng số. Số hạng $w_L\,\|\dot q\|^2$ phạt vận tốc lớn (khuyến khích quỹ đạo đi chậm, mượt), còn $w_E\,\|u\|^2$ phạt năng lượng điều khiển (khuyến khích tín hiệu điều khiển nhỏ).
+
+Tổng chi phí cục bộ trên vùng $v$ trong miền thời gian chuẩn hóa $\tau\in[0,1]$ là
+\begin{equation}
+J_v(s_v^-,w_v,\Delta_v)
+:= a\,\Delta_v
++ \int_0^1 \Delta_v\!\left(
+w_L\,\left\|\frac{1}{\Delta_v}\frac{d q_v}{d\tau}(\tau)\right\|^2
++
+w_E\,\|u_v(\tau)\|^2
+\right)\!d\tau,
+\label{eq:local_cost_ocp}
+\end{equation}
+trong đó số hạng $a\,\Delta_v$ (với $a>0$) phạt thời lượng của đoạn, khuyến khích rô-bốt đi qua vùng $v$ nhanh hơn. Phép đổi biến $\frac{dq_v}{d\tau}=\Delta_v\dot q_v$ cho thấy $\frac{1}{\Delta_v}\frac{dq_v}{d\tau}=\dot q_v$ chính là vận tốc vật lý; tích phân $\Delta_v\,d\tau = dt$, nên $J_v$ tương đương với chi phí tức thời \eqref{eq:running_cost_choice_ocp} tích phân trên thời gian vật lý $[0,\Delta_v]$.
+
+Khi kết hợp với hàm cản log-barrier để đảm bảo an toàn hình học (xem mục~\ref{subsubsec:log_barrier}), hàm mục tiêu toàn cục trở thành:
+\begin{equation}
+\min \sum_{v\in V_r} p_v\!\left[J_v(s_v^-,w_v,\Delta_v)
++ \int_0^1 \Delta_v\,\mu_v\,\phi_v\bigl(x_v(\tau)\bigr)\,d\tau\right].
+\label{eq:global_cost_barrier}
+\end{equation}
+Nhân tử $p_v$ đảm bảo rằng chỉ các vùng thuộc đường đi được chọn mới đóng góp vào chi phí tổng.
+
+\subsection{Mô hình tổng hợp}
+\label{subsec:full_formulation}
+
+Tập hợp tất cả các thành phần đã trình bày, bài toán tối ưu hóa tổng hợp được viết đầy đủ như sau:
+\begin{align}
+\min_{\substack{y,\,p,\,z,\\ \{s_v^-,s_v^+,w_v,\Delta_v\}_{v\in V_r}}}
+\quad & \sum_{v\in V_r} p_v\!\left[J_v(s_v^-,w_v,\Delta_v)
++ \int_0^1 \Delta_v\,\mu_v\,\phi_v\bigl(x_v(\tau)\bigr)\,d\tau\right]
+\label{eq:joint_obj}\\[6pt]
+\text{s.t.}\quad
+& \sum_{(\sigma,v)\in E} y_{\sigma v}=1,
+\qquad
+\sum_{(v,\tau)\in E} y_{v\tau}=1,
+\label{eq:joint_source_sink}\\
+& \sum_{(u,v)\in E} y_{uv}
+=
+\sum_{(v,w)\in E} y_{vw}
+=
+p_v,
+\qquad \forall v\in V_r,
+\label{eq:joint_flow}\\
+& \sum_{e\in I_v^{\mathrm{out}}} y_e \le 1,
+\qquad \forall v\in V_r,
+\label{eq:joint_acyc}\\[6pt]
+& x_v'(\tau)=\Delta_v\,f\bigl(x_v(\tau),u_v(\tau)\bigr),
+\qquad \tau\in[0,1],\ \forall v\in V_r,
+\label{eq:joint_dyn}\\
+& x_v(0)=s_v^-,
+\qquad
+u_v(\tau)=\mathcal{U}_v(\tau;w_v),
+\qquad \forall v\in V_r,
+\label{eq:joint_ivp}\\
+& s_v^+ - F_v(s_v^-,w_v,\Delta_v)=0,
+\qquad \forall v\in V_r,
+\label{eq:joint_defect}\\[6pt]
+& x_v(\tau)\in Q_v,
+\qquad \forall \tau\in[0,1],\ \forall v\in V_r \text{ với } p_v=1,
+\label{eq:joint_region}\\[6pt]
+& y_{uv}=1 \Longrightarrow
+\begin{cases}
+z_{uv}\in Q_u\cap Q_v,\\
+s_u^+=z_{uv},\\
+s_v^-=z_{uv},
+\end{cases}
+\qquad \forall (u,v)\in E_{rr},
+\label{eq:joint_edge}\\
+& y_{\sigma v}=1 \Longrightarrow s_v^-=x^{\mathrm s},
+\qquad \forall (\sigma,v)\in E_s,
+\label{eq:joint_source}\\
+& y_{v\tau}=1 \Longrightarrow s_v^+=x^{\mathrm g},
+\qquad \forall (v,\tau)\in E_t,
+\label{eq:joint_target}\\[6pt]
+& y_{uv}\in\{0,1\},\qquad p_v\in\{0,1\},
+\qquad \forall (u,v)\in E,\ \forall v\in V_r.
+\label{eq:joint_binary}
+\end{align}
+
+Mỗi nhóm ràng buộc đảm nhận một vai trò riêng biệt:
+\begin{itemize}
+    \item \eqref{eq:joint_source_sink}--\eqref{eq:joint_acyc}: ràng buộc network flow, đảm bảo tập cạnh được chọn tạo thành đúng một đường đi đơn giản từ nguồn đến đích, không có nhánh phụ hay chu trình;
+    \item \eqref{eq:joint_dyn}--\eqref{eq:joint_defect}: khối động lực học cục bộ, bao gồm phương trình IVP sau chuẩn hóa thời gian và ràng buộc defect của multiple shooting đảm bảo tính liên tục nội bộ trong từng vùng;
+    \item \eqref{eq:joint_region}: ràng buộc an toàn hình học continuous-time, được hiện thực hóa bằng sampling lưới hoặc log-barrier như đã trình bày trong mục~\ref{subsec:safety_constraints};
+    \item \eqref{eq:joint_edge}--\eqref{eq:joint_target}: ràng buộc ghép nối, liên kết phần rời rạc với phần liên tục để đảm bảo tính liên tục toàn cục của quỹ đạo qua các điểm chuyển tiếp;
+    \item \eqref{eq:joint_binary}: ràng buộc nhị phân trên các biến chọn đường đi.
+\end{itemize}
+
+\subsection{Phân tách cấu trúc bài toán thành bốn lớp}
+\label{subsec:layered_decomposition}
+
+Mặc dù bài toán \eqref{eq:joint_obj}--\eqref{eq:joint_binary} ghép phần rời rạc và phần liên tục thành một chương trình duy nhất, cấu trúc bên trong của nó cho phép tách thành bốn lớp có thể xử lý tương đối độc lập. Phép phân hoạch này không thay đổi nghiệm tối ưu mà cung cấp khung nhìn để thiết kế chiến lược giải (xem mục~\ref{subsec:solver_strategy}):
+\begin{enumerate}
+    \item \textbf{Lớp discrete path}: ràng buộc network flow \eqref{eq:joint_source_sink}, \eqref{eq:joint_flow}, \eqref{eq:joint_acyc} — hoàn toàn tuyến tính nguyên, có thể giải bằng các bộ giải ILP;
+    \item \textbf{Lớp convex/on--off geometry}: các ràng buộc membership được homogenization/perspective để xử lý điều kiện bật/tắt theo biến nhị phân:
+    \begin{align*}
+    (s_v^-,\,p_v),\;(s_v^+,\,p_v) &\in \operatorname{cl}(\widetilde{Q}_v),\qquad \forall v\in V_r,\\
+    (z_{uv},\,y_{uv})&\in \operatorname{cl}\!\bigl(\widetilde{Q_u\cap Q_v}\bigr),\qquad \forall (u,v)\in E_{rr};
+    \end{align*}
+    \item \textbf{Lớp ghép nối on--off}: ràng buộc \eqref{eq:joint_edge}--\eqref{eq:joint_target}, bật/tắt các đẳng thức ghép nối đồng bộ với biến nhị phân tương ứng;
+    \item \textbf{Lớp nonlinear multiple-shooting dynamics}: với mỗi vùng $v\in V_r$,
+    \begin{align*}
+    p_v=1 \Longrightarrow
+    &\begin{cases}
+    \Delta_v \ge \underline{\Delta}_v >0,\\[2pt]
+    \text{IVP cục bộ \eqref{eq:local_ivp_ocp} được kích hoạt,}\\[2pt]
+    s_v^+ - F_v(s_v^-,w_v,\Delta_v)=0,\\[2pt]
+    \text{ràng buộc an toàn (sampling hoặc log-barrier),}\\[2pt]
+    \rho_v \ge \widehat{J}_v(s_v^-,w_v,\Delta_v),
+    \end{cases}
+    \\[4pt]
+    p_v=0 \Longrightarrow
+    &\begin{cases}
+    \Delta_v=0,\quad \rho_v=0,\\[2pt]
+    s_v^- = s_v^+ = 0,\quad w_v=\bar{w}_v.
+    \end{cases}
+    \end{align*}
+\end{enumerate}
+Nhờ vậy, hàm mục tiêu toàn cục được viết gọn thành $\min\sum_{v\in V_r}\rho_v$, trong đó $\rho_v$ là biến epigraph cho chi phí dynamic cục bộ trên vùng $v$, được bật/tắt đồng bộ với $p_v$. Khi $p_v=0$, vùng $v$ không thuộc đường đi và tất cả các biến liên tục gắn với nó được đặt về 0 — điều này tránh đưa vào bài toán các IVP thừa không cần thiết.
+
+\subsection{Phân loại bài toán}
+\label{subsec:problem_class}
+
+Từ mô hình tổng hợp \eqref{eq:joint_obj}--\eqref{eq:joint_binary}, có thể thấy bài toán đề xuất là một bài toán tối ưu lai ghép rời rạc--liên tục. Tính hỗn hợp nguyên xuất hiện từ các biến nhị phân $y_{uv}$ và $p_v$, dùng để quyết định đường đi trên đồ thị vùng lồi. Tính phi tuyến xuất hiện từ khối điều khiển tối ưu liên tục: trạng thái $x_v(\cdot)$ phải thỏa phương trình động lực học \eqref{eq:joint_dyn}, tín hiệu điều khiển được tham số hóa bởi $w_v$, thời lượng đoạn $\Delta_v$ là biến quyết định, và các đoạn quỹ đạo được nối bằng ràng buộc defect của multiple shooting.
+
+Vì vậy, nếu xét ở mức liên tục theo thời gian, trước khi thay thế các hàm trạng thái và điều khiển bằng hữu hạn biến số, bài toán vẫn chứa đồng thời biến nhị phân và các ràng buộc vi phân phi tuyến. Đây chính là dạng \emph{Mixed-Integer Nonlinear Optimal Control Problem} (MIOCP). Sau khi áp dụng direct multiple shooting, các hàm $x_v(\cdot)$ và $u_v(\cdot)$ được thay bằng các biến hữu hạn chiều $\{s_v^-,s_v^+,w_v,\Delta_v\}$ cùng các ràng buộc defect. Khi đó bài toán trở thành một chương trình tối ưu hữu hạn chiều có cả biến nguyên và ràng buộc phi tuyến, tức \emph{Mixed-Integer Nonlinear Program} (MINLP). Nói cách khác, mô hình được phân loại là MIOCP ở dạng liên tục theo thời gian và là MINLP sau khi rời rạc hóa bằng multiple shooting.
+
+Điểm quan trọng là bài toán này \textbf{không thể quy trực tiếp về Mixed-Integer Second Order Cone Problem} (MISOCP) như trong GCS-Bézier của Marcucci và cộng sự~\cite{MarcucciEtAl2023GCS, Marcucci2024Thesis}. Một MISOCP yêu cầu các ràng buộc liên tục có dạng tuyến tính hoặc nón bậc hai lồi. Trong GCS-Bézier, điều này đạt được nhờ tham số hóa quỹ đạo bằng các điểm điều khiển Bézier: ràng buộc nằm trong vùng lồi có thể áp lên các điểm điều khiển thông qua tính chất convex hull, còn các ràng buộc độ dài, vận tốc hoặc gia tốc thường được viết dưới dạng chuẩn Euclid và đưa về SOCP.
+
+Ngược lại, trong mô hình OCP+MMS, ràng buộc defect
+\[
+s_v^+ - F_v(s_v^-,w_v,\Delta_v)=0
+\]
+phụ thuộc vào endpoint map $F_v$, tức nghiệm tại $\tau=1$ của IVP phi tuyến \eqref{eq:local_ivp_ocp}. Nói cách khác, $F_v$ không phải là một biểu thức affine, đa thức lồi, hay nón bậc hai; nó là một hàm ẩn sinh ra bởi quá trình tích phân động lực học. Ngay cả khi $f$ trơn, ánh xạ này nói chung vẫn phi tuyến và không lồi theo $(s_v^-,w_v,\Delta_v)$. Ngoài ra, việc đưa $\Delta_v$ vào phương trình chuẩn hóa thời gian qua tích $\Delta_v f(x_v,u_v)$ cũng tạo thêm quan hệ phi tuyến giữa thời lượng và động lực học. Nếu dùng log-barrier, các số hạng $-\log((b_v)_j-(A_vx)_j)$ trong hàm mục tiêu tiếp tục làm mất cấu trúc conic lồi.
+
+Do đó, chỉ trong các trường hợp rất đặc biệt, chẳng hạn động lực học tuyến tính đơn giản, thời lượng cố định, và ràng buộc hình học được viết hoàn toàn bằng các chuẩn lồi, bài toán mới có thể được xấp xỉ hoặc biến đổi về một lớp lồi hỗn hợp nguyên. Với hệ động lực học tổng quát đang xét, phân loại đúng của mô hình là MIOCP ở cấp liên tục và MINLP sau rời rạc hóa. Hệ quả trực tiếp là ta không còn thừa hưởng bảo đảm convex relaxation chặt và hiệu năng giải của các bộ giải MISOCP như Mosek/Gurobi; thay vào đó, cần dùng chiến lược giải phù hợp với MINLP phi lồi, như tách pha chọn đường đi và pha tối ưu quỹ đạo liên tục được trình bày ở mục~\ref{subsec:solver_strategy}.
+
+\subsubsection{So sánh với GCS-Bézier}
+
+Sự khác biệt giữa mô hình MIOCP+MMS đề xuất và GCS-Bézier dựa trên MISOCP thể hiện rõ ở mức độ biểu diễn động lực học, cấu trúc tối ưu hóa và khả năng giải số.
+
+\textbf{Ưu điểm.} Thứ nhất, quỹ đạo thu được thỏa mãn trực tiếp phương trình động lực học $\dot x = f(x,u)$ của hệ, thay vì chỉ được xấp xỉ ở mức động học bằng đa thức Bézier. Điều này đặc biệt quan trọng đối với các hệ rô-bốt có động lực học phi tuyến rõ rệt, chẳng hạn tay máy với động lực Lagrange, hệ underactuated, hoặc rô-bốt di động chịu ràng buộc nonholonomic. Thứ hai, tín hiệu điều khiển $u(\cdot)$ xuất hiện tường minh như một biến quyết định, nhờ đó các ràng buộc giới hạn điều khiển $u\in\mathcal U$ và chi phí năng lượng $\|u\|^2$ có thể được đưa vào mô hình một cách tự nhiên. Thứ ba, khi sử dụng hàm cản log-barrier (mục~\ref{subsubsec:log_barrier}), bài toán khuyến khích quỹ đạo nằm trong miền trong của các vùng an toàn, thay vì chỉ kiểm tra điều kiện an toàn tại một tập hữu hạn các điểm lưới.
+
+\textbf{Hạn chế.} Đổi lại, mô hình không còn giữ được cấu trúc lồi của GCS-Bézier. Trong GCS-Bézier, relaxation lồi của phần chọn đường đi thường có gap rất nhỏ, và trong nhiều trường hợp gap bằng không~\cite{MarcucciEtAl2023GCS}. Với MIOCP/MINLP, khối động lực học multiple shooting là phi tuyến và nói chung không lồi, nên không có bảo đảm tương tự về độ chặt của relaxation. Ngoài ra, bài toán thuộc lớp MINLP phi lồi, vốn NP-hard trong trường hợp tổng quát, nên chi phí tính toán dự kiến cao hơn đáng kể so với MISOCP. Về mặt công cụ, các bộ giải thương mại như Mosek hoặc Gurobi xử lý rất hiệu quả các bài toán MISOCP, nhưng không trực tiếp giải được MINLP phi lồi tổng quát; do đó cần đến các bộ giải chuyên dụng dựa trên branch-and-bound kết hợp với lời giải NLP tại các nút tìm kiếm.
+
+Tóm lại, OCP+MMS phù hợp hơn trong các bài toán mà tính khả thi động lực học là yêu cầu trung tâm và quỹ đạo Bézier động học không đủ đại diện cho hệ thực. Ngược lại, khi ràng buộc động lực học không phải yếu tố quyết định, GCS-Bézier vẫn là lựa chọn có lợi thế hơn về tốc độ giải và khả năng tận dụng relaxation lồi.
+

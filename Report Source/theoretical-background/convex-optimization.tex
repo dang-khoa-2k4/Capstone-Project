@@ -246,7 +246,7 @@ Một \textbf{Chương trình Lồi (Convex Program - CP)} được thiết lậ
 \end{subequations}
 trong đó hàm mục tiêu $f$ và tập chấp nhận được (feasible set) $\mathcal{C}$ đều là lồi. Một điểm $x^{\text{opt}}$ là một \textit{nghiệm tối ưu} nếu nó thuộc tập chấp nhận được và $f(x^{\text{opt}}) \leq f(x)$ với mọi $x \in \mathcal{C}$.
 
-Mặc dù tính lồi về mặt lý thuyết không đảm bảo tính hiệu quả một cách tuyệt đối (ví dụ, kiểm tra tính không âm của đa thức là NP-khó mặc dù tập hợp này là một nón lồi), nhưng trong phạm vi luận văn này, chúng tôi sử dụng thuật ngữ `bài toán tối ưu lồi'' gần như đồng nghĩa với `bài toán tối ưu giải được một cách hiệu quả''. Phần lớn các bài toán CP thực tế có thể được giải một cách đáng tin cậy bằng các phương pháp điểm trong (interior-point methods).
+Mặc dù tính lồi về mặt lý thuyết không đảm bảo tính hiệu quả một cách tuyệt đối (ví dụ, kiểm tra tính không âm của đa thức là NP-hard mặc dù tập hợp này là một nón lồi), nhưng trong phạm vi luận văn này, chúng tôi sử dụng thuật ngữ `bài toán tối ưu lồi'' gần như đồng nghĩa với `bài toán tối ưu giải được một cách hiệu quả''. Phần lớn các bài toán CP thực tế có thể được giải một cách đáng tin cậy bằng các phương pháp điểm trong (interior-point methods).
 
 \subsubsection{Quy hoạch Nón (Conic Optimization)}
 Một \textbf{Chương trình Nón (Conic Program - KP)} là một lớp con của CP với hàm mục tiêu tuyến tính và các ràng buộc được định nghĩa bởi một nón lồi $\mathcal{K}$:
@@ -275,6 +275,6 @@ Các lớp này đại diện cho một hệ thống phân cấp về khả năn
 & z \in \mathbb{Z}^m. \label{eq:mip_integer}
 \end{align}
 \end{subequations}
-Ràng buộc nguyên làm cho tập chấp nhận được trở nên rời rạc và không lồi, thường khiến các bài toán MIP trở thành NP-khó. Các phương pháp tiêu chuẩn dựa trên tính khả vi không thể áp dụng được.
+Ràng buộc nguyên làm cho tập chấp nhận được trở nên rời rạc và không lồi, thường khiến các bài toán MIP trở thành NP-hard. Các phương pháp tiêu chuẩn dựa trên tính khả vi không thể áp dụng được.
 
 Để giải quyết MIP, phương pháp \textbf{nới lỏng} (relaxation) thường được sử dụng (ví dụ: thay thế $z_j \in \{0,1\}$ bằng $0 \leq z_j \leq 1$). Giá trị tối ưu của bài toán nới lỏng cung cấp một cận dưới cho nghiệm của MIP. Nếu nghiệm nới lỏng không thỏa mãn tính nguyên, các thuật toán như \textbf{Nhánh và Cận} (Branch-and-Bound) sẽ được sử dụng. Phương pháp này phân hoạch không gian tìm kiếm thành các vùng nhỏ hơn (các nhánh) một cách có hệ thống để loại bỏ các giá trị phân số, từ đó duyệt cây tìm kiếm để tìm ra tối ưu toàn cục.
