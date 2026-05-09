@@ -1,121 +1,316 @@
 \subsection{Đồ thị của các Tập Lồi (Graphs of Convex Sets)}
+\label{subsec:gcs_framework}
 
-Graph of Convex Sets (GCS) Framework cung cấp một phương pháp luận thống nhất để giải quyết các bài toán tối ưu hóa lai ghép rời rạc-liên tục (hybrid discrete-continuous optimization). Nó đóng vai trò cầu nối hiệu quả giữa tìm kiếm đồ thị tổ hợp (combinatorial graph search) và quy hoạch lồi liên tục (continuous convex programming). Khác với lý thuyết đồ thị cổ điển, GCS tổng quát hóa Bài toán Đường đi Ngắn nhất (SPP) bằng cách liên kết trực tiếp các biến hình học liên tục với tô pô của đồ thị. Như được minh họa trong Hình \ref{fig:gcs_optimization}, quá trình này bắt đầu bằng việc phân rã không gian an toàn thành các vùng lồi và xây dựng đồ thị giao. Một đường đi trên đồ thị này sẽ tương ứng với một chuỗi các phân đoạn quỹ đạo, và việc tối ưu hóa đường đi sẽ đồng thời xác định hình dạng hình học tối ưu của quỹ đạo đó.
+Đồ thị của các Tập Lồi (Graphs of Convex Sets -- GCS) là một khuôn khổ tối ưu hóa
+hợp nhất giải quyết đồng thời hai thành phần vốn tách biệt trong hoạch định chuyển
+động: chọn đường đi rời rạc trên đồ thị và tối ưu hóa biến hình học liên tục trong
+mỗi vùng~\cite{MarcucciEtAl2023GCS}.
+Khác với bài toán đường đi ngắn nhất cổ điển -- nơi chi phí cạnh là hằng số vô hướng
+-- GCS gắn mỗi đỉnh với một biến quyết định liên tục nằm trong một tập lồi, và chi
+phí của mỗi cạnh là hàm lồi của các biến tại hai đỉnh liên thuộc.
+Cấu trúc này cho phép đặt bài toán hoạch định quỹ đạo -- bao gồm đồng thời việc chọn
+chuỗi vùng an toàn và tối ưu hóa hình dạng quỹ đạo -- thành một bài toán tối ưu hóa
+thống nhất, như minh họa trong Hình~\ref{fig:gcs_optimization}.
 
 \begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.85\textwidth]{experiments/image/gcs_spp.png}
-    \caption[Minh họa quy trình hoạch định quỹ đạo dựa trên khung làm việc GCS]{Tối ưu hóa quỹ đạo có độ dài tối thiểu dưới dạng bài toán Tìm đường đi ngắn nhất (SPP) trong GCS. 
-    \textit{Góc trên bên trái}: Môi trường với hai vật cản (màu hồng) cùng cấu hình khởi đầu $q_0^0$ và kết thúc $q_T^0$. 
-    \textit{Góc trên bên phải}: Phân rã vùng an toàn thành các vùng lồi $\mathcal{C}_i$. 
-    \textit{Giữa bên trái}: Đồ thị giao của các vùng phân rã, với các đỉnh nguồn $s$ và đích $t$ đại diện cho các điểm biên.
-    \textit{Giữa bên phải}: Các phân đoạn quỹ đạo $q_i$ được gán ngẫu nhiên thỏa mãn ràng buộc tương ứng cho từng vùng lồi. 
-    \textit{Dưới cùng}: Việc thiết lập một đường đi trong đồ thị giao sẽ kích hoạt các hàm chi phí và ràng buộc liên tục về mặt toán học lên hình dạng tổng thể của các phân đoạn quỹ đạo kết hợp~\cite{MarcucciEtAl2023GCS}.}
-    \label{fig:gcs_optimization}
+  \centering
+  \includegraphics[width=0.85\textwidth]{experiments/image/gcs_spp.png}
+  \caption[Hoạch định quỹ đạo tối thiểu độ dài dưới dạng SPP trong GCS]{%
+    Tối ưu hóa quỹ đạo tối thiểu độ dài được mô hình hóa thành bài toán Đường
+    đi Ngắn nhất (Shortest Path Problem -- SPP) trong GCS~\cite{MarcucciEtAl2023GCS}.
+    \emph{Trái trên}: Môi trường với hai vật cản (màu hồng), cấu hình khởi đầu
+    $q_0^0$ và cấu hình đích $q_T^0$.
+    \emph{Phải trên}: Phân hoạch không gian tự do thành các vùng lồi
+    $\mathcal{C}_i$.
+    \emph{Trái giữa}: Đồ thị giao của các vùng phân hoạch; các đỉnh nguồn $s$
+    và đích $t$ đại diện cho các điểm biên.
+    \emph{Phải giữa}: Các đoạn quỹ đạo $q_i$ được gán tùy ý, thỏa mãn ràng buộc
+    chứa tương ứng cho từng vùng lồi.
+    \emph{Dưới}: Khi đường đi trên đồ thị được xác định, các hàm chi phí và ràng
+    buộc liên tục đồng thời ràng buộc hình dạng hình học của toàn bộ quỹ đạo ghép.}
+  \label{fig:gcs_optimization}
 \end{figure}
 
-\subsubsection{Công thức Đường đi Ngắn nhất trong Graph of Convex Sets}
+\subsubsection{Bài toán Đường đi Ngắn nhất trong GCS}
+\label{subsubsec:spp_gcs}
 
-Một GCS được định nghĩa là một đồ thị có hướng $G = (V, E)$, trong đó mỗi đỉnh $v \in V$ gắn liền với một biến quyết định liên tục $x_v$ nằm trong một tập lồi compact, khác rỗng $X_v \subset \mathbb{R}^n$. Trong ngữ cảnh lập kế hoạch chuyển động (motion planning), các tập hợp này thường đại diện cho các vùng không va chạm đã được tính toán trước trong không gian cấu hình (configuration space). Các bước chuyển tiếp giữa các đỉnh được quy định bởi các cạnh $e = (u, v) \in E$, áp đặt các ràng buộc lồi phụ trợ $(x_u, x_v) \in X_e$ và được trọng số hóa bởi một hàm chi phí lồi $\ell_e(x_u, x_v)$. Hàm này bắt buộc phải là hàm thực sự (proper), đóng (closed) và lồi, liên kết tường minh các biến liên tục $x_u$ và $x_v$ để mô hình hóa các thước đo chuyển tiếp như khoảng cách Euclid hoặc tiêu hao năng lượng. Cần lưu ý rằng, mặc dù sử dụng thuật ngữ này, chúng tôi không giả định $\ell_e$ là một metric hợp lệ; các tính chất như tính đối xứng hay bất đẳng thức tam giác không bắt buộc phải thỏa mãn~\cite{MarcucciEtAl2023GCS}.
+Một GCS được định nghĩa là một đồ thị có hướng $G = (V, E)$, trong đó mỗi đỉnh
+$v \in V$ được gắn với một biến quyết định liên tục $x_v$ nằm trong một tập lồi
+compact, khác rỗng $\mathcal{X}_v \subset \mathbb{R}^{n_v}$. Trong ngữ cảnh
+hoạch định chuyển động, $\mathcal{X}_v$ thường được xây dựng để mã hóa các tham
+số của đoạn quỹ đạo nằm trong vùng lồi không va chạm tương ứng trong không gian
+cấu hình. Các cạnh $e = (u, v) \in E$ đặc tả sự chuyển tiếp giữa các đỉnh: mỗi
+cạnh áp đặt ràng buộc lồi phụ trợ $(x_u, x_v) \in \mathcal{X}_e$ và được trọng
+số hóa bởi một hàm chi phí lồi, đóng, và proper $\ell_e \colon \mathbb{R}^{n_u
+    + n_v} \to \mathbb{R} \cup \{+\infty\}$. Cần lưu ý rằng $\ell_e$ không nhất
+thiết phải là một metric; tính đối xứng và bất đẳng thức tam giác không được
+yêu cầu~\cite{MarcucciEtAl2023GCS}.
 
-Trong khi công thức luồng mạng (network flow) cổ điển giải quyết hiệu quả SPP trên các đồ thị rời rạc với chi phí cạnh tĩnh, khung GCS tổng quát hóa điều này bằng cách đưa vào các biến quyết định liên tục gắn liền với tô pô đồ thị. Trong GCS, chi phí di chuyển qua một cạnh $e=(u,v)$ không phải là một hằng số vô hướng $c_{uv}$, mà là một hàm lồi $\ell_e(x_u, x_v)$ phụ thuộc vào các trạng thái liên tục $x_u \in X_u$ và $x_v \in X_v$ tại các đỉnh liên thuộc. Mục tiêu của SPP trong GCS là xác định một đường đi $p$ từ đỉnh nguồn $s$ đến đỉnh đích $t$ sao cho tối thiểu hóa tổng chi phí di chuyển qua các cạnh dọc theo đường đi, đồng thời lựa chọn các biến liên tục phù hợp tại mỗi đỉnh. Một cách hình thức, bài toán này được biểu diễn như sau:
+Mục tiêu của SPP trong GCS là xác định một đường đi $p$ từ đỉnh nguồn $s$ đến
+đỉnh đích $t$ sao cho tổng chi phí dọc đường đi được cực tiểu hóa, đồng thời
+chọn các biến liên tục tại mỗi đỉnh và cạnh trong đường đi thỏa mãn các tập khả
+thi tương ứng. Bài toán này được phát biểu hình thức như sau:
+\begin{equation}
+  \begin{aligned}
+    \min_{p,\; \{x_v\}_{v \in p}} \quad
+     & \sum_{(u,v) \in E_p} \ell_{(u,v)}(x_u, x_v)                  \\
+    \mathrm{s.t.} \quad
+     & p \in \mathcal{P},                                           \\
+     & x_v \in \mathcal{X}_v, \quad \forall v \in p,                \\
+     & (x_u, x_v) \in \mathcal{X}_e, \quad \forall e=(u,v) \in E_p,
+  \end{aligned}
+  \label{eq:gcs_spp}
+\end{equation}
+trong đó $\mathcal{P}$ là tập hợp tất cả đường đi đơn giản từ $s$ đến $t$, và $E_p$
+là tập cạnh thuộc đường đi $p$.
 
-\begin{align}
-\min_{p, \{x_v\}_{v \in p}} \quad & \sum_{(u, v) \in E_p} \ell_{(u, v)}(x_u, x_v) \label{eq:gcs_obj} \\
-\text{s.t.} \quad & p \in \mathcal{P}, \label{eq:gcs_path_constraint} \\
-& x_v \in X_v,\quad \forall v \in p, \label{eq:gcs_vertex_constraint} \\
-& (x_u, x_v) \in X_e,\quad \forall e=(u,v) \in E_p \label{eq:gcs_edge_constraint}
-\end{align}
-trong đó $\mathcal{P}$ ký hiệu tập hợp tất cả các đường đi khả thi từ $s$ đến $t$, và $E_p$ đại diện cho các cạnh nằm trong đường đi $p$.
-
-Bằng cách áp dụng công thức luồng mạng vào GCS, SPP có thể được biểu diễn dưới dạng bài toán Quy hoạch Phi tuyến Nguyên Hỗn hợp (Mixed-Integer Nonlinear Program - MINLP) như sau:
+Bằng cách mã hóa việc chọn đường đi bằng biến nhị phân $y_e \in \{0, 1\}$ và áp
+dụng công thức bảo toàn luồng mạng, bài toán~\eqref{eq:gcs_spp} được viết lại
+tương đương dưới dạng Quy hoạch Phi tuyến Nguyên Hỗn hợp (Mixed-Integer
+Nonlinear Program -- MINLP):
 \begin{subequations}
-\begin{align}
-\text{minimize} \quad & \sum_{e=(u,v) \in
-\mathcal{E}} y_e \ell_e(x_u, x_v) \label{eq:gcs_obj_milp} \\
-\text{subject to} \quad & \sum_{e \in \mathcal{E}^+(u)} y_e - \sum_{e \in \mathcal{E}^-(u)} y_e = \delta_u, \quad \forall u \in \mathcal{V} \label{eq:flow_conservation} \\
-& (x_u, x_v) \in X_e, \quad \forall e=(u,v) \in \mathcal{E} \label{eq:edge_constraint} \\
-& x_v \in X_v, \quad \forall v \in \mathcal{V} \label{eq:vertex_constraint} \\
-& y_e \in \{0, 1\}, \quad \forall e \in \mathcal{E} \label{eq:binary_variable}
-\end{align}
+  \label{eq:gcs_minlp}
+  \begin{align}
+    \underset{y,\; x}{\mathrm{minimize}} \quad
+     & \sum_{e=(u,v) \in E} y_e\, \ell_e(x_u, x_v)
+    \label{eq:gcs_obj_milp}                                                  \\
+    \mathrm{subject\ to} \quad
+     & \sum_{e \in \mathcal{E}^+(u)} y_e - \sum_{e \in \mathcal{E}^-(u)} y_e
+    = \delta_u,
+    \quad \forall u \in V,
+    \label{eq:flow_conservation}                                             \\
+     & (x_u, x_v) \in \mathcal{X}_e,
+    \quad \forall e=(u,v) \in E,
+    \label{eq:edge_constraint}                                               \\
+     & x_v \in \mathcal{X}_v,
+    \quad \forall v \in V,
+    \label{eq:vertex_constraint}                                             \\
+     & y_e \in \{0, 1\},
+    \quad \forall e \in E.
+    \label{eq:binary_variable}
+  \end{align}
 \end{subequations}
-Trong công thức này, biến nhị phân $y_e$ chỉ thị việc cạnh $e$ có được đưa vào đường đi được chọn hay không ($y_e=1$) hoặc không ($y_e=0$). Ràng buộc bảo toàn luồng \eqref{eq:flow_conservation} đảm bảo rằng các cạnh được chọn tạo thành một đường đi hợp lệ từ đỉnh nguồn $s$ đến đỉnh đích $t$, trong đó $\delta_u$ được định nghĩa là $1$ cho nguồn, $-1$ cho đích, và $0$ cho tất cả các đỉnh khác. Các ràng buộc \eqref{eq:edge_constraint} và \eqref{eq:vertex_constraint} bắt buộc các biến liên tục tại mỗi đỉnh và dọc theo mỗi cạnh phải tuân thủ các tập lồi tương ứng của chúng.
+Biến nhị phân $y_e$ chỉ thị cạnh $e$ có thuộc đường đi được chọn ($y_e = 1$) hay
+không ($y_e = 0$).
+Ràng buộc bảo toàn luồng~\eqref{eq:flow_conservation} đảm bảo các cạnh tích cực tạo
+thành một đường đi hợp lệ từ $s$ đến $t$, trong đó $\delta_u = 1$ tại nguồn,
+$\delta_u = -1$ tại đích, và $\delta_u = 0$ tại mọi đỉnh trung gian.
+Ràng buộc~\eqref{eq:edge_constraint} và~\eqref{eq:vertex_constraint} bắt buộc các
+biến liên tục phải nằm trong tập khả thi tương ứng tại từng đỉnh và cạnh.
+Mối quan hệ song tuyến tính giữa $y_e$ và $x_v$ trong hàm mục tiêu~\eqref{eq:gcs_obj_milp}
+khiến bài toán không lồi; đây là khó khăn trung tâm mà kỹ thuật nới lỏng phối cảnh
+ở phần sau giải quyết.
 
 \begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.4\textwidth]{experiments/image/gcs_set.png}
-    \caption[Minh họa bài toán SPP in GCS]{Minh họa bài toán SPP in GCS. Mỗi đỉnh $i \in \{\sigma, u, v, w, \tau\}$ trong đồ thị được liên kết với một biến liên tục $x_i$ nằm trong một tập lồi tương ứng $\mathcal{X}_i$. Trọng số của mỗi cạnh là một hàm lồi của các biến liên tục tại hai đỉnh mà cạnh đó kết nối. Trong hình, đường đi màu xanh $p = (\sigma, u, v, \tau)$ thể hiện một nghiệm khả thi của thành phần rời rạc, trong đó tổng chi phí phụ thuộc vào các giá trị tối ưu của $x_\sigma, x_u, x_v, x_\tau$ nhưng độc lập với $x_w$~\cite{MarcucciEtAl2023GCS}.}
-    \label{fig:spp_gcs}
+  \centering
+  \includegraphics[width=0.5\textwidth]{experiments/image/gcs_set.png}
+  \caption[Minh họa bài toán SPP trong GCS]{%
+    Minh họa bài toán SPP trong GCS~\cite{MarcucciEtAl2023GCS}.
+    Mỗi đỉnh $i \in \{\sigma, u, v, w, \tau\}$ được liên kết với một biến liên
+    tục $x_i$ trong tập lồi $\mathcal{X}_i$.
+    Trọng số của mỗi cạnh là hàm lồi của các biến tại hai đỉnh đầu mút.
+    Đường đi màu xanh $p = (\sigma, u, v, \tau)$ thể hiện một nghiệm của thành
+    phần rời rạc; tổng chi phí phụ thuộc vào giá trị tối ưu của
+    $x_\sigma, x_u, x_v, x_\tau$ nhưng độc lập với $x_w$ vì đỉnh $w$ không nằm
+    trên đường đi.}
+  \label{fig:spp_gcs}
 \end{figure}
 
-\subsubsection{Phân tích Độ phức tạp}
+\subsubsection{Phân tích độ phức tạp}
+\label{subsubsec:gcs_complexity}
 
-Độ phức tạp tính toán của SPP trong GCS khác biệt cơ bản so với Bài toán Đường đi Ngắn nhất cổ điển trên đồ thị rời rạc. Trong lý thuyết đồ thị cổ điển, SPP nói chung là NP-hard (ví dụ: bài toán Đường đi Dài nhất hoặc các biến thể liên quan đến chu trình âm). Tuy nhiên, nó trở nên giải được một cách hiệu quả trong thời gian đa thức (polynomial time) dưới hai điều kiện tiên quyết:
-\begin{enumerate}
-    \item Đồ thị là \textbf{không chu trình} (acyclic) (cho phép giải bằng sắp xếp tô pô).
-    \item Tất cả chi phí cạnh và đỉnh là \textbf{không âm} (giải được bằng thuật toán Dijkstra).
-\end{enumerate}
+Bài toán đường đi ngắn nhất trong Graphs of Convex Sets (GCS) có bản chất khác
+với bài toán đường đi ngắn nhất cổ điển trên đồ thị có trọng số. Trong SPP cổ
+điển, mỗi cạnh $e \in E$ được gán một trọng số vô hướng cố định $c_e$, và chi
+phí của một đường đi chỉ là tổng các trọng số này. Vì vậy, khi mọi trọng số
+cạnh không âm, bài toán có thể được giải hiệu quả bằng thuật toán Dijkstra hoặc
+các biến thể tương đương ~\cite{AhujaMagnantiOrlin1993}.
 
-\begin{proposition}
-Trái ngược hoàn toàn với trường hợp trên, bài toán Đường đi ngắn nhất trong Graph of Convex Sets vẫn là \textbf{NP-hard} ngay cả khi đồng thời thỏa mãn hai điều kiện: đồ thị không chu trình và chi phí không âm.
-\end{proposition}
+Ngược lại, trong GCS, mỗi đỉnh $v$ được gắn với một tập lồi $X_v$ và một biến
+liên tục $x_v \in X_v$. Chi phí của cạnh $e=(u,v)$ không còn là một hằng số đã
+biết trước, mà là một hàm lồi
+\[
+  \ell_e(x_u,x_v),
+\]
+phụ thuộc vào các biến liên tục tại hai đầu cạnh. Do đó, nghiệm của SPP trong
+GCS phải đồng thời quyết định hai thành phần: đường đi rời rạc trên đồ thị và
+các biến liên tục gắn với các đỉnh/cạnh được chọn \cite{MarcucciEtAl2023GCS}.
+Chính sự ghép nối giữa quyết định rời rạc và quyết định liên tục này làm cho
+GCS-SPP không thể được xem như một SPP cổ điển chỉ bằng cách thay đổi trọng số
+cạnh.
 
-Độ khó này được thiết lập thông qua việc quy dẫn (reduction) từ bài toán \textbf{3SAT} (bài toán thỏa mãn Boolean với các mệnh đề gồm ba biến), vốn được biết đến là NP-đầy đủ (NP-complete). Như đã chứng minh trong Định lý 9.1 của~\cite{MarcucciEtAl2023GCS}, ta có thể xây dựng một thể hiện GCS phân lớp, không chu trình với chi phí không âm, trong đó việc xác định một đường đi hợp lệ tương đương với việc tìm một phép gán thỏa mãn cho công thức 3SAT. Điều này ngụ ý rằng chỉ riêng việc xác định tính \textit{khả thi} (feasibility) của một SPP trong GCS đã là NP-hard. Các chứng minh khác về tính NP-hard cũng đã được đưa ra cho các trường hợp liên quan đến các tập lồi chiều thấp (1D và 2D), mặc dù các trường hợp này thường dựa trên các đồ thị có chứa chu trình~\cite{Marcucci2024Thesis}.
+\begin{proof}[Lập luận độ phức tạp]
+  Giả sử tồn tại một phép biến đổi đa thức đưa mọi thể hiện của SPP trong GCS
+  về một thể hiện SPP cổ điển sao cho nghiệm tối ưu của hai bài toán tương ứng
+  với nhau. Khi đó, nếu thể hiện SPP cổ điển thu được thuộc lớp có thể giải trong
+  thời gian đa thức, chẳng hạn đồ thị không chu trình hoặc đồ thị có trọng số
+  không âm, thì ta sẽ thu được một thuật toán đa thức cho SPP trong GCS.
 
-\subsubsection{Mô hình chi tiết các đỉnh và cạnh}
+  Tuy nhiên, SPP trong GCS đã được chứng minh là NP-hard ngay cả trong các trường
+  hợp mà đồ thị cơ sở là không chu trình và các chi phí là không âm
+  \cite{MarcucciEtAl2023GCS,Marcucci2024Thesis}. Nói cách khác, hai điều kiện vốn
+  làm cho SPP cổ điển trở nên dễ giải không đủ để làm cho SPP trong GCS trở thành
+  bài toán đa thức. Vì vậy, nếu phép quy giảm nói trên tồn tại, ta sẽ suy ra rằng
+  một bài toán NP-hard có thể được giải trong thời gian đa thức. Điều này mâu
+  thuẫn với giả thiết chuẩn $\mathrm{P}\neq\mathrm{NP}$.
+\end{proof}
 
-Trong bối cảnh tối ưu quỹ đạo, các thành phần của GCS được định nghĩa một cách chặt chẽ nhằm đảm bảo cả tính an toàn hình học lẫn tính khả thi về động học.
+Trong bối cảnh của luận văn này, điểm cần nhấn mạnh không phải là tính song
+tuyến hiển nhiên của biểu thức $y_e \ell_e(\cdot)$ trong công thức
+mixed-integer, mà là việc không thể thay thế toàn bộ cấu trúc GCS bằng một đồ
+thị rời rạc có trọng số cố định. Lý do là trọng số hiệu dụng của một cạnh chỉ
+được xác định sau khi đã chọn các biến liên tục tại các vùng lồi liên quan. Vì
+vậy, nếu ta gán trước cho mỗi cạnh một trọng số duy nhất, ta sẽ làm mất thông
+tin về hình học của quỹ đạo bên trong các vùng lồi.
 
-Mỗi đỉnh $v \in V$ tương ứng với một vùng lồi, không va chạm $Q_v$ trong không gian cấu hình (C-space). Biến quyết định liên tục $x_v \in \mathbb{R}^{n_v}$ gắn với đỉnh $v$ biểu diễn một đoạn quỹ đạo cục bộ hoặc một cấu hình trạng thái. Cần nhấn mạnh rằng chiều $n_v$ là cục bộ theo từng đỉnh, cho phép đồ thị có các đỉnh với số chiều biến khác nhau.
+Mối liên hệ với bài toán Hamiltonian giúp minh họa trực quan nguồn gốc của độ
+khó này. Trong SPP cổ điển với trọng số cố định không âm, mục tiêu ``đường đi
+ngắn nhất'' thường khuyến khích sử dụng ít cạnh hơn. Ngược lại, trong GCS, do
+các biến liên tục có thể được tối ưu dọc theo đường đi, một hàm chi phí lồi
+trên cạnh có thể khiến bài toán ưu tiên các đường đi đi qua nhiều đỉnh hơn. Một
+xây dựng điển hình là đặt
+\[
+  X_s=\{0\}, \qquad
+  X_t=\{1\}, \qquad
+  X_v=[0,1] \quad \forall v\neq s,t,
+\]
+và dùng chi phí cạnh
+\[
+  \ell_{uv}(x_u,x_v)=\|x_v-x_u\|_2^2 .
+\]
+Với một đường đi cố định gồm $\ell$ cạnh từ $s$ đến $t$, các biến liên tục có
+thể được phân bố đều trên đoạn $[0,1]$, làm cho tổng chi phí tối ưu có dạng
+\[
+  \frac{1}{\ell}.
+\]
+Do đó, tối thiểu hóa chi phí tương đương với việc tối đa hóa số cạnh của đường
+đi. Trong trường hợp cực trị, nghiệm tối ưu sẽ tương ứng với một đường đi đi
+qua tất cả các đỉnh, tức là có bản chất giống bài toán Hamiltonian
+\cite{Marcucci2024Thesis}. Ví dụ này cho thấy GCS-SPP không chỉ là SPP cổ điển
+với trọng số được định nghĩa lại; nó là một bài toán tối ưu rời rạc--liên tục,
+trong đó hình học của các tập lồi ảnh hưởng trực tiếp đến lựa chọn tổ hợp.
 
-Biến $x_v$ bị ràng buộc trong một tập lồi compact $\mathcal{X}_v \subset \mathbb{R}^{n_v}$. Đối với bài toán sinh quỹ đạo sử dụng các tham số đa thức từng đoạn (ví dụ như đường cong Bézier), tập $\mathcal{X}_v$ được xây dựng một cách tường minh nhằm đảm bảo quỹ đạo nằm hoàn toàn trong vùng an toàn $Q_v$ và thỏa mãn các giới hạn động lực học.
+Đối với mô hình GCS--Bézier được xét trong luận văn, các tính chất của đường
+cong Bézier giúp chuyển các ràng buộc hình học, độ trơn và một số ràng buộc
+động học như vận tốc thành các ràng buộc lồi trên các điểm điều khiển
+\cite{Marcucci2024Thesis}. Tuy nhiên, việc có một mô hình hữu hạn
+chiều lồi theo từng thành phần không làm mất đi bản chất mixed-integer của bài
+toán, bởi vì ta vẫn phải chọn chuỗi vùng lồi mà quỹ đạo đi qua. Do đó, độ khó
+của bài toán đến từ tầng lựa chọn rời rạc kết hợp với tối ưu liên tục bên trong
+các vùng lồi, chứ không cần viện dẫn đến dynamics phi tuyến của một bài toán
+điều khiển tối ưu tổng quát.
 
-Các ràng buộc xác định $\mathcal{X}_v$ thường có dạng:
+\subsubsection{Mô hình Đỉnh và Cạnh trong Hoạch định Quỹ đạo}
+\label{subsubsec:gcs_vertex_edge}
 
+Trong ngữ cảnh hoạch định quỹ đạo, các thành phần của GCS được đặc tả cụ thể để
+phản ánh cả cấu trúc hình học của không gian cấu hình lẫn ràng buộc động học.
+
+Mỗi đỉnh $v \in V$ tương ứng với một vùng lồi không va chạm $Q_v$ trong không
+gian cấu hình. Biến quyết định $x_v \in \mathbb{R}^{n_v}$ gắn với $v$ biểu diễn
+các tham số của đoạn quỹ đạo cục bộ; chiều $n_v$ là cục bộ theo từng đỉnh, phụ
+thuộc vào cách tham số hóa quỹ đạo được chọn. Biến $x_v$ bị ràng buộc trong tập
+lồi compact $\mathcal{X}_v \subset \mathbb{R}^{n_v}$, được xây dựng để đảm bảo
+đoạn quỹ đạo nằm trong $Q_v$ và thỏa mãn các giới hạn động học.
+
+Với tham số hóa quỹ đạo bằng đường cong Bézier bậc $d$, biến tại đỉnh $v$ gồm
+các điểm điều khiển không gian $\mathbf{r}_{v,k} \in \mathbb{R}^{n_c}$ và các
+điểm điều khiển thời gian $h_{v,k} \in \mathbb{R}$ ($k = 0, \ldots, d$), trong
+đó $n_c$ là số chiều không gian cấu hình. Tập $\mathcal{X}_v$ được đặc tả bởi
+bốn nhóm ràng buộc:
 \begin{align}
-    & r_{i,k} \in Q_i, \quad && k = 0, \dots, d, \label{eq:geo_containment} \\
-    & \dot{h}_{i,k} \ge \dot{h}_{\text{min}} = 10^{-6}, \quad && k = 0, \dots, d-1, \label{eq:time_scaling} \\
-    & \dot{r}_{i,k} \in \dot{h}_{i,k}D, \quad && k = 0, \dots, d-1, \label{eq:dynamic_limits} \\
-    & h_{i,0} \ge 0, \quad h_{i,d} \le T_{\text{max}}. && \label{eq:duration_bounds}
+   & \mathbf{r}_{v,k} \in Q_v,
+  \quad k = 0, \ldots, d,
+  \label{eq:geo_containment}                       \\
+   & \dot{h}_{v,k} \ge \dot{h}_{\min} > 0,
+  \quad k = 0, \ldots, d-1,
+  \label{eq:time_scaling}                          \\
+   & \dot{\mathbf{r}}_{v,k} \in \dot{h}_{v,k}\, D,
+  \quad k = 0, \ldots, d-1,
+  \label{eq:dynamic_limits}                        \\
+   & h_{v,0} \ge 0,
+  \quad h_{v,d} \le T_{\max},
+  \label{eq:duration_bounds}
 \end{align}
+trong đó $\dot{\mathbf{r}}_{v,k} := \mathbf{r}_{v,k+1} - \mathbf{r}_{v,k}$ là hiệu
+điểm điều khiển không gian, $\dot{h}_{v,k} := h_{v,k+1} - h_{v,k}$ là hiệu điểm
+điều khiển thời gian, và $D \subset \mathbb{R}^{n_c}$ là tập giới hạn vận tốc lồi.
+Ràng buộc~\eqref{eq:geo_containment} đảm bảo mỗi điểm điều khiển không gian nằm
+trong vùng an toàn $Q_v$; cùng với tính chất bao lồi của đường cong Bézier, điều
+này kéo theo quỹ đạo $\mathbf{q}_v(s)$ nằm hoàn toàn trong $Q_v$ ở mọi thời điểm
+liên tục.
+Ràng buộc~\eqref{eq:time_scaling} đảm bảo hàm thời gian đơn điệu chặt, với $\dot{h}_{\min} = 10^{-6}$ trong thực tiễn để tránh suy biến số.
+Ràng buộc~\eqref{eq:dynamic_limits} giới hạn vận tốc dưới dạng phối cảnh -- lồi
+đồng thời theo $(\dot{\mathbf{r}}_{v,k}, \dot{h}_{v,k})$ -- và
+ràng buộc~\eqref{eq:duration_bounds} áp đặt biên thời gian bắt đầu và kết thúc của
+mỗi đoạn.
 
-Trong đó, \eqref{eq:geo_containment} đảm bảo các điểm điều khiển không gian $r_{i,k}$ nằm trong vùng an toàn. Phương trình \eqref{eq:time_scaling} đảm bảo tính đơn điệu chặt của hàm co giãn thời gian nhằm duy trì tính nhân quả. Phương trình \eqref{eq:dynamic_limits} liên kết đạo hàm không gian và thời gian để thỏa mãn giới hạn vận tốc được xác định bởi tập $D$, và \eqref{eq:duration_bounds} áp đặt các giới hạn lên thời gian thực hiện quỹ đạo.
+Mỗi cạnh $e = (u, v) \in E$ đặc tả sự chuyển tiếp giữa hai đỉnh. Tập ràng buộc
+cạnh $\mathcal{X}_e \subseteq \mathbb{R}^{n_u + n_v}$ áp đặt các điều kiện
+tương thích lên cặp $(x_u, x_v)$, bao gồm các ràng buộc liên tục $C^0$, $C^1$
+và bậc cao hơn giữa hai đoạn quỹ đạo kề nhau. Hàm chi phí cạnh $\ell_e \colon
+  \mathbb{R}^{n_u + n_v} \to \mathbb{R}$ là lồi, đánh giá chi phí chuyển tiếp dựa
+trên đồng thời $x_u$ và $x_v$.
 
-Một cạnh $e = (u, v) \in E$ xác định sự chuyển tiếp giữa hai đỉnh. Chuyển tiếp này được điều khiển bởi một \textit{tập ràng buộc liên kết} $\mathcal{X}_e \subseteq \mathbb{R}^{n_u + n_v}$. Tập này áp đặt các ràng buộc lên vector ghép $(x_u, x_v)$, đảm bảo các cặp cấu hình $(x_u, x_v)$ là tương thích với nhau, chẳng hạn như thỏa mãn tính liên tục $C^0$, $C^1$ hoặc bậc cao hơn giữa các đoạn quỹ đạo.
+\subsubsection{Đặc tả Hàm Chi phí Cạnh}
+\label{subsubsec:gcs_cost}
 
-Gắn với mỗi cạnh là một \textit{hàm chi phí liên kết} $f_e: \mathbb{R}^{n_u + n_v} \to \mathbb{R}$. Đây là một hàm lồi giá trị vô hướng, đánh giá chi phí dựa trên việc lựa chọn đồng thời $x_u$ và $x_v$, nhằm mô hình hóa các đại lượng như độ dài đường đi hoặc năng lượng tiêu thụ.
+Lựa chọn hàm chi phí $\ell_e(x_u, x_v)$ quyết định ý nghĩa vật lý của quỹ đạo
+tối ưu thu được. Tùy theo mục tiêu bài toán, có hai nhóm chi phí chính được sử
+dụng trong luận văn này.
 
-\subsubsection{Đặc tả hàm chi phí}
+\paragraph{Chi phí Độ dài Đường đi Hình học}\mbox{}\\
 
-Việc lựa chọn hàm chi phí cạnh $\ell_e(x_u, x_v)$ mang tính then chốt, vì nó quy định ý nghĩa vật lý của quỹ đạo tối ưu. Khung làm việc của chúng tôi phân biệt giữa hai mô hình chính: lập kế hoạch đường đi hình học (LinearGCS) và tối ưu hóa quỹ đạo động học (BezierGCS), mỗi mô hình sử dụng các cấu trúc lồi cụ thể để đảm bảo hiệu quả tính toán.
-
-\subsubsubsection{Độ dài Đường đi Hình học}
-
-Đối với các bài toán được xác định chặt chẽ bởi các ràng buộc hình học, chẳng hạn như tìm đường đi ngắn nhất qua các vùng lồi, hàm chi phí được đặc trưng bởi khoảng cách Euclid có trọng số. Bình phương khoảng cách Euclid,
+Khi mục tiêu là cực tiểu hóa độ dài hình học của đường đi qua các vùng lồi, chi
+phí cạnh được xây dựng từ khoảng cách Euclid giữa biến tại hai đỉnh. Bình
+phương chuẩn $\ell_2$,
 \[
-\ell_e(x_u, x_v) = \|x_v - x_u\|_2^2,
+  \ell_e(x_u, x_v) = \|x_v - x_u\|_2^2,
 \]
-là một hàm bậc hai, phù hợp tự nhiên với các bộ giải Quadratic Programming (QP). Ngoài ra, chuẩn $L_2$ tiêu chuẩn
+là hàm bậc hai phù hợp tự nhiên với các bộ giải Quy hoạch Bậc hai (Quadratic
+Programming -- QP). Chuẩn $\ell_2$ thông thường,
 \[
-\ell_e(x_u, x_v) = \|x_v - x_u\|_2
+  \ell_e(x_u, x_v) = \|x_v - x_u\|_2,
 \]
-có thể được mô hình hóa bằng Quy hoạch Nón Bậc hai (Second-Order Cone Programming - SOCP), giúp bảo toàn tính lồi. Các công thức này đảm bảo rằng chi phí tỷ lệ tuyến tính với khoảng cách Euclid, mang lại một thước đo chính xác về mặt hình học cho độ dài đường đi.
+có thể mô hình hóa bằng Quy hoạch Nón Bậc hai (Second-Order Cone Programming --
+SOCP) nhờ tính lồi của chuẩn, và tỷ lệ tuyến tính với khoảng cách Euclid, cho
+một thước đo hình học chính xác cho độ dài đường đi.
 
-\subsubsubsection{Chi phí Quỹ đạo Động lực học}
+\paragraph{Chi phí Quỹ đạo Động lực học}\mbox{}\\
 
-Trong khung lập kế hoạch chuyển động đề xuất sử dụng đường cong Bézier, biến quyết định liên tục $x_v$ được xây dựng để bao hàm cả các điểm điều khiển không gian và thời gian thực hiện của đoạn quỹ đạo. Để quản lý hiệu quả sự đánh đổi giữa tốc độ thực thi và nỗ lực điều khiển (control effort), hàm chi phí được xây dựng như một mục tiêu tổng hợp bao gồm ba thành phần riêng biệt.
+Với tham số hóa Bézier, biến $x_v$ bao gồm cả điểm điều khiển không gian và
+điểm điều khiển thời gian, cho phép xây dựng hàm mục tiêu tổng hợp gồm ba thành
+phần.
 
-Đầu tiên, để ưu tiên tính tối ưu về thời gian, một chi phí tuyến tính được áp dụng cho các biến co giãn thời gian $h$. Công thức này đảm bảo rằng việc tối thiểu hóa tổng thời gian quỹ đạo vẫn bảo toàn tính lồi của hàm mục tiêu. Chi phí thời gian được biểu diễn là:
+Chi phí thời gian, nhằm ưu tiên tính tối ưu thời gian đồng thời bảo toàn tính
+lồi, được định nghĩa là:
 \begin{equation}
-J_t = w_t T_e,
+  J_t = w_t\, T_v,
+  \label{eq:time_cost}
 \end{equation}
-trong đó $w_t$ biểu thị hệ số trọng số được gán cho thời gian thực hiện đoạn $T_e$.
+trong đó $T_v := h_{v,d} - h_{v,0}$ là thời gian thực hiện của đoạn quỹ đạo tại
+đỉnh $v$, và $w_t > 0$ là hệ số trọng số.
+Vì $T_v$ tuyến tính theo biến quyết định, $J_t$ bảo toàn tính lồi của hàm mục tiêu.
 
-Đồng thời, để phạt nỗ lực điều khiển—cụ thể là tối thiểu hóa tích phân của bình phương vận tốc hoặc gia tốc—khung làm việc tận dụng các tính chất toán học của hàm phối cảnh (perspective functions). Đối với một đoạn quỹ đạo có thời gian $T_e$, chi phí năng lượng này được định nghĩa là:
+Chi phí năng lượng, phạt tích phân bình phương vận tốc theo thời gian thực,
+được định nghĩa là:
 \begin{equation}
-J_e = \int_0^{T_e} |\dot{r}(t)|^2 dt.
+  J_e = \int_0^{T_v} \|\dot{\mathbf{r}}(t)\|_2^2\, \mathrm{d}t.
+  \label{eq:energy_cost}
 \end{equation}
-Số hạng này hoạt động như một hàm phối cảnh có dạng bậc hai trên tuyến tính (quadratic-over-linear) $(x^T x / y)$. Một ưu điểm quan trọng của công thức này là nó lồi đồng thời (jointly convex) đối với cả các điểm điều khiển không gian và biến thời gian. Do đó, điều này cho phép bộ giải tối ưu hóa đường đi hình học và phân bổ thời gian một cách đồng thời trong một khung Quy hoạch Lồi Nguyên Hỗn hợp (Mixed-Integer Convex Programming - MICP) thống nhất.
+Khi biểu diễn qua các tham số Bézier, $J_e$ có dạng hàm bậc hai trên tuyến tính
+(quadratic-over-linear) theo $(\mathbf{r}_{v,k}, T_v)$.
+Vì hàm phối cảnh của một hàm lồi bảo toàn tính lồi, $J_e$ lồi đồng thời theo các
+điểm điều khiển không gian và biến thời gian, cho phép tối ưu hóa hình dạng hình học
+và phân bổ thời gian trong cùng một bài toán MICP.
 
-Cuối cùng, để đảm bảo độ trơn bậc cao, chẳng hạn như tối thiểu hóa độ giật (jerk), hàm chi phí kết hợp điều chuẩn đạo hàm (derivative regularization). Khác với chi phí năng lượng, điều này đạt được bằng cách áp dụng các chi phí bậc hai tiêu chuẩn trực tiếp lên các hệ số của các đạo hàm bậc cao của quỹ đạo. Cách tiếp cận này tránh được các yêu cầu nghiêm ngặt của các công thức phối cảnh trong khi vẫn duy trì thành công cấu trúc lồi tổng thể của bài toán tối ưu hóa.
-
+Để đảm bảo độ trơn bậc cao, chẳng hạn như cực tiểu hóa độ giật (jerk), hàm chi phí
+kết hợp thêm điều chuẩn đạo hàm bậc cao:
+\begin{equation}
+  J_s = \sum_{k=0}^{d-2} \|\ddot{\mathbf{r}}_{v,k}\|_2^2,
+  \label{eq:smooth_cost}
+\end{equation}
+trong đó $\ddot{\mathbf{r}}_{v,k} := \dot{\mathbf{r}}_{v,k+1} - \dot{\mathbf{r}}_{v,k}$
+là sai phân bậc hai của điểm điều khiển không gian.
+Khác với $J_e$, số hạng $J_s$ là bậc hai tiêu chuẩn theo các điểm điều khiển và
+không đòi hỏi công thức phối cảnh, nên tương thích trực tiếp với bộ giải QP hoặc SOCP.

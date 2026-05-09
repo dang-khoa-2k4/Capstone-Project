@@ -2,12 +2,12 @@
 
 Nghiên cứu này đặt ra hai mục tiêu trọng tâm, tương ứng với hai hướng tiếp cận bổ sung cho nhau trong bài toán hoạch định chuyển động cho robot.
 
-\textbf{Mục tiêu 1:} Xây dựng và đánh giá khuôn khổ GCS-Bézier cho hoạch định chuyển động hình học với bảo đảm tính tối ưu toàn cục.
+\textbf{Mục tiêu 1:} Xây dựng và đánh giá khuôn khổ GCS-Bézier cho hoạch định chuyển động hình học, hướng đến nghiệm tốt nhất và trong đa số trường hợp đạt cận tối ưu toàn cục.
 Luận văn đề xuất phân hoạch không gian tự do thành một họ hữu hạn các vùng lồi bằng các phương pháp ACD, IRIS hoặc VCC, tham số hóa quỹ đạo bằng đường cong Bézier, và thiết lập bài toán hoạch định dưới dạng lập trình lồi hỗn hợp số nguyên (Mixed-Integer Convex Programming -- MICP).
-Kỹ thuật nới lỏng phối cảnh (perspective cone relaxation) được áp dụng để chuyển bài toán về dạng Lập trình nón bậc hai (Second-Order Cone Programming -- SOCP) có thể giải hiệu quả trong thời gian đa thức, đảm bảo tìm được quỹ đạo tối ưu toàn cục thỏa mãn các ràng buộc liên tục về vận tốc, gia tốc và độ trơn.
+Kỹ thuật nới lỏng phối cảnh (perspective cone relaxation) được áp dụng để chuyển bài toán về dạng Lập trình nón bậc hai (Second-Order Cone Programming -- SOCP) có thể giải hiệu quả trong thời gian đa thức, hướng đến nghiệm tốt nhất, trong đa số trường hợp đạt cận tối ưu toàn cục, thỏa mãn các ràng buộc liên tục về vận tốc, gia tốc và độ trơn.
 
 \textbf{Mục tiêu 2:} Đề xuất và triển khai mô hình OCP kết hợp Multiple Shooting và hàm cản log-barrier trên nền tảng GCS.
 Hướng tiếp cận này mô hình hóa bài toán hoạch định chuyển động thành một bài toán Điều khiển Tối ưu (OCP) trên đồ thị các vùng lồi, trong đó phương trình động lực học của hệ được rời rạc hóa trực tiếp bằng kỹ thuật Direct Multiple Shooting và ràng buộc an toàn hình học được đảm bảo thông qua hàm cản logarit.
-Mục tiêu là thu được quỹ đạo vừa tối ưu toàn cục về mặt hình học, vừa khả thi về mặt động lực học, vừa không vi phạm biên của các vùng an toàn tại mọi thời điểm liên tục.
+Mục tiêu là thu được quỹ đạo hướng đến tối ưu hình học cao nhất có thể, vừa khả thi về mặt động lực học, vừa không vi phạm biên của các vùng an toàn tại mọi thời điểm liên tục.
 
 Cuối cùng, luận văn tập trung \textbf{so sánh và phân tích} hai hướng tiếp cận trên các kịch bản thực nghiệm đa dạng, làm rõ sự đánh đổi giữa tốc độ tính toán, chất lượng quỹ đạo và mức độ đảm bảo tính khả thi động lực học, từ đó cung cấp hướng dẫn thực tiễn cho việc lựa chọn phương pháp phù hợp với yêu cầu của từng ứng dụng.
