@@ -1,7 +1,9 @@
 \chapter{Phương pháp đề xuất}
 \label{ch:proposed_method}
 
-Trong chương này, chúng tôi trình bày chi tiết về hai hướng tiếp cận để giải quyết bài toán hoạch định chuyển động cho rô-bốt. Đầu tiên là mô hình bài toán, sau đó là chi tiết phương pháp lập kế hoạch chuyển động bằng Đồ thị các tập hợp lồi (Graph of Convex Sets - GCS), và cuối cùng là phương pháp cải tiến sử dụng bài toán Điều khiển Tối ưu (Optimal Control Problem - OCP) kết hợp với Multiple Shooting (MMS) và hàm cản logarit (log-barrier).
+\indent\textit{
+Trong chương này, chúng tôi trình bày chi tiết về hai hướng tiếp cận để giải quyết bài toán hoạch định chuyển động cho rô-bốt. Đầu tiên là mô hình bài toán, sau đó là chi tiết phương pháp lập kế hoạch chuyển động bằng Đồ thị các tập hợp lồi (Graph of Convex Sets - GCS), và cuối cùng là phương pháp cải tiến sử dụng bài toán Điều khiển Tối ưu (Optimal Control Problem - OCP) kết hợp với Multiple Shooting (DMS) và hàm cản logarit (log-barrier).
+}
 
 \input{experiments/prb_statement}
 \input{experiments/cnx_decomp}
@@ -11,9 +13,9 @@ Trong chương này, chúng tôi trình bày chi tiết về hai hướng tiếp
 \input{experiments/GCS}
 \input{experiments/relaxation}
 \section{Hướng tiếp cận 2: Hoạch định chuyển động sử dụng Optimal Control và Multiple Shooting}
-\label{sec:ocp_mms_approach}
+\label{sec:ocp_DMS_approach}
 
 Để khắc phục các hạn chế của hướng tiếp cận hình học thuần túy, chúng tôi đề xuất mô hình hóa bài toán hoạch định chuyển động thành một bài toán Điều khiển Tối ưu (OCP) trên đồ thị các vùng lồi, sử dụng phương pháp direct multiple shooting. Mô hình này ghép hai khối lý thuyết: (i) Graphs of Convex Sets / network flow để chọn đường đi rời rạc qua các vùng an toàn lồi, và (ii) direct multiple shooting để mô hình hóa quỹ đạo liên tục trong mỗi vùng lồi. Phần ràng buộc an toàn hình học được hiện thực bằng cả hard constraint trên lưới hữu hạn lẫn hàm phạt log-barrier. Cấu trúc của mô hình hợp nhất được phân tích thành bốn lớp có thể xử lý tương đối độc lập (xem mục~\ref{subsec:layered_decomposition}), tạo nền tảng cho chiến lược giải sẽ được trình bày ở mục~\ref{subsec:solver_strategy}.
 
-\input{proposed-method/ocp_mms}
+\input{proposed-method/ocp_dms}
 

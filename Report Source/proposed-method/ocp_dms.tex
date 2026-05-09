@@ -23,8 +23,8 @@
 \node[align=center, font=\scriptsize] at (9.6,-1.4)  {network flow\\+ multiple shooting\\+ log-barrier};
 \node[align=center, font=\scriptsize] at (12.8,-1.4) {liên tục, an toàn,\\động lực hợp lệ};
 \end{tikzpicture}
-\caption[Quy trình tổng quan OCP+MMS]{Quy trình tổng quan của hướng tiếp cận OCP+MMS. Bắt đầu từ bài toán điều khiển tối ưu liên tục với ràng buộc hình học phi lồi, không gian tự do được phân hoạch thành một họ vùng lồi; cấu trúc kề giữa các vùng được mã hóa thành đồ thị có hướng; việc chọn đường đi rời rạc và tối ưu hóa quỹ đạo cục bộ được hợp nhất thành một bài toán MIOCP/MINLP duy nhất; nghiệm thu được là cặp quỹ đạo trạng thái và điều khiển tối ưu thỏa mãn đồng thời ràng buộc động lực học và an toàn.}
-\label{fig:ocp_mms_pipeline}
+\caption[Quy trình tổng quan GCS-DMS]{Quy trình tổng quan của hướng tiếp cận GCS-DMS. Bắt đầu từ bài toán điều khiển tối ưu liên tục với ràng buộc hình học phi lồi, không gian tự do được phân hoạch thành một họ vùng lồi; cấu trúc kề giữa các vùng được mã hóa thành đồ thị có hướng; việc chọn đường đi rời rạc và tối ưu hóa quỹ đạo cục bộ được hợp nhất thành một bài toán MIOCP/MINLP duy nhất; nghiệm thu được là cặp quỹ đạo trạng thái và điều khiển tối ưu thỏa mãn đồng thời ràng buộc động lực học và an toàn.}
+\label{fig:ocp_DMS_pipeline}
 \end{figure}
 
 \subsection{Bài toán gốc cần giải}
@@ -197,7 +197,7 @@ x_v(\tau)\in Q_v,
 \end{equation}
 Đây là ràng buộc continuous-time vô hạn chiều — nó phải thỏa mãn tại mọi $\tau\in[0,1]$, không chỉ tại hữu hạn điểm rời rạc. Để đưa vào bộ giải số, ta cần xấp xỉ hoặc thay thế nó bằng một dạng hữu hạn chiều. Hai cách tiếp cận chính được trình bày dưới đây.
 
-\subsubsection{Cách 1: Xấp xỉ qua lưới hữu hạn điểm (hard constraint)}
+\subsubsection*{Cách 1: Xấp xỉ qua lưới hữu hạn điểm (hard constraint)}
 
 Cách tiếp cận trực tiếp nhất là kiểm tra ràng buộc an toàn tại $M_v+1$ điểm lưới trên $[0,1]$:
 \[
@@ -210,7 +210,7 @@ A_v x_v(\tau_{v,k})\le b_v-\varepsilon_v,
 \]
 với $\varepsilon_v>0$ là biên an toàn (safety margin). Cách này đơn giản và không thay đổi cấu trúc hàm mục tiêu, nhưng chỉ đảm bảo an toàn tại các điểm lưới; vi phạm giữa các điểm vẫn có thể xảy ra với bước lưới đủ thô.
 
-\subsubsection{Cách 2: Hàm cản logarit (log-barrier)}
+\subsubsection*{Cách 2: Hàm cản logarit (log-barrier)}
 \label{subsubsec:log_barrier}
 
 Một hướng tiếp cận có nền tảng lý thuyết chắc hơn là sử dụng hàm cản logarit (log-barrier) — một kỹ thuật cổ điển trong tối ưu hóa điểm trong (interior-point optimization). Ý tưởng là thay ràng buộc cứng $A_v x \le b_v$ bằng một số hạng phạt trong hàm mục tiêu, số hạng này tiến về $+\infty$ khi quỹ đạo tiếp cận biên vùng lồi. Với polytope $Q_v = \{x : A_v x \le b_v\}$ có $m_v$ bất đẳng thức, ta định nghĩa hàm cản
@@ -423,7 +423,7 @@ Vì vậy, nếu xét ở mức liên tục theo thời gian, trước khi thay 
 
 Điểm quan trọng là bài toán này \textbf{không thể quy trực tiếp về Mixed-Integer Second Order Cone Problem} (MISOCP) như trong GCS-Bézier của Marcucci và cộng sự~\cite{MarcucciEtAl2023GCS, Marcucci2024Thesis}. Một MISOCP yêu cầu các ràng buộc liên tục có dạng tuyến tính hoặc nón bậc hai lồi. Trong GCS-Bézier, điều này đạt được nhờ tham số hóa quỹ đạo bằng các điểm điều khiển Bézier: ràng buộc nằm trong vùng lồi có thể áp lên các điểm điều khiển thông qua tính chất convex hull, còn các ràng buộc độ dài, vận tốc hoặc gia tốc thường được viết dưới dạng chuẩn Euclid và đưa về SOCP.
 
-Ngược lại, trong mô hình OCP+MMS, ràng buộc defect
+Ngược lại, trong mô hình GCS-DMS, ràng buộc defect
 \[
 s_v^+ - F_v(s_v^-,w_v,\Delta_v)=0
 \]
@@ -433,11 +433,11 @@ Do đó, chỉ trong các trường hợp rất đặc biệt, chẳng hạn đ�
 
 \subsubsection{So sánh với GCS-Bézier}
 
-Sự khác biệt giữa mô hình MIOCP+MMS đề xuất và GCS-Bézier dựa trên MISOCP thể hiện rõ ở mức độ biểu diễn động lực học, cấu trúc tối ưu hóa và khả năng giải số.
+Sự khác biệt giữa mô hình MIGCS-DMS đề xuất và GCS-Bézier dựa trên MISOCP thể hiện rõ ở mức độ biểu diễn động lực học, cấu trúc tối ưu hóa và khả năng giải số.
 
 \textbf{Ưu điểm.} Thứ nhất, quỹ đạo thu được thỏa mãn trực tiếp phương trình động lực học $\dot x = f(x,u)$ của hệ, thay vì chỉ được xấp xỉ ở mức động học bằng đa thức Bézier. Điều này đặc biệt quan trọng đối với các hệ rô-bốt có động lực học phi tuyến rõ rệt, chẳng hạn tay máy với động lực Lagrange, hệ underactuated, hoặc rô-bốt di động chịu ràng buộc nonholonomic. Thứ hai, tín hiệu điều khiển $u(\cdot)$ xuất hiện tường minh như một biến quyết định, nhờ đó các ràng buộc giới hạn điều khiển $u\in\mathcal U$ và chi phí năng lượng $\|u\|^2$ có thể được đưa vào mô hình một cách tự nhiên. Thứ ba, khi sử dụng hàm cản log-barrier (mục~\ref{subsubsec:log_barrier}), bài toán khuyến khích quỹ đạo nằm trong miền trong của các vùng an toàn, thay vì chỉ kiểm tra điều kiện an toàn tại một tập hữu hạn các điểm lưới.
 
 \textbf{Hạn chế.} Đổi lại, mô hình không còn giữ được cấu trúc lồi của GCS-Bézier. Trong GCS-Bézier, relaxation lồi của phần chọn đường đi thường có gap rất nhỏ, và trong nhiều trường hợp gap bằng không~\cite{MarcucciEtAl2023GCS}. Với MIOCP/MINLP, khối động lực học multiple shooting là phi tuyến và nói chung không lồi, nên không có bảo đảm tương tự về độ chặt của relaxation. Ngoài ra, bài toán thuộc lớp MINLP phi lồi, vốn NP-hard trong trường hợp tổng quát, nên chi phí tính toán dự kiến cao hơn đáng kể so với MISOCP. Về mặt công cụ, các bộ giải thương mại như Mosek hoặc Gurobi xử lý rất hiệu quả các bài toán MISOCP, nhưng không trực tiếp giải được MINLP phi lồi tổng quát; do đó cần đến các bộ giải chuyên dụng dựa trên branch-and-bound kết hợp với lời giải NLP tại các nút tìm kiếm.
 
-Tóm lại, OCP+MMS phù hợp hơn trong các bài toán mà tính khả thi động lực học là yêu cầu trung tâm và quỹ đạo Bézier động học không đủ đại diện cho hệ thực. Ngược lại, khi ràng buộc động lực học không phải yếu tố quyết định, GCS-Bézier vẫn là lựa chọn có lợi thế hơn về tốc độ giải và khả năng tận dụng relaxation lồi.
+Tóm lại, GCS-DMS phù hợp hơn trong các bài toán mà tính khả thi động lực học là yêu cầu trung tâm và quỹ đạo Bézier động học không đủ đại diện cho hệ thực. Ngược lại, khi ràng buộc động lực học không phải yếu tố quyết định, GCS-Bézier vẫn là lựa chọn có lợi thế hơn về tốc độ giải và khả năng tận dụng relaxation lồi.
 

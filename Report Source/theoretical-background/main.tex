@@ -1,38 +1,28 @@
 % \chapter{Theoretical Background}
 \chapter{Kiến thức nền tảng}
 % \hline
-% \textit{In Chapter \thechapter, it presents about preliminary knowledge in this project.}
-Để hỗ trợ xây dựng và phân tích luận án, chương hiện tại trình bày hệ thống các kiến thức
-nền tảng từ bốn lĩnh vực toán học liên ngành.
+\textit{
+Chương này trình bày các kiến thức nền tảng phục vụ cho việc xây dựng hai hướng tiếp cận trong báo
+cáo. Nội dung bao gồm giải tích lồi và tối ưu hóa nón, lý thuyết đồ thị và mô hình dòng mạng, phân
+hoạch lồi không gian tự do, mô hình kinodynamic với đường cong Bézier, bài toán Điều khiển Tối ưu,
+và phương pháp direct multiple shooting. Các nền tảng này cung cấp ngôn ngữ toán học để mô tả vùng
+an toàn, chọn đường đi rời rạc, tham số hóa quỹ đạo, cũng như xử lý các ràng buộc động lực học phi
+tuyến.
+}
 
-Đầu tiên, \textit{giải tích lồi và tối ưu hóa} cung cấp ngôn ngữ đại số chính xác để mô tả các
-tập an toàn và các ràng buộc tối ưu hóa.
-Đặc biệt, kỹ thuật đồng nhất hóa (homogenization) và nón phối cảnh (perspective cone) là nền tảng
-để chuyển đổi các ràng buộc nhị phân trong bài toán GCS thành dạng lồi giải được hiệu quả bằng
-quy hoạch nón bậc hai (SOCP).
-Tiếp theo, \textit{lý thuyết đồ thị} cung cấp cấu trúc tổ hợp cho GCS: bài toán tìm đường đi qua
-đồ thị các tập lồi được quy về bài toán dòng mạng (network flow), vốn sở hữu tính chất hoàn toàn
-đơn mô (Total Unimodularity - TU) giúp bài toán nới lỏng LP tự động có nghiệm nguyên.
-Song song với đó, \textit{đường cong Bézier} được sử dụng làm cơ chế tham số hóa quỹ đạo bên trong
-mỗi tập lồi: tính chất bao lồi của chúng cho phép quy ràng buộc an toàn liên tục về một tập hữu hạn
-các ràng buộc tuyến tính trên các điểm điều khiển, đồng thời bảo toàn tính lồi của toàn bộ bài toán
-tối ưu hóa.
-Cuối cùng, \textit{phân hoạch lồi} (convex decomposition) là bước tiền xử lý chuyển đổi không gian
-tự do phi lồi thành tập hợp các vùng lồi phủ lấp, từ đó xây dựng nên đồ thị đầu vào cho GCS.
-
-Phần còn lại của chương được tổ chức như sau.
-Mục~\ref{sec:convex_analysis} trình bày giải tích lồi, các lớp bài toán tối ưu nón và quy hoạch
-nguyên-hỗn hợp.
-Mục~\ref{sec:graph_theory} xây dựng lý thuyết đồ thị và mô hình dòng mạng cho bài toán đường đi
-ngắn nhất.
-Mục~\ref{sec:kinodynamic_theory} giới thiệu mô hình kinodynamic và các tính chất của đường cong
-Bézier.
-Mục~\ref{sec:convex-decomposition} phân tích các phương pháp phân hoạch lồi, phân biệt phương pháp
-chính xác và xấp xỉ.
-Mục~\ref{sec:ocp} phát biểu bài toán Điều khiển Tối ưu dạng liên tục và thảo luận về tính không lồi
-của không gian trạng thái trong bài toán tránh vật cản.
-Cuối cùng, Mục~\ref{sec:multiple_shooting} trình bày phương pháp Bắn Nhiều Lần Trực tiếp, công cụ
-rời rạc hóa OCP thành bài toán NLP hữu hạn chiều có cấu trúc thưa khai thác được.
+% Phần còn lại của chương được tổ chức như sau.
+% Mục~\ref{sec:convex_analysis} trình bày giải tích lồi, các lớp bài toán tối ưu nón và quy hoạch
+% nguyên-hỗn hợp.
+% Mục~\ref{sec:graph_theory} xây dựng lý thuyết đồ thị và mô hình dòng mạng cho bài toán đường đi
+% ngắn nhất.
+% Mục~\ref{sec:kinodynamic_theory} giới thiệu mô hình kinodynamic và các tính chất của đường cong
+% Bézier.
+% Mục~\ref{sec:convex-decomposition} phân tích các phương pháp phân hoạch lồi, phân biệt phương pháp
+% chính xác và xấp xỉ.
+% Mục~\ref{sec:ocp} phát biểu bài toán Điều khiển Tối ưu dạng liên tục và thảo luận về tính không lồi
+% của không gian trạng thái trong bài toán tránh vật cản.
+% Cuối cùng, Mục~\ref{sec:multiple_shooting} trình bày phương pháp Bắn Nhiều Lần Trực tiếp, công cụ
+% rời rạc hóa OCP thành bài toán NLP hữu hạn chiều có cấu trúc thưa khai thác được.
 
 \input{theoretical-background/convex-optimization.tex}
 \input{theoretical-background/graph.tex}

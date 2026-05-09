@@ -1,8 +1,4 @@
-% filepath: /home/dang-khoa/university/Capstone Project/Report Source/experiments/resutls.tex
-
-
-\newpage
-\section{Kết quả và Phân tích}
+% filepath: /home/dang-khoa/university/Capstone Project/Report Source/experiments/results.tex
 Trong chương này, chúng tôi trình bày các kết quả định lượng thu được từ các thực nghiệm đã thiết lập ở phần trước. Mục tiêu là phân tích sự đánh đổi giữa độ phức tạp của việc phân hoạch không gian và tính tối ưu của quỹ đạo đầu ra. Toàn bộ các thực nghiệm được thực hiện trên máy tính cá nhân với cấu hình: CPU AMD Ryzen 7 4800H 2.9 GHz, RAM 16GB, hệ điều hành Ubuntu 24.04.
 \subsection{Phân tích Môi trường 2D đơn giản: Tác động của Phân hoạch lồi}
 
@@ -228,3 +224,246 @@ Quan sát các quỹ đạo tại Hình~\ref{fig:maze_results} (tương ứng v�
 \end{enumerate}
 
 Kết luận, việc thực hiện trên 10 mê cung khác nhau đã khẳng định tính ổn định của framework GCS. Mặc dù chi phí tính toán cho quỹ đạo \textit{kinodynamic} cao hơn, GCS cung cấp một giải pháp nhất quán để tìm ra lộ trình trơn tru, an toàn tuyệt đối và tối ưu toàn cục trong các môi trường có độ phức tạp tổ hợp cực cao.
+
+\subsection{Phân tích Kịch bản C: GCS-DMS với ràng buộc động lực học phi tuyến}
+
+Trong kịch bản này, chúng tôi đánh giá hướng tiếp cận GCS-DMS trên bài toán hoạch định quỹ đạo có động lực học phi tuyến. Khác với các thực nghiệm GCS-Bezier ở trên, mục tiêu của phần này không phải là so sánh trực tiếp giá trị hàm mục tiêu giữa hai formulation, mà là kiểm chứng khả năng của GCS-DMS trong việc đồng thời lựa chọn chuỗi vùng lồi, tối ưu trạng thái liên tục và sinh tín hiệu điều khiển thỏa mãn động lực học của hệ. Do bài toán sau rời rạc hóa thuộc lớp NLP/MINLP phi lồi, các kết quả dưới đây được diễn giải theo hướng đánh giá tính khả thi, độ hội tụ và chất lượng động học của nghiệm, thay vì khẳng định tối ưu toàn cục.
+
+\subsubsection{Hội tụ trên môi trường 2D đơn giản}
+
+Hình~\ref{fig:dms_convergence_2d} minh họa quá trình hội tụ của Direct Multiple Shooting trên môi trường 2D nhỏ. Ở các vòng lặp đầu, nghiệm khởi tạo chủ yếu bám theo chuỗi vùng được chọn từ đồ thị, do đó tồn tại sai lệch lớn giữa các đoạn shooting và ràng buộc defect của động lực học. Khi IPOPT tiếp tục tối ưu, các điểm nối giữa các vùng được kéo về cùng một vị trí, quỹ đạo cong dần theo động lực học của xe và các đoạn shooting rời rạc trở thành một quỹ đạo liên tục.
+
+\begin{figure}[!htp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{experiments/image/dms/conv_2d.png}
+    \caption{Quá trình hội tụ của GCS-DMS trên môi trường 2D đơn giản. Các khung hình thể hiện sự giảm dần của defect dynamics và connection gap trong quá trình tối ưu.}
+    \label{fig:dms_convergence_2d}
+\end{figure}
+
+Kết quả định lượng ở Bảng~\ref{tab:dms_simple_result} cho thấy nghiệm cuối cùng đạt mức sai số rất nhỏ: defect dynamics đạt $2.47\times 10^{-11}$, connection gap đạt $1.05\times 10^{-10}$ và vi phạm ràng buộc hình học ở mức $7.13\times 10^{-8}$. Điều này xác nhận rằng nghiệm thu được không chỉ nằm trong các vùng an toàn được kích hoạt, mà còn thỏa mãn nhất quán điều kiện khớp giữa các đoạn multiple shooting.
+
+\begin{table}[!htp]
+\centering
+\caption{Kết quả GCS-DMS trên môi trường 2D đơn giản}
+\label{tab:dms_simple_result}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lccccccc}
+\toprule
+\textbf{Kịch bản} 
+& \textbf{Số vùng kích hoạt}
+& \textbf{Duration (s)}
+& \textbf{Thời gian giải (s)}
+& \textbf{Cost}
+& \textbf{Defect}
+& \textbf{Connection gap}
+& \textbf{Violation} \\
+\midrule
+2D đơn giản
+& 9
+& 25.47
+& 17.94
+& 51.55
+& $2.47\times 10^{-11}$
+& $1.05\times 10^{-10}$
+& $7.13\times 10^{-8}$ \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+Hồ sơ vận tốc ở Hình~\ref{fig:dms_velocity_2d} cũng phản ánh rõ tác động của ràng buộc động lực học. Xe duy trì vận tốc cao trên các đoạn tương đối thẳng, nhưng giảm tốc mạnh tại những vị trí cần đổi hướng hoặc đi qua vùng nối hẹp. Đây là hành vi mong đợi đối với mô hình Unicycle: việc đổi hướng không thể được thực hiện tức thời như trong quỹ đạo hình học thuần túy, mà phải thông qua điều khiển vận tốc góc hữu hạn.
+
+\begin{figure}[!htp]
+    \centering
+    \includegraphics[width=0.72\textwidth]{experiments/image/dms/vel_profile.png}
+    \caption{Hồ sơ vận tốc của nghiệm GCS-DMS trên môi trường 2D đơn giản. Vận tốc giảm tại các đoạn cua và tăng trở lại ở các đoạn có hình học thuận lợi hơn.}
+    \label{fig:dms_velocity_2d}
+\end{figure}
+
+\subsubsection{Kết quả trên mê cung kích thước lớn}
+
+Để đánh giá khả năng mở rộng của GCS-DMS trong môi trường có cấu trúc tổ hợp phức tạp hơn, chúng tôi tiếp tục kiểm thử trên các mê cung kích thước $15\times 15$ với phân hoạch lồi dày đặc (ở đây chúng tôi sử dụng giải thuật giải thuật ACD để phân hoạch không gian tự do). Hình~\ref{fig:dms_maze_paths} trình bày bốn trường hợp đại diện tương ứng với các seed khác nhau. Trong mỗi trường hợp, vùng màu xanh nhạt thể hiện các vùng lồi được kích hoạt trên đường đi rời rạc, còn đường cong màu xanh/tím là quỹ đạo liên tục sau bước polish bằng fixed-path NLP.
+
+\begin{figure}[!htp]
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{experiments/image/dms/maze_case_size15_kd15_seed4_animation_last_frame.png}
+        \caption{Seed 4}
+        \label{fig:dms_maze_seed4}
+    \end{subfigure}
+    
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{experiments/image/dms/maze_case_size15_kd15_seed20_animation_last_frame.png}
+        \caption{Seed 20}
+        \label{fig:dms_maze_seed20}
+    \end{subfigure}
+    \vspace{0.5cm}
+    
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{experiments/image/dms/maze_case_size15_kd15_seed18_animation_last_frame.png}
+        \caption{Seed 18}
+        \label{fig:dms_maze_seed18}
+    \end{subfigure}
+    
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{experiments/image/dms/maze_case_size15_kd15_seed17_animation_last_frame.png}
+        \caption{Seed 17}
+        \label{fig:dms_maze_seed17}
+    \end{subfigure}
+    \caption{Các nghiệm GCS-DMS trên mê cung kích thước $15\times 15$. Phương pháp tìm được chuỗi vùng khả thi và quỹ đạo liên tục thỏa mãn ràng buộc động lực học trong nhiều cấu trúc mê cung khác nhau.}
+    \label{fig:dms_maze_paths}
+\end{figure}
+
+Bảng~\ref{tab:dms_maze_results} tổng hợp các chỉ số chính của bốn mẫu thử. Hai cơ chế an toàn hình học được sử dụng theo đúng mô tả ở mục~\ref{subsec:safety_constraints}: seed 4 và seed 20 dùng hàm cản logarit (log-barrier), còn seed 17 và seed 18 dùng ràng buộc cứng tại lưới hữu hạn điểm trên từng đoạn shooting. Tất cả các trường hợp đều hội tụ thành công với số đường ứng viên được đánh giá bằng $1$, nghĩa là đường đi trích xuất từ relaxation ban đầu đã đủ tốt để bước fixed-path NLP polish hoàn tất mà không cần dùng đến các đường fallback. Sau polish, defect dynamics và constraint violation đều nằm ở mức rất nhỏ, từ $10^{-10}$ đến $10^{-8}$, cho thấy nghiệm cuối cùng đạt tính khả thi số học tốt.
+
+\begin{table}[!htp]
+\centering
+\caption{Kết quả GCS-DMS trên các mê cung kích thước $15\times 15$}
+\label{tab:dms_maze_results}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llcccccccc}
+\toprule
+\textbf{Seed}
+& \textbf{Chế độ}
+& \textbf{Số vùng}
+& \textbf{Duration (s)}
+& \textbf{Thời gian giải (s)}
+& \textbf{Cost}
+& \textbf{Defect}
+& \textbf{Gap}
+& \textbf{Violation}
+& \textbf{Int. gap} \\
+\midrule
+4
+& Log-barrier
+& 24
+& 44.76
+& 640.26
+& 92.57
+& $0.00$
+& $2.62\times 10^{-9}$
+& $1.00\times 10^{-8}$
+& $1.34\times 10^{-1}$ \\
+17
+& Lưới hữu hạn
+& 27
+& 56.76
+& 75.77
+& 113.52
+& $1.33\times 10^{-9}$
+& $0.00$
+& $1.18\times 10^{-9}$
+& $6.10\times 10^{-2}$ \\
+18
+& Lưới hữu hạn
+& 33
+& 47.90
+& 69.71
+& 95.80
+& $8.53\times 10^{-10}$
+& $0.00$
+& $7.63\times 10^{-10}$
+& $5.94\times 10^{-2}$ \\
+20
+& Log-barrier
+& 44
+& 72.70
+& 297.03
+& 150.64
+& $0.00$
+& $1.89\times 10^{-10}$
+& $1.86\times 10^{-10}$
+& $1.87\times 10^{-1}$ \\
+\midrule
+\textbf{Trung bình}
+& --
+& 32
+& 55.53
+& 270.69
+& 113.13
+& --
+& --
+& --
+& -- \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\begin{table}[!htp]
+\centering
+\caption{Tổng hợp theo cơ chế an toàn hình học trong GCS-DMS}
+\label{tab:dms_safety_mode_summary}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Chế độ an toàn}
+& \textbf{Seed}
+& \textbf{Duration TB (s)}
+& \textbf{Thời gian giải TB (s)}
+& \textbf{Cost TB}
+& \textbf{Int. gap TB} \\
+\midrule
+Log-barrier
+& 4, 20
+& 58.73
+& 468.65
+& 121.61
+& $1.61\times 10^{-1}$ \\
+Lưới hữu hạn điểm
+& 17, 18
+& 52.33
+& 72.74
+& 104.66
+& $6.02\times 10^{-2}$ \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+Kết quả này cho thấy chi phí tính toán của GCS-DMS biến thiên mạnh theo cấu trúc mê cung, điều kiện khởi tạo và cơ chế an toàn được sử dụng. Nhóm log-barrier có thời gian giải trung bình lớn hơn đáng kể ($468.65$ giây so với $72.74$ giây của nhóm lưới hữu hạn), đồng thời integrality gap trung bình cũng cao hơn. Điều này phù hợp với kỳ vọng: log-barrier đưa thêm các số hạng phi tuyến vào hàm mục tiêu và có xu hướng nhạy hơn với hình học biên của vùng lồi, trong khi ràng buộc lưới hữu hạn giữ bài toán trực tiếp hơn tại các điểm kiểm tra đã chọn. Ngược lại, log-barrier có ưu điểm là khuyến khích quỹ đạo nằm sâu trong miền trong của vùng an toàn, thay vì chỉ kiểm tra an toàn tại một số điểm lưới rời rạc.
+
+Cần lưu ý rằng hai nhóm seed không tạo thành một thí nghiệm ablation hoàn toàn kiểm soát, vì môi trường mê cung và chuỗi vùng tối ưu khác nhau giữa các seed. Do đó, Bảng~\ref{tab:dms_safety_mode_summary} chỉ nên được hiểu như so sánh tổng quan trên bộ kết quả hiện có. Nhìn chung, cả hai cơ chế đều cho nghiệm khả thi với defect và violation rất nhỏ; ràng buộc lưới hữu hạn cho thời gian giải ổn định hơn trong hai seed 17--18, còn log-barrier thể hiện rõ đánh đổi giữa an toàn kiểu interior và chi phí tối ưu hóa cao hơn. Chẳng hạn, seed 4 có thời gian di chuyển ngắn nhất trong bốn mẫu thử ($44.76$ giây) nhưng lại có thời gian giải lớn nhất ($640.26$ giây), cho thấy thời gian hội tụ không chỉ phụ thuộc vào độ dài đường đi mà còn chịu ảnh hưởng bởi hình học vùng nối và mức độ khó của bài toán NLP.
+
+Hồ sơ vận tốc ở Hình~\ref{fig:dms_maze_velocity} cho thấy xe thường vận hành gần vận tốc hành trình khoảng $0.6$--$0.75$ m/s trên các đoạn thuận lợi, nhưng xuất hiện nhiều pha giảm tốc sâu tại các nút giao hoặc tại các đoạn đổi hướng gấp. Các điểm giảm tốc này phù hợp với trực quan hình học của mê cung: khi chuỗi vùng buộc xe phải đi qua các hành lang hẹp hoặc đổi hướng liên tiếp, nghiệm tìm được giảm vận tốc tịnh tiến để thỏa mãn giới hạn quay của mô hình Unicycle và tránh sinh ra defect lớn trong multiple shooting.
+
+\begin{figure}[!htp]
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{experiments/image/dms/seed4_vel.png}
+        \caption{Seed 4}
+        \label{fig:dms_seed4_vel}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{experiments/image/dms/seed17_vel.png}
+        \caption{Seed 17}
+        \label{fig:dms_seed17_vel}
+    \end{subfigure}
+    
+    \vspace{0.5cm}
+    
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{experiments/image/dms/seed18_vel.png}
+        \caption{Seed 18}
+        \label{fig:dms_seed18_vel}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{experiments/image/dms/seed20_vel.png}
+        \caption{Seed 20}
+        \label{fig:dms_seed20_vel}
+    \end{subfigure}
+    
+    \caption{Hồ sơ vận tốc của các nghiệm GCS-DMS trong mê cung. Các pha giảm tốc xuất hiện tại những đoạn cua hẹp hoặc chuyển tiếp nhiều vùng, phản ánh tác động trực tiếp của ràng buộc động lực học phi tuyến.}
+    \label{fig:dms_maze_velocity}
+\end{figure}
+
+Tổng hợp các kết quả trên, GCS-DMS cho thấy khả năng sinh quỹ đạo khả thi về mặt động lực học trong các môi trường có nhiều vùng lồi và cấu trúc đường đi phức tạp. Điểm mạnh chính của phương pháp là mô hình hóa trực tiếp trạng thái, điều khiển và defect dynamics, nhờ đó nghiệm cuối cùng có thể được kiểm chứng bằng các residual vật lý cụ thể. Đổi lại, phương pháp phải chấp nhận chi phí tính toán cao hơn và không có bảo đảm tối ưu toàn cục như các relaxation lồi của GCS-Bezier. Đây là đánh đổi phù hợp với mục tiêu của hướng tiếp cận thứ hai: ưu tiên tính đúng đắn động lực học và tính khả thi của quỹ đạo trên hệ robot thực, thay vì chỉ tối ưu hóa hình học trong không gian cấu hình.
