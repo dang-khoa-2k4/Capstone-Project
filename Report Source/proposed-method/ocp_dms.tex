@@ -423,7 +423,7 @@ Vì vậy, nếu xét ở mức liên tục theo thời gian, trước khi thay 
 
 Điểm quan trọng là bài toán này \textbf{không thể quy trực tiếp về Mixed-Integer Second Order Cone Problem} (MISOCP) như trong GCS-Bézier của Marcucci và cộng sự~\cite{MarcucciEtAl2023GCS, Marcucci2024Thesis}. Một MISOCP yêu cầu các ràng buộc liên tục có dạng tuyến tính hoặc nón bậc hai lồi. Trong GCS-Bézier, điều này đạt được nhờ tham số hóa quỹ đạo bằng các điểm điều khiển Bézier: ràng buộc nằm trong vùng lồi có thể áp lên các điểm điều khiển thông qua tính chất convex hull, còn các ràng buộc độ dài, vận tốc hoặc gia tốc thường được viết dưới dạng chuẩn Euclid và đưa về SOCP.
 
-Ngược lại, trong mô hình GCS-DMS, ràng buộc defect
+Ngược lại, trong mô hình OCP-DMS, ràng buộc defect
 \[
 s_v^+ - F_v(s_v^-,w_v,\Delta_v)=0
 \]
@@ -431,13 +431,4 @@ phụ thuộc vào endpoint map $F_v$, tức nghiệm tại $\tau=1$ của IVP p
 
 Do đó, chỉ trong các trường hợp rất đặc biệt, chẳng hạn động lực học tuyến tính đơn giản, thời lượng cố định, và ràng buộc hình học được viết hoàn toàn bằng các chuẩn lồi, bài toán mới có thể được xấp xỉ hoặc biến đổi về một lớp lồi hỗn hợp nguyên. Với hệ động lực học tổng quát đang xét, phân loại đúng của mô hình là MIOCP ở cấp liên tục và MINLP sau rời rạc hóa. Hệ quả trực tiếp là ta không còn thừa hưởng bảo đảm convex relaxation chặt và hiệu năng giải của các bộ giải MISOCP như Mosek/Gurobi; thay vào đó, cần dùng chiến lược giải phù hợp với MINLP phi lồi, như tách pha chọn đường đi và pha tối ưu quỹ đạo liên tục được trình bày ở mục~\ref{subsec:solver_strategy}.
 
-\subsubsection{So sánh với GCS-Bézier}
-
-Sự khác biệt giữa mô hình MIGCS-DMS đề xuất và GCS-Bézier dựa trên MISOCP thể hiện rõ ở mức độ biểu diễn động lực học, cấu trúc tối ưu hóa và khả năng giải số.
-
-\textbf{Ưu điểm.} Thứ nhất, quỹ đạo thu được thỏa mãn trực tiếp phương trình động lực học $\dot x = f(x,u)$ của hệ, thay vì chỉ được xấp xỉ ở mức động học bằng đa thức Bézier. Điều này đặc biệt quan trọng đối với các hệ rô-bốt có động lực học phi tuyến rõ rệt, chẳng hạn tay máy với động lực Lagrange, hệ underactuated, hoặc rô-bốt di động chịu ràng buộc nonholonomic. Thứ hai, tín hiệu điều khiển $u(\cdot)$ xuất hiện tường minh như một biến quyết định, nhờ đó các ràng buộc giới hạn điều khiển $u\in\mathcal U$ và chi phí năng lượng $\|u\|^2$ có thể được đưa vào mô hình một cách tự nhiên. Thứ ba, khi sử dụng hàm cản log-barrier (mục~\ref{subsubsec:log_barrier}), bài toán khuyến khích quỹ đạo nằm trong miền trong của các vùng an toàn, thay vì chỉ kiểm tra điều kiện an toàn tại một tập hữu hạn các điểm lưới.
-
-\textbf{Hạn chế.} Đổi lại, mô hình không còn giữ được cấu trúc lồi của GCS-Bézier. Trong GCS-Bézier, relaxation lồi của phần chọn đường đi thường có gap rất nhỏ, và trong nhiều trường hợp gap bằng không~\cite{MarcucciEtAl2023GCS}. Với MIOCP/MINLP, khối động lực học multiple shooting là phi tuyến và nói chung không lồi, nên không có bảo đảm tương tự về độ chặt của relaxation. Ngoài ra, bài toán thuộc lớp MINLP phi lồi, vốn NP-hard trong trường hợp tổng quát, nên chi phí tính toán dự kiến cao hơn đáng kể so với MISOCP. Về mặt công cụ, các bộ giải thương mại như Mosek hoặc Gurobi xử lý rất hiệu quả các bài toán MISOCP, nhưng không trực tiếp giải được MINLP phi lồi tổng quát; do đó cần đến các bộ giải chuyên dụng dựa trên branch-and-bound kết hợp với lời giải NLP tại các nút tìm kiếm.
-
-Tóm lại, GCS-DMS phù hợp hơn trong các bài toán mà tính khả thi động lực học là yêu cầu trung tâm và quỹ đạo Bézier động học không đủ đại diện cho hệ thực. Ngược lại, khi ràng buộc động lực học không phải yếu tố quyết định, GCS-Bézier vẫn là lựa chọn có lợi thế hơn về tốc độ giải và khả năng tận dụng relaxation lồi.
 

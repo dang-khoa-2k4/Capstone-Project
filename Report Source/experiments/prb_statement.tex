@@ -1,44 +1,79 @@
 \section{Mô hình hoạch định chuyển động}
+\label{sec:motion_planning_model}
 
-Trong phần này, chúng tôi trình bày mô hình toán học của bài toán hoạch định chuyển động cho hệ thống robot tự hành với các ràng buộc vi phân liên tục. Mục tiêu là xây dựng một khung lý thuyết vững chắc để phát triển các thuật toán lập kế hoạch hiệu quả, đồng thời đảm bảo tính khả thi về mặt động lực học và tối ưu hóa hiệu suất vận hành trong môi trường phức tạp chứa vật cản. 
+Bài toán hoạch định chuyển động cho robot tự hành đặt ra yêu cầu tìm một quỹ đạo
+kết nối trạng thái khởi đầu với trạng thái đích trong môi trường chứa vật cản,
+đồng thời thỏa mãn các ràng buộc về an toàn hình học và giới hạn động học của hệ.
+Phần này xây dựng mô hình toán học tổng quát làm nền tảng chung cho cả hai hướng
+tiếp cận được trình bày trong Phần~\ref{sec:gcs_approach}
+và Phần~\ref{sec:ocp_dms_approach}.
 
-\subsection{Mô hình toán học}
+\subsection{Phát biểu bài toán}
+\label{subsec:planning_problem}
 
-Ta xem xét một quỹ đạo mượt trong $\mathbb{R}^d$. Một quỹ đạo có thể được biểu diễn dưới dạng hàm số liên tục:
+Xét quỹ đạo liên tục $\mathbf{x}(t) \colon [0, T] \to \mathbb{R}^d$, trong đó
+$d$ là số chiều của không gian cấu hình và $T > 0$ là thời gian thực hiện.
+Quỹ đạo phải khả vi đến bậc $K$, tức là
+$\frac{\mathrm{d}^k \mathbf{x}}{\mathrm{d}t^k}$ tồn tại và liên tục với $k = 1, \ldots, K$.
+Hàm mục tiêu tổng quát được định nghĩa là
 \begin{equation}
-    \mathbf{x}(t): [0, T] \rightarrow \mathbb{R}^d,
+    \psi(\mathbf{x}(\cdot),\, T)
+    :=
+    a\,\Phi(T)
+    + \sum_{m=1}^{M} b_m
+      \int_0^T
+      \left\| \frac{\mathrm{d}^m \mathbf{x}}{\mathrm{d}t^m}(t) \right\|^2
+      \mathrm{d}t,
+    \label{eq:cost_general}
 \end{equation}
-trong đó $T$ là thời gian hoàn thành quỹ đạo. Quỹ đạo này phải thỏa mãn điều kiện khả vi đến bậc $K$, tức là:
-\begin{equation}
-    \frac{d^k \mathbf{x}(t)}{dt^k} \text{ tồn tại và liên tục với } k = 1, 2, \ldots, K,
-\end{equation}
-với đạo hàm bậc 0 là chính hàm số $\mathbf{x}(t)$.
-
-Hàm mục tiêu cần được tối ưu hóa có thể là tổng chi phí năng lượng, thời gian hoàn thành, hoặc một hàm chi phí tổng quát khác. Cụ thể, ta định nghĩa hàm mục tiêu dưới dạng tích phân:
-\begin{equation}
-    \psi(\mathbf{x}(t), T) := a\Phi(T) + \sum_{m=1}^{M}b_m\int_0^T \left\| \frac{d^m \mathbf{x}(t)}{dt^m} \right\|^2 dt,
-\end{equation}
-trong đó $\Phi(T)$ là hàm chi phí liên quan đến thời gian, $m$ là bậc đạo hàm đại diện cho đặc tính động lực học cần tối ưu hóa (ví dụ: vận tốc, gia tốc), và $a, b_m$ là các hệ số trọng số điều chỉnh tầm quan trọng tương đối của các thành phần trong hàm mục tiêu.
-
-Tổng quát, bài toán hoạch định chuyển động có thể được mô tả như sau:
+trong đó $\Phi(T)$ là chi phí liên quan đến thời gian, $m$ là bậc đạo hàm cần
+tối ưu hóa, và $a, b_m > 0$ là các hệ số trọng số.
+Bài toán hoạch định chuyển động tổng quát được phát biểu như sau:
 \begin{equation}
 \begin{aligned}
-    & \min_{\mathbf{x}(t), T} & & \psi(\mathbf{x}(t), T) \\
-    & \text{subject to} & & \mathbf{x}(0) = \mathbf{x}_{\text{start}}, \quad \mathbf{x}(T) = \mathbf{x}_{\text{goal}}, \\
-    & & & \mathbf{x}(t) \in \mathcal{C}_{\text{free}}, \quad \forall t \in [0, T], \\
-    & & & \frac{d^k \mathbf{x}(t)}{dt^k} \in \mathcal{D}_k, \quad k = 1, 2, \ldots, K, \quad \forall t \in [0, T], \\
-    & & & T_{\min} \leq T \leq T_{\max}.
+    \min_{\mathbf{x}(\cdot),\; T} \quad
+    & \psi(\mathbf{x}(\cdot), T) \\
+    \mathrm{s.t.} \quad
+    & \mathbf{x}(0) = \mathbf{x}_{\mathrm{start}},
+      \quad
+      \mathbf{x}(T) = \mathbf{x}_{\mathrm{goal}}, \\
+    & \mathbf{x}(t) \in \mathcal{C}_{\mathrm{free}},
+      \quad \forall\, t \in [0, T], \\
+    & \frac{\mathrm{d}^k \mathbf{x}}{\mathrm{d}t^k}(t) \in \mathcal{D}_k,
+      \quad k = 1, \ldots, K,\; \forall\, t \in [0, T], \\
+    & T_{\min} \leq T \leq T_{\max}.
 \end{aligned}
+\label{eq:planning_problem}
 \end{equation}
 
-Trong đó, ràng buộc đầu và cuối đảm bảo quỹ đạo bắt đầu và kết thúc tại các vị trí xác định. Ràng buộc không gian trạng thái yêu cầu quỹ đạo phải nằm trong không gian tự do $\mathcal{C}_{\text{free}}$. Ràng buộc động học giới hạn các đạo hàm bậc $k$ của quỹ đạo trong các tập hợp khả thi $\mathcal{D}_k$, phản ánh các giới hạn vật lý của hệ thống robot. Cuối cùng, ràng buộc về thời gian đảm bảo rằng thời gian hoàn thành quỹ đạo nằm trong khoảng cho phép $[T_{\min}, T_{\max}]$.
+Ràng buộc $\mathbf{x}(t) \in \mathcal{C}_{\mathrm{free}}$ yêu cầu quỹ đạo tránh
+va chạm tại mọi thời điểm; ràng buộc $\frac{\mathrm{d}^k \mathbf{x}}{\mathrm{d}t^k}
+\in \mathcal{D}_k$ giới hạn các đạo hàm bậc $k$ trong tập khả thi $\mathcal{D}_k$,
+phản ánh giới hạn vật lý của hệ như vận tốc tối đa, gia tốc tối đa, và độ trơn (jerk).
+Thách thức trung tâm nằm ở tập $\mathcal{C}_{\mathrm{free}}$: do sự hiện diện của
+vật cản, $\mathcal{C}_{\mathrm{free}}$ là tập phi lồi, khiến bài
+toán~\eqref{eq:planning_problem} trở thành phi lồi và NP-hard trong trường hợp
+tổng quát~\cite{LaValle2006}.
 
-Quan sát hàm mục tiêu và ràng buộc, khi tổng thời gian thực hiện quỹ đạo $T$ được coi là một biến quyết định (decision variable) để tối ưu hóa hiệu suất, cấu trúc của hàm mục tiêu tích phân $\int_0^T \| \mathbf{x}^{(m)}(t) \|^2 dt$ trở nên cực kỳ phức tạp. Do giới hạn tích phân thay đổi theo $T$, mối liên hệ giữa các biến trạng thái và thời gian bị ràng buộc một cách phi tuyến tính. 
+\subsection{Tách biệt hình học và phân bổ thời gian}
+\label{subsec:path_coord}
 
-\subsection{Tham số hóa quỹ đạo dựa trên tọa độ đường đi}
+Khi $T$ là biến quyết định, tích phân trong~\eqref{eq:cost_general} có giới hạn trên
+phụ thuộc vào $T$, tạo ra quan hệ phi tuyến giữa hình dạng quỹ đạo và thời gian.
+Một chiến lược thực tiễn là tham số hóa $\mathbf{x}(t)$ qua tọa độ đường đi
+$s \in [0,1]$ thông qua cặp hàm $q(s)$ (hình dạng hình học) và $h(s)$ (phân bổ thời
+gian), sao cho $\mathbf{x}(t) = q(h^{-1}(t))$~\cite{BobrowDubowskyGibson1985TimeOptimal}.
+Cách tách biệt này giúp áp đặt các ràng buộc về tính mượt mà lên $q(s)$ và $h(s)$
+một cách độc lập; tuy nhiên, các ràng buộc về gia tốc và đạo hàm bậc cao thường mất
+tính lồi trong hệ tọa độ này~\cite{MarcucciEtAl2023MotionPlanning}.
 
-Để giải quyết sự phức tạp của bài toán tối ưu hóa đồng thời hình dạng quỹ đạo và phân bổ thời gian, một phương pháp tiếp cận hiệu quả là thực hiện tham số hóa quỹ đạo thông qua một tọa độ đường đi vô hướng $s \in [0, 1]$ (~\cite{BobrowDubowskyGibson1985TimeOptimal,ShinMcKay1985MinimumTime}). Việc sử dụng biến độc lập $s$ thay cho biến thời gian $t$ cho phép phân rã quỹ đạo thành hai thành phần biệt lập: đặc tính hình học không gian và quy luật tiến triển theo thời gian~\cite{Verscheure2009TimeOptimalPathTracking}. Trong cấu trúc này, quỹ đạo $\mathbf{x}(t)$ được tái cấu trúc thông qua cặp hàm số bao gồm hàm hình dạng $q(s): [0, 1] \rightarrow \mathbb{R}^d$ xác định hình dáng hình học trong không gian cấu hình, và hàm thời gian $h(s): [0, 1] \rightarrow \mathbb{R}$ xác định thời điểm mà robot đi qua vị trí tương ứng với tọa độ $s$. Khi đó, quỹ đạo thực tế được biểu diễn dưới dạng hàm hợp $\mathbf{x}(t) = q(h^{-1}(t))$, trong đó mối liên hệ giữa thời gian và tọa độ đường đi được thiết lập bởi phương trình $t = h(s)$.
-
-Việc tách biệt này mang lại lợi ích đáng kể trong việc thiết kế các quỹ đạo mượt mà bằng cách áp đặt các điều kiện về tính khả vi lên hàm $q(s)$ và $h(s)$ một cách độc lập. Tuy nhiên, phương pháp tham số hóa này làm nảy sinh những thách thức nhất định khi thiết lập các ràng buộc động học cấp cao. Trong khi các hàm chi phí lồi và các ràng buộc về vận tốc vẫn duy trì được tính lồi khi biểu diễn qua $q(s)$ và $h(s)$, thì các ràng buộc liên quan đến đạo hàm bậc hai (như gia tốc) hoặc cao hơn thường mất đi tính lồi vốn có \cite{DeitsTedrake2022}. Điều này gây khó khăn cho các thuật toán tối ưu hóa lồi truyền thống trong việc tìm kiếm nghiệm tối ưu toàn cục cho các bài toán có ràng buộc động lực học phức tạp.
-
-Để khắc phục hạn chế về tính phi lồi của các đạo hàm cấp cao trong khung tham số hóa $q(s)$ và $h(s)$, một chiến lược thực tiễn thường được áp dụng là sử dụng kỹ thuật điều chuẩn (regularization). Thay vì giải quyết trực tiếp các ràng buộc phi lồi khắt khe, hệ thống sẽ bổ sung các thành phần phạt (penalty) tỉ lệ thuận với độ lớn của các đạo hàm bậc cao như $q''(s)$ và $h''(s)$ vào hàm mục tiêu. Đồng thời, hàm thời gian $h(s)$ được ràng buộc chặt chẽ để đảm bảo đạo hàm $h'(s)$ không tiệm cận giá trị không, nhằm duy trì tính đơn điệu tăng của thời gian và đảm bảo tính khả nghịch của phép biến đổi \cite{DeitsTedrake2022}. Cách tiếp cận này cho phép xấp xỉ các ràng buộc kinodynamic trong một không gian tìm kiếm ổn định hơn, giúp bộ lập kế hoạch hội tụ nhanh chóng về các quỹ đạo khả thi về mặt vật lý ngay cả trong các bài toán có số chiều lớn.
+Hai hướng tiếp cận trong chương này xử lý tính phi lồi của
+bài toán~\eqref{eq:planning_problem} theo hai cách bổ sung cho nhau.
+\textbf{Hướng tiếp cận GCS-Bézier} (Phần~\ref{sec:gcs_approach}) phân hoạch
+$\mathcal{C}_{\mathrm{free}}$ thành các vùng lồi và tham số hóa quỹ đạo bằng đường
+cong Bézier, khai thác tính chất bao lồi để đảm bảo an toàn hình học, hướng đến
+nghiệm tốt nhất và trong đa số trường hợp cận tối ưu toàn cục.
+\textbf{Hướng tiếp cận OCP-DMS} (Phần~\ref{sec:ocp_dms_approach}) mô hình hóa
+trực tiếp phương trình động lực học $\dot{x} = f(x, u)$ và giải bài toán điều khiển
+tối ưu bằng Direct Multiple Shooting kết hợp hàm cản logarit, đảm bảo tính khả thi
+về mặt động lực học tại mọi thời điểm liên tục.
