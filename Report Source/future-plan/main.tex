@@ -1,82 +1,112 @@
 \chapter{Kết luận}
 
-\section{Kết luận}
-Luận văn này đã tập trung nghiên cứu và triển khai khung lý thuyết Đồ thị các
-Tập lồi (Graphs of Convex Sets - GCS) để giải quyết bài toán hoạch định chuyển
-động cho hệ thống robot trong các môi trường có cấu trúc hình học phức tạp. Về
-mặt lý thuyết, chúng tôi đã xây dựng một quy trình hoàn chỉnh từ giai đoạn phân
-hoạch không gian tự do thành hợp của các tập lồi, đến việc tham số hóa quỹ đạo
-bằng đường cong Bézier nhằm đảm bảo tính liên tục của các trạng thái động học
-cấp cao như vận tốc và gia tốc. Điểm cốt lõi của phương pháp nằm ở việc vận
-dụng kỹ thuật nới lỏng phối cảnh để chuyển đổi bài toán tối ưu hóa lồi nguyên
-hỗn hợp (MICP) vốn có độ phức tạp tính toán rất lớn thành bài toán Lập trình
-nón bậc hai (SOCP) có thể giải quyết hiệu quả trong thời gian đa thức.
+\section{Tổng kết kết quả đạt được}
+\label{sec:conclusion_summary}
 
-Thông qua các kết quả thực nghiệm định lượng trên môi trường 2D và hệ thống mê
-cung đa tầng, luận văn đã chứng minh được tính khả thi và hiệu quả vận hành của
-khung làm việc GCS. Trong các kịch bản môi trường 2D, việc phân tích đối chiếu
-giữa các kỹ thuật phân hoạch không gian cho thấy thuật toán Phân hoạch lồi xấp
-xỉ (ACD) mang lại sự cân bằng tối ưu giữa số lượng vùng lồi và thời gian hội tụ
-của bộ giải so với phương pháp Lớp phủ Clique Khả kiến (VCC). Đặc biệt, kết quả
-tính toán trên môi trường mê cung có độ phức tạp tổ hợp cao đã làm nổi bật sự
-đánh đổi giữa hai mô hình: Linear GCS cho phép phản hồi cực nhanh về mặt hình
-học, trong khi Bezier GCS mặc dù yêu cầu chi phí tính toán cao hơn nhưng lại
-tạo ra các quỹ đạo mượt mà, đảm bảo các ràng buộc vi phân liên tục $C^2$ và khả
-thi về mặt vật lý cho robot.
+Luận văn đã nghiên cứu và triển khai khung lý thuyết Đồ thị các Tập lồi
+(Graphs of Convex Sets --- GCS) để giải quyết bài toán hoạch định chuyển
+động cho hệ thống rô-bốt trong các môi trường có cấu trúc hình học phức tạp.
+Về mặt lý thuyết, một quy trình hoàn chỉnh đã được xây dựng, bao gồm ba giai
+đoạn liên tiếp: phân hoạch không gian tự do thành hợp của các tập lồi, tham
+số hóa quỹ đạo bằng đường cong Bézier nhằm bảo đảm tính liên tục vi phân
+$C^r$ cho các trạng thái động học cấp cao như vận tốc và gia tốc, và vận dụng
+kỹ thuật nới lỏng phối cảnh để chuyển đổi bài toán tối ưu hóa lồi nguyên hỗn
+hợp (Mixed-Integer Convex Program --- MICP) vốn có độ phức tạp tổ hợp rất
+lớn thành bài toán Lập trình Nón Bậc hai (Second-Order Cone Program ---
+SOCP) có thể giải hiệu quả trong thời gian đa thức.
 
-Một đóng góp quan trọng của nghiên cứu này là việc đề xuất và triển khai thành công mô hình bài toán Điều khiển Tối ưu (OCP) kết hợp Multiple Shooting và hàm cản log-barrier trên nền tảng của GCS. Thay vì chỉ tạo ra quỹ đạo hình học như GCS nguyên bản, hướng tiếp cận đề xuất đã giải quyết triệt để vấn đề vi phạm biên (hiện tượng đi xuyên vùng) thông qua áp dụng hàm phạt logarit. Đồng thời, kỹ thuật Multiple Shooting cho phép chia nhỏ và tối ưu hóa động lực học hệ thống một cách trơn tru, đảm bảo quỹ đạo thu được vừa tối ưu về mặt hình học, vừa khả thi tuyệt đối về mặt vật lý. Mặc dù trong phạm vi của báo cáo này, chúng tôi tập trung chủ yếu vào hệ thống robot trong môi trường tĩnh, nhưng các dữ liệu thực nghiệm định lượng thu được đã minh chứng tính hiệu quả vượt trội của phương pháp đề xuất.
+Thông qua các kết quả thực nghiệm định lượng trên môi trường 2D và hệ thống
+mê cung đa tầng, tính khả thi và hiệu quả vận hành của khung GCS đã được
+kiểm chứng.
+Trong các kịch bản môi trường 2D, việc đối chiếu giữa hai kỹ thuật phân hoạch
+không gian cho thấy thuật toán Phân hoạch Lồi Xấp xỉ (Approximate Convex
+Decomposition --- ACD) mang lại sự cân bằng tối ưu giữa số lượng vùng lồi
+sinh ra và thời gian hội tụ của bộ giải so với phương pháp Lớp phủ Clique Khả
+kiến (Visible Clique Cover --- VCC).
+Trên môi trường mê cung có độ phức tạp tổ hợp cao, kết quả thực nghiệm làm
+rõ sự đánh đổi giữa hai mô hình GCS: Linear~GCS cho phép phản hồi rất nhanh
+về mặt hình học, trong khi Bézier~GCS tuy đòi hỏi chi phí tính toán cao hơn
+nhưng tạo ra các quỹ đạo mượt mà, bảo đảm ràng buộc vi phân liên tục $C^2$
+và tính khả thi vật lý cho rô-bốt.
 
-\section{Hướng nghiên cứu trong tương lai}
+Một đóng góp trung tâm của luận văn là việc đề xuất và triển khai mô hình bài
+toán Điều khiển Tối ưu kết hợp Multiple Shooting (OCP-DMS) trên nền tảng của
+GCS.
+Khác với GCS nguyên bản chỉ sinh ra quỹ đạo hình học ở mức động học, hướng
+tiếp cận này mô hình hóa trực tiếp phương trình động lực học
+$\dot{\mathbf{x}} = \mathbf{f}(\mathbf{x}, \mathbf{u})$ của hệ thông qua ràng
+buộc defect của multiple shooting, đồng thời đưa tín hiệu điều khiển
+$\mathbf{u}(\cdot)$ vào như một biến quyết định tường minh.
+Hàm cản log-barrier được tích hợp để khuyến khích quỹ đạo nằm sâu trong miền
+trong của các vùng an toàn, từ đó giảm thiểu hiện tượng vi phạm biên vốn xuất
+hiện khi chỉ kiểm tra ràng buộc an toàn tại một tập hữu hạn các điểm lưới.
+Các kết quả thực nghiệm định lượng đã minh chứng tính hiệu quả của phương
+pháp đề xuất trong bối cảnh môi trường tĩnh được sử dụng trong luận văn này.
 
-Dựa trên những kết quả thực nghiệm đạt được, nghiên cứu đề xuất các hướng phát triển tiếp theo nhằm tối ưu hóa hiệu năng và mở rộng khả năng ứng dụng của đồ án như sau:
+\section{Những mặt còn hạn chế}
+\label{sec:conclusion_limitations}
 
-\begin{itemize}
-    \item \textbf{Tối ưu hóa hiệu suất tính toán thời gian thực (Real-time MPC):} Nghiên cứu sẽ tập trung vào việc áp dụng phương pháp của đồ án trong mô hình Điều khiển Dự báo Mô hình (Model Predictive Control - MPC). Việc khai thác khả năng warm-start của Multiple Shooting sẽ giúp hệ thống đáp ứng tốt hơn các yêu cầu hoạch định quỹ đạo trực tuyến (online planning) cho robot.
+Mặc dù đạt được những kết quả trên, luận văn vẫn còn một số hạn chế cần được
+nhìn nhận rõ ràng.
 
-    \item \textbf{Mở rộng cho môi trường động (Dynamic Environments):} Khung làm việc hiện tại chủ yếu giải quyết bài toán tĩnh. Hướng đi tiếp theo là mở rộng đồ thị tập lồi theo cả trục thời gian (Spatiotemporal GCS) để nhận diện và lẩn tránh các vật cản di động.
+Về mặt cấu trúc tối ưu hóa, khi tích hợp động lực học multiple shooting vào
+khung GCS, mô hình OCP-DMS không còn giữ được tính lồi của GCS-Bézier gốc.
+Trong GCS-Bézier, relaxation lồi của phần chọn đường đi thường có integrality
+gap bằng không hoặc rất nhỏ~\cite{MarcucciEtAl2023GCS}, cho phép bộ giải SOCP
+thương mại (Mosek, Gurobi) xử lý hiệu quả.
+Ngược lại, khối ràng buộc defect của multiple shooting là ánh xạ phi tuyến ẩn
+sinh ra bởi tích phân động lực học, khiến bài toán thuộc lớp Quy hoạch Nguyên
+Phi tuyến Hỗn hợp (Mixed-Integer Nonlinear Program --- MINLP) phi lồi---NP-hard
+trong trường hợp tổng quát.
+Điều này đồng nghĩa với chi phí tính toán cao hơn đáng kể và không có bảo đảm
+về độ chặt của relaxation, đòi hỏi các bộ giải chuyên dụng dựa trên
+branch-and-bound kết hợp lời giải Quy hoạch Phi tuyến (NLP) tại các nút tìm
+kiếm.
 
-    \item \textbf{Nâng cao thuật toán phân hoạch không gian an toàn:} Để xử lý các môi trường có vật thể phi tuyến tính phức tạp trong không gian đa chiều, nghiên cứu dự kiến sẽ tích hợp các kỹ thuật phân hoạch trực tiếp trong không gian cấu hình ($C$-space) như C-IRIS. Điều này cho phép mở rộng áp dụng hệ thống cho các cánh tay robot công nghiệp có số bậc tự do (DOF) lớn.
+Về mặt bảo đảm an toàn liên tục, hàm cản log-barrier được sử dụng trong
+OCP-DMS khuyến khích quỹ đạo tránh xa biên của các vùng an toàn theo nghĩa
+heuristic, nhưng không cung cấp bảo đảm chính xác theo kiểu convex hull như
+trong GCS-Bézier.
+Trong GCS-Bézier, tính chất bao lồi của đường cong Bézier đảm bảo rằng nếu
+toàn bộ điểm điều khiển nằm trong vùng lồi $Q_v$ thì toàn bộ đường cong nằm
+trong $Q_v$---một bảo đảm liên tục chính xác.
+OCP-DMS chỉ đạt được bảo đảm tương tự ở mức gần đúng thông qua phạt logarit,
+chứ không phải qua ràng buộc hình học cứng trên toàn bộ khoảng thời gian.
 
-    \item \textbf{Cải tiến hàm phạt Log-barrier:} Đánh giá thêm các dạng hàm phạt hoặc các phương pháp interior-point nâng cao nhằm giảm số lần lặp (iterations) cần thiết khi điều chỉnh trọng số $\mu$, qua đó tối ưu thêm chi phí tính toán của bài toán NLP.
-\end{itemize}
+Cuối cùng, phạm vi thực nghiệm của luận văn còn giới hạn ở môi trường tĩnh
+và không gian làm việc hai chiều.
+Khả năng tổng quát hóa của phương pháp đối với môi trường động, không gian cấu
+hình ($C$-space) nhiều chiều, và phần cứng rô-bốt thực tế chưa được kiểm chứng
+trong khuôn khổ nghiên cứu này.
 
-\newpage
-Để cụ thể hóa các hướng nghiên cứu trên, bảng \ref{tab:graduation-plan} trình bày kế hoạch chi tiết trong 15 tuần tới nhằm hoàn thiện đồ án tốt nghiệp, tập trung vào việc kiểm thử và đánh giá các cải tiến đề xuất.
+\section{Hướng phát triển}
+\label{sec:conclusion_future}
 
-\begin{table}[htbp]
-    \centering
-    \caption{Kế hoạch chi tiết Đồ án Tốt nghiệp (15 tuần)}
-    \label{tab:graduation-plan}
-    \footnotesize
-    \setlength{\tabcolsep}{4pt}
-    \renewcommand{\arraystretch}{1.3} % Tăng độ giãn dòng để các ô đa dòng dễ đọc hơn
-    \begin{tabular}{|>{\raggedright\arraybackslash}m{2.2cm}|
-        >{\raggedright\arraybackslash}m{6cm}|
-        >{\centering\arraybackslash}m{1cm}|
-        >{\centering\arraybackslash}m{1cm}|
-        >{\centering\arraybackslash}m{1cm}|
-        >{\centering\arraybackslash}m{1cm}|
-        >{\centering\arraybackslash}m{1cm}|}
-        \hline
-        \textbf{Giai đoạn} & \textbf{Nhiệm vụ chi tiết}                                                          & \textbf{W1--3} & \textbf{W4--6} & \textbf{W7--9} & \textbf{W10--12} & \textbf{W13--15} \\ \hline
+Dựa trên những kết quả và hạn chế được xác định ở trên, luận văn đề xuất các
+hướng phát triển tiếp theo nhằm tăng cường hiệu năng và mở rộng phạm vi ứng
+dụng của khung GCS-OCP.
 
-        % Giai đoạn 1
-        \multirow{4}{2.4cm}{\textbf{Tối ưu thuật toán}}
-                           & (1) Kiểm thử và tích hợp kỹ thuật Multiple Shooting vào GCS Framework               & X              &                &                &                  &                  \\ \cline{2-7}
-                           & (2) Triển khai phân hoạch $C$-space bằng C-IRIS/IRIS-NP để xử lý vật cản phi tuyến  & X              & X              &                &                  &                  \\ \hline
+\textbf{Hoạch định quỹ đạo trực tuyến với Điều khiển Dự báo Mô hình.}
+Một hướng tiếp theo tự nhiên là tích hợp khung OCP-DMS vào vòng lặp Điều
+khiển Dự báo Mô hình (Model Predictive Control --- MPC) để đáp ứng yêu cầu
+hoạch định quỹ đạo trực tuyến.
+Khả năng warm-start của bộ giải multiple shooting---khởi động từ lời giải của
+bước trước---có thể rút ngắn đáng kể thời gian giải tại mỗi chu kỳ điều khiển,
+mở ra khả năng triển khai thời gian thực cho các hệ rô-bốt đòi hỏi phản xạ
+nhanh trước thay đổi của môi trường.
 
-        % Giai đoạn 2
-        \multirow{4}{2.4cm}{\textbf{Hiện thực mô hình}}
-                           & (3) Thiết kế hệ thống điều khiển robot tích hợp khung BezierGCS                     &                & X              & X              &                  &                  \\ \cline{2-7}
-                           & (4) Xây dựng thuật toán nhận diện và ánh xạ mê cung thực tế sang đồ thị các tập lồi &                &                & X              & X                &                  \\ \hline
+\textbf{Mở rộng sang môi trường động với GCS không---thời gian.}
+Khung làm việc hiện tại được xây dựng cho bài toán môi trường tĩnh.
+Hướng phát triển tiếp theo là mở rộng đồ thị tập lồi theo cả trục thời gian,
+hình thành cấu trúc GCS không---thời gian (Spatiotemporal GCS), từ đó biểu
+diễn và giải quyết bài toán né tránh vật cản di động trực tiếp trong không gian
+trạng thái---thời gian mở rộng.
 
-        % Giai đoạn 3
-        \multirow{4}{2.4cm}{\textbf{Thực nghiệm}}
-                           & (5) Thử nghiệm robot giải mê cung, đo lường thời gian giải và sai số quỹ đạo        &                &                &                & X                & X                \\ \cline{2-7}
-                           & (6) Đánh giá đối chứng hiệu năng với các thuật toán lấy mẫu RRT* và PRM             &                &                &                &                  & X                \\ \hline
-
-        % Giai đoạn 4
-        \multirow{2}{2.4cm}{\textbf{Hoàn thiện}}
-                           & (7) Phân tích dữ liệu, đánh giá tính hội tụ của nới lỏng phối cảnh và viết luận văn &                &                &                &                  & X                \\ \hline
-    \end{tabular}
-\end{table}
+\textbf{Phân hoạch không gian cấu hình cho rô-bốt nhiều bậc tự do.}
+Để xử lý các môi trường có vật thể phi tuyến phức tạp trong không gian cấu
+hình nhiều chiều, hướng phát triển dự kiến tích hợp các kỹ thuật phân hoạch
+trực tiếp trong $C$-space như C-IRIS~\cite{DeitsTedrake2022CIRIS} hoặc IRIS-NP.
+Điều này cho phép xây dựng các vùng lồi an toàn trực tiếp trong không gian
+khớp, loại bỏ sự phụ thuộc vào biểu diễn hình học trong không gian làm việc
+và mở ra khả năng áp dụng cho các cánh tay rô-bốt công nghiệp có số bậc tự do
+lớn.
