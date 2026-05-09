@@ -281,45 +281,61 @@ Hồ sơ vận tốc ở Hình~\ref{fig:dms_velocity_2d} cũng phản ánh rõ t
 
 \subsubsection{Kết quả trên mê cung kích thước lớn}
 
-Để đánh giá khả năng mở rộng của GCS-DMS trong môi trường có cấu trúc tổ hợp phức tạp hơn, chúng tôi tiếp tục kiểm thử trên các mê cung kích thước $15\times 15$ với phân hoạch lồi dày đặc (ở đây chúng tôi sử dụng giải thuật giải thuật ACD để phân hoạch không gian tự do). Hình~\ref{fig:dms_maze_paths} trình bày bốn trường hợp đại diện tương ứng với các seed khác nhau. Trong mỗi trường hợp, vùng màu xanh nhạt thể hiện các vùng lồi được kích hoạt trên đường đi rời rạc, còn đường cong màu xanh/tím là quỹ đạo liên tục sau bước polish bằng fixed-path NLP.
+Để đánh giá khả năng mở rộng của GCS-DMS trong môi trường có cấu trúc tổ hợp phức tạp hơn, chúng tôi tiếp tục kiểm thử trên các mê cung kích thước $15\times 15$ với phân hoạch lồi dày đặc (ở đây chúng tôi sử dụng giải thuật giải thuật ACD để phân hoạch không gian tự do). Hình~\ref{fig:dms_maze_paths} trình bày bốn trường hợp đại diện tương ứng với các seed khác nhau. Trong mỗi trường hợp, vùng màu xanh nhạt thể hiện các vùng lồi được kích hoạt trên đường đi rời rạc, còn đường cong màu xanh/tím là quỹ đạo liên tục.
 
-\begin{figure}[!htp]
+\begin{figure}[!htbp]
     \centering
+
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{experiments/image/dms/maze_case_size15_kd15_seed4_animation_last_frame.png}
+        \includegraphics[
+            width=\linewidth,
+            height=0.28\textheight,
+            keepaspectratio
+        ]{experiments/image/dms/maze_case_size15_kd15_seed4_animation_last_frame.png}
         \caption{Seed 4}
         \label{fig:dms_maze_seed4}
-    \end{subfigure}
-    
+    \end{subfigure}%
     \hfill
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{experiments/image/dms/maze_case_size15_kd15_seed20_animation_last_frame.png}
+        \includegraphics[
+            width=\linewidth,
+            height=0.28\textheight,
+            keepaspectratio
+        ]{experiments/image/dms/maze_case_size15_kd15_seed20_animation_last_frame.png}
         \caption{Seed 20}
         \label{fig:dms_maze_seed20}
     \end{subfigure}
-    \vspace{0.5cm}
-    
+
+    \vspace{0.2cm}
+
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{experiments/image/dms/maze_case_size15_kd15_seed18_animation_last_frame.png}
+        \includegraphics[
+            width=\linewidth,
+            height=0.28\textheight,
+            keepaspectratio
+        ]{experiments/image/dms/maze_case_size15_kd15_seed18_animation_last_frame.png}
         \caption{Seed 18}
         \label{fig:dms_maze_seed18}
-    \end{subfigure}
-    
+    \end{subfigure}%
     \hfill
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{experiments/image/dms/maze_case_size15_kd15_seed17_animation_last_frame.png}
+        \includegraphics[
+            width=\linewidth,
+            height=0.28\textheight,
+            keepaspectratio
+        ]{experiments/image/dms/maze_case_size15_kd15_seed17_animation_last_frame.png}
         \caption{Seed 17}
         \label{fig:dms_maze_seed17}
     \end{subfigure}
+
     \caption{Các nghiệm GCS-DMS trên mê cung kích thước $15\times 15$. Phương pháp tìm được chuỗi vùng khả thi và quỹ đạo liên tục thỏa mãn ràng buộc động lực học trong nhiều cấu trúc mê cung khác nhau.}
     \label{fig:dms_maze_paths}
 \end{figure}
-
-Bảng~\ref{tab:dms_maze_results} tổng hợp các chỉ số chính của bốn mẫu thử. Hai cơ chế an toàn hình học được sử dụng theo đúng mô tả ở mục~\ref{subsec:safety_constraints}: seed 4 và seed 20 dùng hàm cản logarit (log-barrier), còn seed 17 và seed 18 dùng ràng buộc cứng tại lưới hữu hạn điểm trên từng đoạn shooting. Tất cả các trường hợp đều hội tụ thành công với số đường ứng viên được đánh giá bằng $1$, nghĩa là đường đi trích xuất từ relaxation ban đầu đã đủ tốt để bước fixed-path NLP polish hoàn tất mà không cần dùng đến các đường fallback. Sau polish, defect dynamics và constraint violation đều nằm ở mức rất nhỏ, từ $10^{-10}$ đến $10^{-8}$, cho thấy nghiệm cuối cùng đạt tính khả thi số học tốt.
+Bảng~\ref{tab:dms_maze_results} tổng hợp các chỉ số chính của bốn mẫu thử. Hai cơ chế an toàn hình học được sử dụng theo đúng mô tả ở mục~\ref{subsec:safety_constraints}: seed 4 và seed 20 dùng hàm cản logarit (log-barrier), còn seed 17 và seed 18 dùng ràng buộc cứng tại lưới hữu hạn điểm trên từng đoạn shooting. Tất cả các trường hợp đều hội tụ thành công; defect dynamics và constraint violation đều nằm ở mức rất nhỏ, từ $10^{-10}$ đến $10^{-8}$, cho thấy nghiệm cuối cùng đạt tính khả thi số học tốt.
 
 \begin{table}[!htp]
 \centering
@@ -343,7 +359,7 @@ Bảng~\ref{tab:dms_maze_results} tổng hợp các chỉ số chính của bố
 & Log-barrier
 & 24
 & 44.76
-& 640.26
+& 240.26
 & 92.57
 & $0.00$
 & $2.62\times 10^{-9}$
@@ -411,7 +427,7 @@ Bảng~\ref{tab:dms_maze_results} tổng hợp các chỉ số chính của bố
 Log-barrier
 & 4, 20
 & 58.73
-& 468.65
+& 268.65
 & 121.61
 & $1.61\times 10^{-1}$ \\
 Lưới hữu hạn điểm
@@ -424,9 +440,9 @@ Lưới hữu hạn điểm
 \end{tabular}}
 \end{table}
 
-Kết quả này cho thấy chi phí tính toán của GCS-DMS biến thiên mạnh theo cấu trúc mê cung, điều kiện khởi tạo và cơ chế an toàn được sử dụng. Nhóm log-barrier có thời gian giải trung bình lớn hơn đáng kể ($468.65$ giây so với $72.74$ giây của nhóm lưới hữu hạn), đồng thời integrality gap trung bình cũng cao hơn. Điều này phù hợp với kỳ vọng: log-barrier đưa thêm các số hạng phi tuyến vào hàm mục tiêu và có xu hướng nhạy hơn với hình học biên của vùng lồi, trong khi ràng buộc lưới hữu hạn giữ bài toán trực tiếp hơn tại các điểm kiểm tra đã chọn. Ngược lại, log-barrier có ưu điểm là khuyến khích quỹ đạo nằm sâu trong miền trong của vùng an toàn, thay vì chỉ kiểm tra an toàn tại một số điểm lưới rời rạc.
+Kết quả này cho thấy chi phí tính toán của GCS-DMS biến thiên mạnh theo cấu trúc mê cung, điều kiện khởi tạo và cơ chế an toàn được sử dụng. Nhóm log-barrier có thời gian giải trung bình lớn hơn đáng kể ($268.65$ giây so với $72.74$ giây của nhóm lưới hữu hạn), đồng thời integrality gap trung bình cũng cao hơn. Điều này phù hợp với kỳ vọng: log-barrier đưa thêm các số hạng phi tuyến vào hàm mục tiêu và có xu hướng nhạy hơn với hình học biên của vùng lồi, trong khi ràng buộc lưới hữu hạn giữ bài toán trực tiếp hơn tại các điểm kiểm tra đã chọn. Ngược lại, log-barrier có ưu điểm là khuyến khích quỹ đạo nằm sâu trong miền trong của vùng an toàn, thay vì chỉ kiểm tra an toàn tại một số điểm lưới rời rạc. Về mặt mô hình hóa, cách tiếp cận này cũng nhất quán và thanh lịch hơn vì tránh việc lựa chọn heuristic số lượng điểm kiểm tra, vị trí điểm lưới và biên an toàn cục bộ.
 
-Cần lưu ý rằng hai nhóm seed không tạo thành một thí nghiệm ablation hoàn toàn kiểm soát, vì môi trường mê cung và chuỗi vùng tối ưu khác nhau giữa các seed. Do đó, Bảng~\ref{tab:dms_safety_mode_summary} chỉ nên được hiểu như so sánh tổng quan trên bộ kết quả hiện có. Nhìn chung, cả hai cơ chế đều cho nghiệm khả thi với defect và violation rất nhỏ; ràng buộc lưới hữu hạn cho thời gian giải ổn định hơn trong hai seed 17--18, còn log-barrier thể hiện rõ đánh đổi giữa an toàn kiểu interior và chi phí tối ưu hóa cao hơn. Chẳng hạn, seed 4 có thời gian di chuyển ngắn nhất trong bốn mẫu thử ($44.76$ giây) nhưng lại có thời gian giải lớn nhất ($640.26$ giây), cho thấy thời gian hội tụ không chỉ phụ thuộc vào độ dài đường đi mà còn chịu ảnh hưởng bởi hình học vùng nối và mức độ khó của bài toán NLP.
+Cần lưu ý rằng hai nhóm seed không tạo thành một thí nghiệm ablation hoàn toàn kiểm soát, vì môi trường mê cung và chuỗi vùng tối ưu khác nhau giữa các seed. Do đó, Bảng~\ref{tab:dms_safety_mode_summary} chỉ nên được hiểu như so sánh tổng quan trên bộ kết quả hiện có. Nhìn chung, cả hai cơ chế đều cho nghiệm khả thi với defect và violation rất nhỏ; ràng buộc lưới hữu hạn cho thời gian giải ổn định hơn trong hai seed 17--18, còn log-barrier thể hiện rõ đánh đổi giữa an toàn kiểu interior và chi phí tối ưu hóa cao hơn. Chẳng hạn, seed 4 có thời gian di chuyển ngắn nhất trong bốn mẫu thử ($44.76$ giây) nhưng lại có thời gian giải lớn ($240.26$ giây), cho thấy thời gian hội tụ không chỉ phụ thuộc vào độ dài đường đi mà còn chịu ảnh hưởng bởi hình học vùng nối và mức độ khó của bài toán NLP.
 
 Hồ sơ vận tốc ở Hình~\ref{fig:dms_maze_velocity} cho thấy xe thường vận hành gần vận tốc hành trình khoảng $0.6$--$0.75$ m/s trên các đoạn thuận lợi, nhưng xuất hiện nhiều pha giảm tốc sâu tại các nút giao hoặc tại các đoạn đổi hướng gấp. Các điểm giảm tốc này phù hợp với trực quan hình học của mê cung: khi chuỗi vùng buộc xe phải đi qua các hành lang hẹp hoặc đổi hướng liên tiếp, nghiệm tìm được giảm vận tốc tịnh tiến để thỏa mãn giới hạn quay của mô hình Unicycle và tránh sinh ra defect lớn trong multiple shooting.
 
