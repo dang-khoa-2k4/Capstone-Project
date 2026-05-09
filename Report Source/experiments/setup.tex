@@ -2,7 +2,7 @@
 
 Mục đích của các thực nghiệm là kiểm chứng hai hướng tiếp cận đã đề xuất ở Chương~\ref{ch:proposed_method}: hoạch định bằng \textbf{Graph of Convex Sets (GCS-Bezier)} và hoạch định bằng \textbf{GCS kết hợp Direct Multiple Shooting (GCS-DMS)}. Hai hướng này không được xem như hai bộ giải cạnh tranh trực tiếp cho cùng một bài toán tối ưu, vì chúng khác nhau về biến quyết định, hàm mục tiêu, lớp ràng buộc và ý nghĩa vật lý của nghiệm. GCS-Bezier tập trung vào tối ưu quỹ đạo hình học/động học với cấu trúc lồi, trong khi GCS-DMS mô hình hóa trực tiếp động lực học và tín hiệu điều khiển của hệ. Vì vậy, phần thực nghiệm được thiết kế nhằm đánh giá từng mô hình trong miền áp dụng phù hợp, đồng thời làm rõ vai trò bổ trợ giữa chúng.
 
-Các câu hỏi thực nghiệm chính gồm: (i) chất lượng phân hoạch không gian tự do ảnh hưởng như thế nào đến bài toán hoạch định trên đồ thị vùng lồi; (ii) GCS-Bezier mở rộng ra sao trong các bài toán hình học có số vùng lớn; và (iii) GCS-DMS thể hiện lợi thế gì khi ràng buộc động lực phi tuyến trở thành yếu tố quyết định tính khả thi của quỹ đạo. Các chỉ số chung như thời gian giải, độ dài quỹ đạo hoặc mức vi phạm an toàn chỉ được dùng như thông tin mô tả; chúng không hàm ý một so sánh công bằng tuyệt đối giữa hai mô hình.
+Các câu hỏi thực nghiệm chính gồm: (i) GCS-DMS thể hiện lợi thế gì khi ràng buộc động lực phi tuyến trở thành yếu tố quyết định tính khả thi của quỹ đạo; (ii) GCS-Bezier mở rộng ra sao trong các bài toán hình học có số vùng lớn; và (iii) chất lượng phân hoạch không gian tự do ảnh hưởng như thế nào đến bài toán hoạch định trên đồ thị vùng lồi. Các chỉ số chung như thời gian giải, độ dài quỹ đạo hoặc mức vi phạm an toàn chỉ được dùng như thông tin mô tả; chúng không hàm ý một so sánh công bằng tuyệt đối giữa hai mô hình.
 
 \subsection{Môi trường phần cứng và phần mềm}
 \label{subsec:exp_environment}
@@ -42,55 +42,32 @@ Do GCS-Bezier và GCS-DMS giải hai bài toán tối ưu khác nhau, hệ chỉ
     \item $T_{\text{exec}}$: thời gian thực thi quỹ đạo, được báo cáo theo cách định nghĩa riêng của từng mô hình.
     \item $C_{\text{path}}$ hoặc $C_{\text{round}}$: giá trị hàm mục tiêu sau khi làm tròn/khôi phục đường đi đối với GCS-Bezier. Trong các thực nghiệm 2D, đại lượng này bao gồm thời gian thực thi và thành phần điều chuẩn gia tốc.
     \item $C_{\text{DMS}}$: giá trị hàm mục tiêu của GCS-DMS sau bước relaxation hoặc polish, bao gồm thời gian di chuyển và các thành phần phạt tương ứng của formulation.
-    \item Hồ sơ vận tốc $|v(t)|$: dùng trong Kịch bản C để đánh giá định tính hành vi động lực của xe Unicycle, đặc biệt là hiện tượng giảm tốc tại các đoạn cua hẹp hoặc vùng chuyển tiếp phức tạp.
+    \item Hồ sơ vận tốc $|v(t)|$: dùng trong Thực nghiệm 1 để đánh giá định tính hành vi động lực của xe Unicycle, đặc biệt là hiện tượng giảm tốc tại các đoạn cua hẹp hoặc vùng chuyển tiếp phức tạp.
 \end{itemize}
 
 \paragraph*{(C) Tính khả thi và tối ưu.}
 \begin{itemize}
     \item Với GCS-Bezier: thời gian giải, giá trị cost, cost ratio giữa các biến thể mô hình khi có báo cáo, và trạng thái nhị phân của biến luồng sau relaxation/làm tròn.
-    \item Với GCS-DMS: trạng thái hội tụ của relaxation/NLP polish, số đường ứng viên đã đánh giá, residual của ràng buộc defect cuối cùng $\|s_v^+ - F_v\|_\infty$, connection gap giữa các vùng kề, integrality gap của biến đường đi và mức vi phạm ràng buộc sau tối ưu.
+    \item Với GCS-DMS: trạng thái hội tụ của relaxation/NLP polish, residual của ràng buộc defect cuối cùng $\|s_v^+ - F_v\|_\infty$, connection gap giữa các vùng kề, integrality gap của biến đường đi và mức vi phạm ràng buộc sau tối ưu.
     \item Với ràng buộc an toàn GCS-DMS: chế độ containment được sử dụng, gồm log-barrier hoặc ràng buộc cứng trên lưới hữu hạn điểm như đã mô tả ở mục~\ref{subsec:safety_constraints}.
 \end{itemize}
 
-\subsection{Các kịch bản thử nghiệm}
+\subsection{Các thực nghiệm}
 \label{subsec:exp_scenarios}
 
-Chúng tôi thiết kế ba kịch bản với độ phức tạp tăng dần. Mỗi kịch bản được dùng để kiểm tra một khía cạnh riêng của khung GCS và của hai formulation:
+Chúng tôi thiết kế ba thực nghiệm với mục tiêu bổ trợ nhau. Mỗi thực nghiệm được dùng để kiểm tra một khía cạnh riêng của khung GCS và của hai formulation:
 \begin{itemize}
-    \item \textbf{Kịch bản A — Môi trường 2D đơn giản} (mục~\ref{subsubsec:scenario_A}): tác động của thuật toán phân hoạch lên từng formulation;
-    \item \textbf{Kịch bản B — Mê cung} (mục~\ref{subsubsec:scenario_B}): khả năng mở rộng tổ hợp của GCS-Bezier khi số vùng lồi lên đến hàng trăm;
-    \item \textbf{Kịch bản C — GCS-DMS cho xe nonholonomic kiểu Unicycle} (mục~\ref{subsubsec:scenario_C}): khả năng sinh quỹ đạo khả thi động lực học trong môi trường 2D đơn giản và trong các mê cung kích thước $15\times 15$.
+    \item \textbf{Thực nghiệm 1 — GCS-DMS cho xe nonholonomic kiểu Unicycle} (mục~\ref{subsubsec:scenario_C}): khả năng sinh quỹ đạo khả thi động lực học trong môi trường 2D đơn giản và trong các mê cung kích thước $15\times 15$;
+    \item \textbf{Thực nghiệm 2 — Mê cung} (mục~\ref{subsubsec:scenario_B}): khả năng mở rộng tổ hợp của GCS-Bezier khi số vùng lồi lên đến hàng trăm;
+    \item \textbf{Thực nghiệm 3 — Môi trường 2D đơn giản} (mục~\ref{subsubsec:scenario_A}): tác động của thuật toán phân hoạch lên từng formulation.
 \end{itemize}
 
-\subsubsection{Kịch bản A — Môi trường 2D đơn giản}
-\label{subsubsec:scenario_A}
+\subsubsection{Thực nghiệm 1 — GCS-DMS cho xe nonholonomic kiểu Unicycle}
 
-\textbf{Mục tiêu.}
-Định lượng tác động của các thuật toán phân hoạch lồi (ACD, VCC) so với phân hoạch thủ công\footnote{Tức người dùng tự phân hoạch không gian tự do; ở đây chúng tôi coi kết quả thủ công làm chuẩn tham chiếu về số vùng tối thiểu.} (Manual) lên chất lượng đầu vào của bài toán GCS. Kịch bản này không nhằm kết luận GCS-Bezier hay GCS-DMS tốt hơn, mà nhằm quan sát cách mỗi formulation phản ứng với các phân hoạch khác nhau.
-
-\textbf{Mô tả kịch bản.}
-Một không gian làm việc 2D với các vật cản đa giác lồi được bố trí cố định, cấu hình bắt đầu $q_{0}$ và cấu hình kết thúc $q_{T}$ được xác định trước. Không gian tự do $\mathcal{X}_{\text{free}}$ được phân rã thành tập các vùng lồi an toàn $\{Q_{i}\}_{i\in I}$ thông qua ba phương pháp:
-\begin{enumerate}
-    \item \textbf{Phân hoạch thủ công:} tạo số vùng lồi tối thiểu bằng can thiệp của con người, làm chuẩn tham chiếu.
-    \item \textbf{Phân hoạch lồi xấp xỉ (ACD):} dung sai $\tau = 0$ (các vùng lồi hoàn toàn).
-    \item \textbf{Lớp phủ clique khả kiến (VCC):} mức độ phủ $96\%$.
-\end{enumerate}
-Trên mỗi phân hoạch, GCS-Bezier và GCS-DMS được giải theo formulation và hàm mục tiêu riêng của chúng. Kết quả được trình bày theo từng mô hình, còn các chỉ số chung chỉ đóng vai trò tham chiếu định tính.
-
-\subsubsection{Kịch bản B — Mê cung}
-\label{subsubsec:scenario_B}
-
-\textbf{Mục tiêu.}
-Đánh giá khả năng mở rộng tổ hợp của formulation GCS-Bézier khi số vùng lồi tăng cao, đồng thời kiểm chứng tính ổn định thống kê qua nhiều lần sinh môi trường ngẫu nhiên. Kịch bản này chủ yếu nhấn mạnh lợi thế của cấu trúc tối ưu lồi và relaxation trong các bài toán hình học quy mô lớn.
-
-\textbf{Mô tả kịch bản.}
-Mê cung kích thước $25 \times 25 = 625$ ô được sinh bằng thuật toán DFS ngẫu nhiên, sau đó loại bỏ ngẫu nhiên 100 bức tường để tạo ra các lộ trình đa dạng. Mỗi ô được mô hình hóa thành một tập an toàn lồi $Q_i$ với các cạnh hai chiều giữa các ô kề. Thực nghiệm được lặp lại trên 10 mê cung khác nhau để đảm bảo tính khách quan thống kê.
-
-\subsubsection{Kịch bản C — GCS-DMS cho xe nonholonomic kiểu Unicycle}
 \label{subsubsec:scenario_C}
 
 \textbf{Mục tiêu.}
-Minh chứng khả năng của GCS-DMS trong việc kết hợp lựa chọn đường đi rời rạc trên đồ thị vùng lồi với tối ưu quỹ đạo liên tục có ràng buộc động lực học phi tuyến. Kịch bản này tập trung kiểm chứng tính khả thi của nghiệm GCS-DMS thông qua defect dynamics, connection gap, mức vi phạm ràng buộc và hồ sơ vận tốc. Do bài toán GCS-DMS là NLP/MINLP phi lồi sau rời rạc hóa, kết quả được diễn giải như nghiệm khả thi chất lượng tốt của formulation động lực, không nhằm so sánh trực tiếp giá trị mục tiêu với GCS-Bezier.
+Minh chứng khả năng của GCS-DMS trong việc kết hợp lựa chọn đường đi rời rạc trên đồ thị vùng lồi với tối ưu quỹ đạo liên tục có ràng buộc động lực học phi tuyến. Thực nghiệm này tập trung kiểm chứng tính khả thi của nghiệm GCS-DMS thông qua defect dynamics, connection gap, mức vi phạm ràng buộc và hồ sơ vận tốc. Do bài toán GCS-DMS là NLP/MINLP phi lồi sau rời rạc hóa, kết quả được diễn giải như nghiệm khả thi chất lượng tốt của formulation động lực, không nhằm so sánh trực tiếp giá trị mục tiêu với GCS-Bezier.
 
 \textbf{Mô hình động lực.}
 Xét một xe Unicycle di chuyển trong mặt phẳng, có trạng thái $x = (p_x, p_y, \theta)^\top \in \mathbb{R}^2 \times S^1$ và điều khiển $u = (v, \omega)^\top$, với phương trình:
@@ -104,12 +81,81 @@ Xét một xe Unicycle di chuyển trong mặt phẳng, có trạng thái $x = (
 \end{equation}
 Vận tốc thẳng bị giới hạn $v \in [v_{\min}, v_{\max}]$ với $v_{\min}>0$ (xe không lùi), và tốc độ góc lái $|\omega| \le \omega_{\max}$, mô hình hóa giới hạn vật lý của bánh trước.
 
-\textbf{Mô tả kịch bản.}
+\textbf{Mô tả thực nghiệm.}
 Thực nghiệm được triển khai theo hai mức độ. Trước hết, một môi trường 2D nhỏ với các vật cản đa giác được dùng để quan sát trực tiếp quá trình hội tụ của Direct Multiple Shooting, bao gồm sự giảm dần của defect dynamics và connection gap qua các vòng lặp IPOPT. Sau đó, phương pháp được kiểm thử trên các mê cung kích thước $15\times 15$ với bốn seed đại diện $\{4,17,18,20\}$. Mỗi mê cung được phân hoạch thành các vùng lồi an toàn trên không gian vị trí $(p_x,p_y)$; chiều góc $\theta$ không tham gia phân hoạch mà xuất hiện trong biến trạng thái và ràng buộc động lực nội bộ của GCS-DMS.
 
 Hai cơ chế an toàn hình học đã trình bày ở mục~\ref{subsec:safety_constraints} được sử dụng trong nhóm thực nghiệm này. Cụ thể, seed 4 và seed 20 sử dụng hàm cản logarit (log-barrier), trong khi seed 17 và seed 18 sử dụng ràng buộc cứng tại lưới hữu hạn điểm trên từng đoạn shooting. Cách bố trí này nhằm quan sát khác biệt định tính giữa hai cơ chế containment trong cùng framework GCS-DMS.
 
 Trong pha giải, bài toán relaxation tích hợp được giải bằng CasADi/IPOPT. Các chỉ số báo cáo gồm thời gian giải, thời gian thực thi quỹ đạo, chi phí mục tiêu, số vùng được kích hoạt, defect dynamics, connection gap, integrality gap và mức vi phạm ràng buộc. Hồ sơ vận tốc $|v(t)|$ được dùng để kiểm tra định tính hành vi động lực: xe được kỳ vọng giảm tốc tại các nút giao, hành lang hẹp hoặc đoạn đổi hướng mạnh, và tăng tốc trở lại trên các đoạn hình học thuận lợi.
+
+
+\subsubsection{Thực nghiệm 2 — Mê cung}
+
+\label{subsubsec:scenario_B}
+
+\textbf{Mục tiêu.}
+Đánh giá khả năng mở rộng tổ hợp của formulation GCS-Bézier khi số vùng lồi tăng cao, đồng thời kiểm chứng tính ổn định thống kê qua nhiều lần sinh môi trường ngẫu nhiên. Thực nghiệm này chủ yếu nhấn mạnh lợi thế của cấu trúc tối ưu lồi và relaxation trong các bài toán hình học quy mô lớn.
+
+\textbf{Mô tả thực nghiệm.}
+Mê cung kích thước $25 \times 25 = 625$ ô được sinh bằng thuật toán DFS ngẫu nhiên, sau đó loại bỏ ngẫu nhiên 100 bức tường để tạo ra các lộ trình đa dạng. Mỗi ô được mô hình hóa thành một tập an toàn lồi $Q_i$ với các cạnh hai chiều giữa các ô kề. Thực nghiệm được lặp lại trên 10 mê cung khác nhau để đảm bảo tính khách quan thống kê.
+
+
+\subsubsection{Thực nghiệm 3 — Môi trường 2D đơn giản}
+
+\label{subsubsec:scenario_A}
+
+\textbf{Mục tiêu.}
+Định lượng tác động của các thuật toán phân hoạch lồi (ACD, VCC) so với phân hoạch thủ công\footnote{Tức người dùng tự phân hoạch không gian tự do; ở đây chúng tôi coi kết quả thủ công làm chuẩn tham chiếu về số vùng tối thiểu.} (Manual) lên chất lượng đầu vào của bài toán GCS. Thực nghiệm này không nhằm kết luận GCS-Bezier hay GCS-DMS tốt hơn, mà nhằm quan sát cách mỗi formulation phản ứng với các phân hoạch khác nhau.
+
+\textbf{Mô tả thực nghiệm.}
+Một không gian làm việc 2D với các vật cản đa giác lồi được bố trí cố định, cấu hình bắt đầu $q_{0}$ và cấu hình kết thúc $q_{T}$ được xác định trước. Không gian tự do $\mathcal{X}_{\text{free}}$ được phân rã thành tập các vùng lồi an toàn $\{Q_{i}\}_{i\in I}$ thông qua ba phương pháp:
+\begin{enumerate}
+    \item \textbf{Phân hoạch thủ công:} tạo số vùng lồi tối thiểu bằng can thiệp của con người, làm chuẩn tham chiếu.
+    \item \textbf{Phân hoạch lồi xấp xỉ (ACD):} dung sai $\tau = 0$ (các vùng lồi hoàn toàn).
+    \item \textbf{Lớp phủ clique khả kiến (VCC):} mức độ phủ $96\%$.
+\end{enumerate}
+Trên mỗi phân hoạch, GCS-Bezier và GCS-DMS được giải theo formulation và hàm mục tiêu riêng của chúng. Kết quả được trình bày theo từng mô hình, còn các chỉ số chung chỉ đóng vai trò tham chiếu định tính.
+
+Đối với phần GCS-DMS của thực nghiệm này, mô hình động lực được chọn là xe Unicycle với trạng thái
+$x=(p_x,p_y,\theta)^\top$ và điều khiển $u=(v,\omega)^\top$. Cấu hình số dùng cho ba phân hoạch
+thủ công, ACD và VCC được tóm tắt trong Bảng~\ref{tab:dms_2d_config}. Các tham số này chỉ áp dụng
+cho bài toán GCS-DMS trong môi trường 2D đơn giản; các thực nghiệm GCS-Bézier sử dụng formulation và
+tham số riêng như đã mô tả ở các mục trước.
+
+\begin{table}[!htp]
+\centering
+\caption{Cấu hình GCS-DMS cho môi trường 2D đơn giản.}
+\label{tab:dms_2d_config}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lll}
+\toprule
+\textbf{Nhóm} & \textbf{Tham số} & \textbf{Giá trị} \\
+\midrule
+Động lực học
+& Mô hình
+& Unicycle, $n_x=3$, $n_u=2$ \\
+Giới hạn điều khiển
+& $v_{\min}, v_{\max}$
+& $-2.0,\; 2.0$ \\
+& $\omega_{\min}, \omega_{\max}$
+& $-\pi,\; \pi$ \\
+Tham số hóa điều khiển
+& Kiểu tham số hóa
+& Piecewise-constant \\
+& Số đoạn điều khiển mỗi vùng
+& $3$ \\
+An toàn hình học
+& $\mu$ của log-barrier
+& $0.01$ \\
+Hàm mục tiêu
+& $a,\; w_L,\; w_E$
+& $1.0,\; 1.0,\; 1.0$ \\
+& $w_{u,\mathrm{smooth}},\; w_{\theta,\mathrm{smooth}}$
+& $0.5,\; 0.5$ \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
 
 \subsection{Tham số bài toán}
 \label{subsec:exp_parameters}
@@ -123,30 +169,30 @@ Bảng~\ref{tab:exp_params} tóm tắt các tham số chính của các thực n
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{lccc}
 \toprule
-\textbf{Tham số} & \textbf{Kịch bản A} & \textbf{Kịch bản B} & \textbf{Kịch bản C} \\
+\textbf{Tham số} & \textbf{Thực nghiệm 1} & \textbf{Thực nghiệm 2} & \textbf{Thực nghiệm 3} \\
 \midrule
-Số chiều cấu hình & 2 & 2 & 3 \\
-Bậc Bezier (GCS) / liên tục $C^k$ & 6 / $C^2$ & 6 / $C^2$ & --- \\
+Số chiều cấu hình & 3 & 2 & 2 (GCS-Bézier); 3 (GCS-DMS) \\
+Bậc Bezier (GCS) / liên tục $C^k$ & --- & 6 / $C^2$ & 6 / $C^2$ \\
 % $M_v$ — số nút lưới mỗi vùng (GCS-DMS) & 10 & 5 & 15 \\
 % $K$ — số đường đi ứng viên (GCS-DMS) & 5 & 20 & 10 \\
-$\mu_v$ ban đầu / cuối (log-barrier) & $10^{-2}$ / $10^{-5}$ & $10^{-2}$ / $10^{-5}$ & $10^{-2}$ / $10^{-5}$ (seed 4,20) \\
-Chế độ an toàn GCS-DMS & --- & --- & LB: 4,20; lưới: 17,18 \\
-Trọng số $w_t$ / $w_E$ & 1 / 0.1 & 1 / 0.1 & 1 / 0.1 \\
-Vận tốc tối đa $v_{\max}$ & 1 & 1 & 1 \\
-Tốc độ góc lái $\omega_{\max}$ & --- & --- & $\pi/2$ rad/s \\
-Số seed & 1 (cố định) & 10 & 4 mê cung + 1 trường hợp 2D \\
+$\mu_v$ ban đầu / cuối (log-barrier) & $10^{-2}$ / $10^{-5}$ (seed 4,20) & $10^{-2}$ / $10^{-5}$ & $10^{-2}$ \\
+Chế độ an toàn GCS-DMS & LB: 4,20; lưới: 17,18 & --- & Log-barrier \\
+Trọng số $w_t$ / $w_E$ & 1 / 0.1 & 1 / 0.1 & 1 / 0.1 (GCS-Bézier); xem Bảng~\ref{tab:dms_2d_config} (GCS-DMS) \\
+Vận tốc tối đa $v_{\max}$ & 1 & 1 & 1 (GCS-Bézier); 2 (GCS-DMS) \\
+Tốc độ góc lái $\omega_{\max}$ & $\pi/2$ rad/s & --- & $\pi$ rad/s (GCS-DMS) \\
+Số seed & 4 mê cung + 1 trường hợp 2D & 10 & 1 (cố định) \\
 \bottomrule
 \end{tabular}}
 \end{table}
 
-\subsection{Các mô hình thực nghiệm}
-\label{subsec:exp_models}
+% \subsection{Các mô hình thực nghiệm}
+% \label{subsec:exp_models}
 
-Các mô hình được sử dụng trong chương thực nghiệm gồm:
-\begin{itemize}
-    \item \textbf{Manual + GCS-Bezier} (chỉ Kịch bản A): cấu hình tham chiếu để đánh giá ảnh hưởng của phân hoạch thủ công.
-    \item \textbf{Linear-GCS}: chỉ tối thiểu hóa độ dài hình học, dùng làm cận dưới về thời gian giải.
-    \item \textbf{Bezier-GCS}: phương pháp đề xuất hướng 1 của báo cáo này (mục~\ref{sec:gcs_approach}).
-    \item \textbf{GCS-DMS}: phương pháp đề xuất hướng 2 của báo cáo này (mục~\ref{sec:ocp_DMS_approach}).
-\end{itemize}
-Trong Kịch bản C, kết quả được trình bày cho GCS-DMS nhằm đánh giá riêng khả năng xử lý động lực học phi tuyến của formulation này. GCS-Bezier không được dùng làm baseline trực tiếp trong kịch bản này, vì hai mô hình khác nhau về biến quyết định, hàm mục tiêu và lớp ràng buộc động lực.
+% Các mô hình được sử dụng trong chương thực nghiệm gồm:
+% \begin{itemize}
+%     \item \textbf{Manual + GCS-Bezier} (chỉ Thực nghiệm 3): cấu hình tham chiếu để đánh giá ảnh hưởng của phân hoạch thủ công.
+%     \item \textbf{Linear-GCS}: chỉ tối thiểu hóa độ dài hình học, dùng làm cận dưới về thời gian giải.
+%     \item \textbf{Bezier-GCS}: phương pháp đề xuất hướng 1 của báo cáo này (mục~\ref{sec:gcs_approach}).
+%     \item \textbf{GCS-DMS}: phương pháp đề xuất hướng 2 của báo cáo này (mục~\ref{sec:ocp_DMS_approach}).
+% \end{itemize}
+% Trong Thực nghiệm 1, kết quả được trình bày cho GCS-DMS nhằm đánh giá riêng khả năng xử lý động lực học phi tuyến của formulation này. GCS-Bezier không được dùng làm baseline trực tiếp trong thực nghiệm này, vì hai mô hình khác nhau về biến quyết định, hàm mục tiêu và lớp ràng buộc động lực.
