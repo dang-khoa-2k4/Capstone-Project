@@ -45,7 +45,7 @@ Ví dụ đơn giản nhất là điều khiển hằng từng đoạn:
 \begin{equation}
 u(t)=q_i,
 \qquad t\in[t_i,t_{i+1}],
-\label{eq:piecewise_control_mms}
+\label{eq:piecewise_control_DMS}
 \end{equation}
 trong đó $q_i$ là tham số điều khiển của đoạn thứ $i$.
 
@@ -65,7 +65,7 @@ ta giải bài toán giá trị đầu cục bộ
 \qquad t\in[t_i,t_{i+1}],\\
 x_i(t_i)=s_i.
 \end{cases}
-\label{eq:local_ivp_mms}
+\label{eq:local_ivp_DMS}
 \end{equation}
 
 Nghiệm của bài toán giá trị đầu này tạo ra một đoạn quỹ đạo cục bộ
@@ -80,7 +80,7 @@ Trạng thái cuối thu được sau khi tích phân đoạn thứ $i$ được
 F_i(s_i,q_i)
 :=
 x_i(t_{i+1};s_i,q_i).
-\label{eq:endpoint_map_mms}
+\label{eq:endpoint_map_DMS}
 \end{equation}
 
 Nếu chỉ tạo ra các đoạn cục bộ như trên thì ta chưa có một quỹ đạo toàn cục hợp lệ, vì các đoạn
@@ -90,13 +90,13 @@ constraints) hay ràng buộc sai lệch (defect constraints):
 \begin{equation}
 s_{i+1}-F_i(s_i,q_i)=0,
 \qquad i=0,\ldots,N-1.
-\label{eq:defect_constraint_mms}
+\label{eq:defect_constraint_DMS}
 \end{equation}
 
 Với cách xây dựng này, vector biến tối ưu trong phương pháp DMS có dạng
 \begin{equation}
 w=(s_0,q_0,s_1,q_1,\ldots,s_{N-1},q_{N-1},s_N).
-\label{eq:mms_decision_vector}
+\label{eq:DMS_decision_vector}
 \end{equation}
 Trong đó, các $s_i$ là các trạng thái tại các shooting node, còn các $q_i$ là các tham số điều khiển
 cục bộ.
@@ -120,7 +120,7 @@ s_{i+1}-F_i(s_i,q_i)=0,
 &
 \text{các ràng buộc trạng thái, điều khiển, và điều kiện cuối nếu có.}
 \end{aligned}
-\label{eq:mms_nlp_general}
+\label{eq:DMS_nlp_general}
 \end{equation}
 Ở đây $l_i(s_i,q_i)$ là chi phí cục bộ trên đoạn $[t_i,t_{i+1}]$, thường thu được bằng cách
 xấp xỉ tích phân của chi phí chạy (running cost) trên đoạn đó:
@@ -129,7 +129,7 @@ l_i(s_i,q_i)
 \approx
 \int_{t_i}^{t_{i+1}}
 L(x_i(t;s_i,q_i),q_i)\,dt.
-\label{eq:local_cost_mms}
+\label{eq:local_cost_DMS}
 \end{equation}
 
 Một điểm quan trọng của phương pháp DMS là các trạng thái $s_i$ được phép là biến tối ưu độc lập

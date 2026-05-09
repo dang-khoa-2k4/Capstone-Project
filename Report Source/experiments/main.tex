@@ -1,7 +1,9 @@
 \chapter{Thực nghiệm và mô phỏng}
 \label{ch:experiments}
 
-Trong chương này, chúng tôi tiến hành đánh giá hiệu năng và tính khả thi của hai hướng tiếp cận đã đề xuất: (1) phương pháp dựa trên hình học nguyên bản (GCS) và (2) phương pháp Điều khiển tối ưu kết hợp Multiple Shooting và hàm cản log-barrier (GCS+DMS). Mục tiêu là so sánh một cách toàn diện khả năng sinh quỹ đạo an toàn, chất lượng động lực học và thời gian tính toán của hai phương pháp trên nhiều kịch bản thử nghiệm từ đơn giản đến phức tạp.
+\indent\textit{
+Trong chương này, chúng tôi tiến hành đánh giá hiệu năng và tính khả thi của hai hướng tiếp cận đã đề xuất: (1) phương pháp dựa trên hình học nguyên bản (GCS-Bézier) và (2) phương pháp Điều khiển tối ưu kết hợp Direct Multiple Shooting (GCS-DMS), trong đó ràng buộc an toàn hình học được hiện thực bằng lưới hữu hạn điểm hoặc hàm cản log-barrier. Do hai hướng tiếp cận giải các formulation khác nhau, mục tiêu của chương không phải là xếp hạng trực tiếp hai phương pháp, mà là kiểm chứng từng mô hình trong miền áp dụng phù hợp và phân tích vai trò bổ trợ giữa tối ưu hình học lồi và tối ưu động lực học phi tuyến.
+}
 
 \section{Thiết lập thực nghiệm}
 \label{sec:exp_setup}
@@ -10,10 +12,10 @@ Trong chương này, chúng tôi tiến hành đánh giá hiệu năng và tính
 
 \section{Kết quả thực nghiệm}
 \label{sec:exp_results}
-\input{experiments/resutls}
-% (Bổ sung phần phân tích so sánh định lượng giữa 2 hướng tiếp cận)
+\input{experiments/results}
+% (Bổ sung phần phân tích định lượng theo từng formulation và đánh giá hậu kiểm các chỉ số chung)
 
-\section{Mô phỏng}
-\label{sec:exp_simulation}
+% \section{Mô phỏng}
+% \label{sec:exp_simulation}
 % \input{experiments/simulation}
 % (Trình bày các hình ảnh demo và bình luận kết quả định tính)

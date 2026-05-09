@@ -19,3 +19,4 @@
 *.blg-SAVE-ERROR
 *.bcf
 *.run.xml
+Report Source/*.pdf
