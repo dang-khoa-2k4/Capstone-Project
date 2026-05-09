@@ -32,6 +32,7 @@ Do GCS-Bezier và GCS-DMS giải hai bài toán tối ưu khác nhau, hệ chỉ
 \paragraph*{(A) Chi phí tính toán.}
 \begin{itemize}
     \item $t_{\text{decomp}}$: thời gian phân hoạch không gian tự do thành các vùng lồi.
+    \item $N_{\text{region}}$: số vùng lồi thu được sau phân hoạch, hoặc số vùng được kích hoạt trên đường đi nghiệm. Chỉ số này phản ánh trực tiếp quy mô đồ thị và số lượng biến/ràng buộc mà bộ giải phải xử lý.
     \item $t_{\text{solve}}$: thời gian giải bài toán tối ưu tương ứng của từng mô hình (SOCP cho GCS-Bezier, NLP cho GCS-DMS). Chỉ số này phản ánh chi phí tính toán nội bộ của từng formulation, không phải thước đo so sánh tuyệt đối vì hai bài toán có số biến, ràng buộc và mục tiêu khác nhau.
     \item $t_{\text{total}} = t_{\text{decomp}} + t_{\text{solve}}$.
 \end{itemize}
@@ -39,15 +40,16 @@ Do GCS-Bezier và GCS-DMS giải hai bài toán tối ưu khác nhau, hệ chỉ
 \paragraph*{(B) Chất lượng quỹ đạo.}
 \begin{itemize}
     \item $T_{\text{exec}}$: thời gian thực thi quỹ đạo, được báo cáo theo cách định nghĩa riêng của từng mô hình.
-    \item $L = \int_{0}^{T_{\text{exec}}} \|\dot q(t)\|\,dt$: độ dài hình học, dùng như chỉ số mô tả hình dạng đường đi.
-    \item $E_u = \int_{0}^{T_{\text{exec}}} \|u(t)\|^2\,dt$: chi phí điều khiển (chỉ khả dụng cho GCS-DMS, vì GCS-Bezier không có $u$ tường minh).
-    \item $J_{\text{jerk}} = \int_{0}^{T_{\text{exec}}} \|\dddot q(t)\|^2\,dt$: tích phân jerk, phản ánh độ trơn hình học của quỹ đạo.
+    \item $C_{\text{path}}$ hoặc $C_{\text{round}}$: giá trị hàm mục tiêu sau khi làm tròn/khôi phục đường đi đối với GCS-Bezier. Trong các thực nghiệm 2D, đại lượng này bao gồm thời gian thực thi và thành phần điều chuẩn gia tốc.
+    \item $C_{\text{DMS}}$: giá trị hàm mục tiêu của GCS-DMS sau bước relaxation hoặc polish, bao gồm thời gian di chuyển và các thành phần phạt tương ứng của formulation.
+    \item Hồ sơ vận tốc $|v(t)|$: dùng trong Kịch bản C để đánh giá định tính hành vi động lực của xe Unicycle, đặc biệt là hiện tượng giảm tốc tại các đoạn cua hẹp hoặc vùng chuyển tiếp phức tạp.
 \end{itemize}
 
 \paragraph*{(C) Tính khả thi và tối ưu.}
 \begin{itemize}
-    \item Với GCS-Bezier: optimality gap của relaxation $\delta_{\text{relax}} = (C_{\text{round}} - C_{\text{relax}})/C_{\text{relax}}$.
-    \item Với GCS-DMS: trạng thái hội tụ của relaxation/NLP polish, residual của ràng buộc defect cuối cùng $\|s_v^+ - F_v\|_\infty$, connection gap giữa các vùng kề, integrality gap của biến đường đi và mức vi phạm ràng buộc sau tối ưu.
+    \item Với GCS-Bezier: thời gian giải, giá trị cost, cost ratio giữa các biến thể mô hình khi có báo cáo, và trạng thái nhị phân của biến luồng sau relaxation/làm tròn.
+    \item Với GCS-DMS: trạng thái hội tụ của relaxation/NLP polish, số đường ứng viên đã đánh giá, residual của ràng buộc defect cuối cùng $\|s_v^+ - F_v\|_\infty$, connection gap giữa các vùng kề, integrality gap của biến đường đi và mức vi phạm ràng buộc sau tối ưu.
+    \item Với ràng buộc an toàn GCS-DMS: chế độ containment được sử dụng, gồm log-barrier hoặc ràng buộc cứng trên lưới hữu hạn điểm như đã mô tả ở mục~\ref{subsec:safety_constraints}.
 \end{itemize}
 
 \subsection{Các kịch bản thử nghiệm}
