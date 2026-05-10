@@ -221,40 +221,40 @@ trực tiếp.
     \label{tab:exp_params}
     \renewcommand{\arraystretch}{1.4}
     {\footnotesize
-        \begin{tabular}{@{}p{3.8cm}p{3.8cm}p{2.6cm}p{4.6cm}@{}}
+        \begin{tabular}{@{}p{3cm}p{3.8cm}p{2.6cm}p{4.6cm}@{}}
             \toprule
             \textbf{Tham số}
-                & \textbf{TN 1}
-                & \textbf{TN 2}
-                & \textbf{TN 3} \\
+             & {\tiny\textbf{Thí nghiệm 1}}
+             & {\tiny\textbf{Thí nghiệm 2}}
+             & {\tiny\textbf{Thí nghiệm 3}}                                                                                                                \\
             \midrule
             Số chiều cấu hình
-                & 3 & 2 & 2 (GCS-Bézier); 3 (GCS-DMS) \\
+             & 3                                                                      & 2                   & 2 (GCS-Bézier); 3 (GCS-DMS)   \\
             \addlinespace[3pt]
             Bậc Bézier / liên tục $C^k$
-                & --- & $6 \,/\, C^2$ & $6 \,/\, C^2$ \\
+             & ---                                                                    & $6 \,/\, C^2$       & $6 \,/\, C^2$                 \\
             \addlinespace[3pt]
             % $M_v$ — số nút lưới mỗi vùng (GCS-DMS) & 10 & 5 & 15 \\
             % $K$ — số đường đi ứng viên (GCS-DMS) & 5 & 20 & 10 \\
             $\mu_v$ ban đầu / cuối
-                & $10^{-2} / 10^{-5}$ & $10^{-2} / 10^{-5}$ & $10^{-2}$ \\
+             & $10^{-2} / 10^{-5}$                                                    & $10^{-2} / 10^{-5}$ & $10^{-2}$                     \\
             \addlinespace[3pt]
             Chế độ an toàn GCS-DMS
-                & Log-barrier + lưới hữu hạn (cùng seed) & --- & Log-barrier \\
+             & Log-barrier + lưới hữu hạn (cùng seed)                                 & ---                 & Log-barrier                   \\
             \addlinespace[3pt]
             Trọng số $w_t \,/\, w_E$
-                & $1 \,/\, 0.1$ & $1 \,/\, 0.1$
-                & $1 \,/\, 0.1$ (GCS-Bézier); xem Bảng~\ref{tab:dms_2d_config} (GCS-DMS) \\
+             & $1 \,/\, 0.1$                                                          & $1 \,/\, 0.1$
+             & $1 \,/\, 0.1$ (GCS-Bézier); xem Bảng~\ref{tab:dms_2d_config} (GCS-DMS)                                                       \\
             \addlinespace[3pt]
-            Vận tốc tối đa $v_{\max}$
-                & 1 & 1 & 1 (GCS-Bézier); 2 (GCS-DMS) \\
+            Vận tốc tịnh tiến $v_{\max}$
+             & 1                                                                      & 1                   & 1 (GCS-Bézier); 2 (GCS-DMS)   \\
             \addlinespace[3pt]
-            Tốc độ góc lái $\omega_{\max}$
-                & $\pi/2\ \text{rad/s}$ & --- & $\pi\ \text{rad/s}$ (GCS-DMS) \\
+            Vận tốc góc $\omega_{\max}$
+             & $\pi/2\ \text{rad/s}$                                                  & ---                 & $\pi\ \text{rad/s}$ (GCS-DMS) \\
             \addlinespace[3pt]
             Số seed
-                & ${\ge}10$ mê cung $\times$ 2 chế độ $+$ 1 TH 2D
-                & 10 & 1 (cố định) \\
+             & ${\ge}10$ mê cung $\times$ 2 chế độ $+$ 1 TH 2D
+             & 10                                                                     & 1 (cố định)                                         \\
             \bottomrule
         \end{tabular}
     }

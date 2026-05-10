@@ -5,7 +5,7 @@
 %==============================================================================
 
 \documentclass[final]{beamer}
-\usepackage[orientation=portrait,size=a0,scale=1.25]{beamerposter}
+\usepackage[orientation=portrait,size=a0,scale=1.20]{beamerposter}
 \geometry{hmargin=2.5cm,vmargin=1.5cm}
 
 \usepackage[utf8]{inputenc}
@@ -20,8 +20,18 @@
 \usepackage{tcolorbox}
 \tcbuselibrary{most}
 \usepackage{ragged2e}
+\usepackage{enumitem}
 
 \linespread{1.08}
+
+% ── Bảng màu tùy chỉnh ───────────────────────────────────────
+\definecolor{softmint}{HTML}{A8D5BA}
+\definecolor{aquamarine}{HTML}{7FFFD4}   % xanh lá mint chủ đạo
+\definecolor{softcoral}{HTML}{FFB3A7}    % san hô nhạt
+\definecolor{softlavender}{HTML}{C8B4E8} % tím lavender nhạt
+\definecolor{softyellow}{HTML}{FFF176}   % vàng chanh nhạt
+\definecolor{softpeach}{HTML}{FFCC99}    % đào nhạt
+\definecolor{softsky}{HTML}{90CAF9}      % xanh trời nhạt
 
 \graphicspath{
   {../Report Source/experiments/image/}
@@ -32,25 +42,53 @@
 \usetheme{sharelatex}
 \setlength{\columnsep}{45pt}
 
-% Hộp công thức
+% Hộp công thức – nền softmint nhạt, viền softmint đậm
 \newtcolorbox{mathbox}{
-  enhanced, colback=color1!7, colframe=color2,
-  boxrule=1.3pt, arc=3pt,
-  left=4pt, right=4pt, top=2pt, bottom=2pt
+  enhanced,
+  colback=softmint!28, colframe=softmint!85,
+  boxrule=1.6pt, arc=5pt,
+  left=5pt, right=5pt, top=3pt, bottom=3pt
 }
 
-% Hộp thông điệp
+% Hộp thông điệp – nền vàng chanh, viền san hô
 \newtcolorbox{keybox}{
-  enhanced, colback=color2!10, colframe=color2,
-  boxrule=1.8pt, arc=4pt,
-  left=6pt, right=6pt, top=3pt, bottom=3pt
+  enhanced,
+  colback=softyellow!55, colframe=softcoral!90,
+  boxrule=2pt, arc=5pt,
+  left=7pt, right=7pt, top=4pt, bottom=4pt
 }
 
-% Hộp placeholder (viền đứt)
+% Hộp placeholder – đào nhạt trung tính
 \newtcolorbox{placeholderbox}{
-  enhanced, colback=gray!8, colframe=gray!50,
-  boxrule=1pt, arc=3pt,
+  enhanced,
+  colback=softpeach!25, colframe=softpeach!65,
+  boxrule=1pt, arc=4pt,
   left=6pt, right=6pt, top=4pt, bottom=4pt
+}
+
+% Hộp kết luận – tím lavender nhạt, thanh bên aquamarine
+\newtcolorbox{conclusionbox}{
+  enhanced,
+  colback=softlavender!32, colframe=softlavender!80,
+  borderline west={3.5pt}{0pt}{aquamarine!90},
+  boxrule=0.8pt, arc=4pt,
+  left=10pt, right=7pt, top=5pt, bottom=5pt
+}
+
+% Hộp tài liệu tham khảo – xanh trời, nhãn tiêu đề nổi
+\newtcolorbox{refbox}{
+  enhanced,
+  colback=softsky!30, colframe=softsky!80,
+  boxrule=1.3pt, arc=5pt,
+  left=7pt, right=7pt, top=8pt, bottom=5pt,
+  title={\small\bfseries\color{black} Tài liệu tham khảo},
+  fonttitle=\small\bfseries,
+  attach boxed title to top left={yshift=-2.5mm, xshift=6mm},
+  boxed title style={
+    colback=softsky!80, colframe=softsky!80,
+    arc=3pt, boxrule=0pt,
+    left=4pt, right=4pt, top=1.5pt, bottom=1.5pt
+  }
 }
 
 %==============================================================================
@@ -58,7 +96,7 @@
   Hoạch định chuyển động cho Rô-bốt\\[0.3ex]sử dụng Tối ưu Lồi%
 }
 \author{%
-\textbf{GVHD:} PGS.TS.\ Lê Hồng Trang \& ThS.\ Trương Quỳnh Chi%
+\textbf{Mã đề tài:} HK252-DATN-028 \quad | \quad \textbf{GVHD:} PGS.TS.\ Lê Hồng Trang \& ThS.\ Trương Quỳnh Chi%
 \\ % \qquad% 
 \textbf{SVTH:} Nguyễn Trần Đăng Khoa (2211635) \& Hồ Đăng Khoa (2211588)%
 }
@@ -79,6 +117,8 @@
       \section{Bài toán Hoạch định Chuyển động}
 
       % ---- FIX 1: Hàm mục tiêu rõ ràng + tính phi lồi (thesis eq. 4.1–4.2) ----
+
+      \textbf{Bài toán:} Sinh quỹ đạo cho rô-bốt trong môi trường có vật cản, đảm bảo (i) tránh va chạm, (ii) trơn (liên tục bậc cao), (iii) khả thi về mặt động lực học.
 
       \textbf{Hàm mục tiêu:}
       \begin{mathbox}
@@ -127,28 +167,29 @@
       \section{Phân hoạch Không gian Tự do}
 
        {\small
-        \renewcommand{\arraystretch}{1.0}
-        \begin{tabular}{@{}p{9cm}p{14cm}p{14cm}@{}}
+        \renewcommand{\arraystretch}{1.15}
+        \begin{tabular}{@{}p{9cm}p{13.5cm}p{14cm}@{}}
           \toprule
-          \textbf{Phương pháp} & \textbf{Ưu điểm}                                                                       & \textbf{Nhược điểm} \\
+          \textbf{Phương pháp} & \textbf{Ưu điểm}                                                               & \textbf{Nhược điểm} \\
           \midrule
           \textbf{ACD}\newline
           {\footnotesize Approx.\ Convex Decomp.}
-                               & Không cần vật cản lồi; bao phủ toàn bộ $\mathcal{C}_\mathrm{free}$; phù hợp polygon 2D
-                               & Chỉ xấp xỉ lồi (dung sai $\tau$); heuristic; số vùng khó kiểm soát                                           \\[3pt]
+                               & Không cần vật cản lồi; bao phủ $\mathcal{C}_\mathrm{free}$; phù hợp polygon 2D
+                               & Xấp xỉ (dung sai $\tau$); heuristic; số vùng khó kiểm soát                                           \\[4pt]
           \textbf{IRIS}\newline
           {\footnotesize Iter.\ Inflation by SDP}
-                               & Vùng lồi chính xác trong $\mathbb{R}^n$; mở rộng tốt theo số vật cản (QP+SDP)
-                               & Điểm mầm thủ công; cần vật cản lồi; không tự bao phủ toàn bộ                                                 \\[3pt]
+                               & Vùng lồi chính xác trong $\mathbb{R}^n$; mở rộng tốt (QP+SDP)
+                               & Điểm mầm thủ công; cần vật cản lồi; không tự bao phủ                                                 \\[4pt]
           \textbf{VCC}\newline
           {\footnotesize Visibility Clique Cover}
-                               & Tự động đặt điểm mầm; ít vùng hơn IRIS; bao phủ tự động theo vòng lặp
-                               & Lấy mẫu dày trong không gian hẹp; MAXCLIQUE giải gần đúng (ILP)                                              \\
+                               & Tự động đặt điểm mầm; ít vùng hơn IRIS; bao phủ tự động
+                               & Lấy mẫu dày không gian hẹp; MAXCLIQUE giải gần đúng (ILP)                                            \\
           \bottomrule
         \end{tabular}
        }
 
       %======================================================================
+      \vspace{0.4em}
       % ---- FIX 3: Bézier — thêm hàm mục tiêu, kỹ thuật phối cảnh, bao lồi ----
       \section{Hướng 1: GCS-Bézier}
       \begin{mathbox}
@@ -182,6 +223,7 @@
       \end{center}
 
       %======================================================================
+      \vspace{0.4em}
       % ---- FIX 4: DMS — OCP rõ ràng + hàm mục tiêu tổng quát
       \section{Hướng 2: GCS-DMS}
 
@@ -229,8 +271,8 @@
       %======================================================================
       \section{Kết quả: GCS-DMS --- Unicycle Dynamics}
       \begin{center}
-        \includegraphics[width=0.82\linewidth]{default_result_manual.png}\\[-2pt]
-        {\footnotesize GCS-DMS: OCP $\to$ MINLP giải bằng NLP (IPOPT)}
+        \includegraphics[width=0.82\linewidth]{maze-dms.jpg}\\[-2pt]
+        {GCS-DMS: OCP $\to$ MINLP giải bằng NLP (IPOPT) - khả thi động lực học}
       \end{center}
 
       \begin{minipage}[t]{0.47\linewidth}
@@ -274,11 +316,13 @@
         \end{center}
       \end{minipage}
 
+      \vspace{0.6em}
       %======================================================================
       \section{Kết quả: GCS-Bézier --- Mê cung $25\!\times\!25$}
       \begin{center}
-        \includegraphics[width=0.82\linewidth]{maze-2.png}\\[-2pt]
-        {\footnotesize Bézier bậc $d=6$, liên tục $C^2$, Mosek (SOCP relaxation)}
+        \includegraphics[width=0.82\linewidth]{maze-gcsbezier.png}\\[-2pt]
+        {Bézier bậc $d=6$, liên tục $C^2$ tại các điểm nối giữa vùng lồi. Relaxation SOCP luôn cho nghiệm binary xấp xỉ tốt - không cần rounding heuristic}
+      \subsection{Kết quả chi tiết}
       \end{center}
       \begin{center}
         \small\renewcommand{\arraystretch}{1.2}
@@ -292,33 +336,56 @@
           \bottomrule
         \end{tabular}
       \end{center}
-
+      
+      \vspace{0.6em}
       %======================================================================
       \section{So sánh \& Kết luận}
 
       \begin{center}
-        \small\renewcommand{\arraystretch}{1.2}
+        \small\renewcommand{\arraystretch}{1.25}
         \begin{tabular}{@{}p{5cm}p{10cm}p{10cm}@{}}
           \toprule
           \textbf{Tiêu chí} & \textbf{GCS-Bézier}                     & \textbf{GCS-DMS}             \\
           \midrule
           Mô hình
                             & Bézier trên vùng lồi
-                            & Direct Multiple Shooting                                               \\
+                            & Direct Multiple Shooting                                               \\[2pt]
 
-          Bài toán          & MISOCP $\rightarrow$ SOCP               & MIOCP $\rightarrow$ MINLP    \\
+          Bài toán          & MISOCP $\rightarrow$ SOCP               & MIOCP $\rightarrow$ MINLP    \\[2pt]
 
           Điểm mạnh
                             & Nhanh, lồi, quỹ đạo mượt $C^2$
-                            & Khả thi động lực học, có điều khiển $u$                                \\
+                            & Khả thi động lực học, có điều khiển $u$                                \\[2pt]
 
-          Hạn chế           & Chưa ràng buộc dynamics đầy đủ          & Chậm, phi lồi, nhạy khởi tạo \\
+          Hạn chế           & Chưa ràng buộc dynamics đầy đủ          & Chậm, phi lồi, nhạy khởi tạo \\[2pt]
 
           Phù hợp           & Planning hình học nhanh                 & Planning có dynamics thực    \\
 
           \bottomrule
         \end{tabular}
       \end{center}
+
+      \vspace{0.5em}
+      \begin{conclusionbox}
+        \textbf{Kết luận:} GCS-Bézier là convex relaxation của MICP — tight khi các vùng lồi đủ lớn và ít overlap.
+        GCS-DMS bổ sung khả năng mô hình hoá nonlinear dynamics nhưng là NLP non-convex với nguy cơ local minima
+        — phù hợp nhất khi warm-start từ GCS-Bézier.
+      \end{conclusionbox}
+
+      \vspace{0.8em}
+      %======================================================================
+      \begin{refbox}
+        \begin{enumerate}[label={[\arabic*]}, leftmargin=*, itemsep=2pt, topsep=3pt,
+            labelsep=4pt]
+          \small
+          \item T.~Marcucci et al., ``Motion Planning around Obstacles with Convex
+                Optimization,'' \textit{Science Robotics}, 2023.
+          \item J.~M.~Lien \& N.~M.~Amato, ``Approximate Convex Decomposition of Polygons,''
+                \textit{CGTA}, 2006.
+          \item M.~Diehl et al., ``Fast Direct Multiple Shooting Algorithms for Optimal Robot
+                Control,'' \textit{Springer}, 2006.
+        \end{enumerate}
+      \end{refbox}
 
       %======================================================================
     \end{column}
