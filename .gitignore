@@ -19,5 +19,6 @@
 *.blg-SAVE-ERROR
 *.bcf
 *.run.xml
-Report Source/*.pdf
+*.pdf
 */CLAUDE.md
+doc/

@@ -15,90 +15,83 @@ hợp (Mixed-Integer Convex Program --- MICP) vốn có độ phức tạp tổ 
 lớn thành bài toán Lập trình Nón Bậc hai (Second-Order Cone Program ---
 SOCP) có thể giải hiệu quả trong thời gian đa thức.
 
-Thông qua các kết quả thực nghiệm định lượng trên môi trường 2D và hệ thống
-mê cung đa tầng, tính khả thi và hiệu quả vận hành của khung GCS đã được
-kiểm chứng.
-Trong các kịch bản môi trường 2D, việc đối chiếu giữa hai kỹ thuật phân hoạch
-không gian cho thấy thuật toán Phân hoạch Lồi Xấp xỉ (Approximate Convex
-Decomposition --- ACD) mang lại sự cân bằng tối ưu giữa số lượng vùng lồi
-sinh ra và thời gian hội tụ của bộ giải so với phương pháp Lớp phủ Clique Khả
-kiến (Visible Clique Cover --- VCC).
-Trên môi trường mê cung có độ phức tạp tổ hợp cao, kết quả thực nghiệm làm
-rõ sự đánh đổi giữa hai mô hình GCS: Linear~GCS cho phép phản hồi rất nhanh
-về mặt hình học, trong khi Bézier~GCS tuy đòi hỏi chi phí tính toán cao hơn
-nhưng tạo ra các quỹ đạo mượt mà, bảo đảm ràng buộc vi phân liên tục $C^2$
-và tính khả thi vật lý cho rô-bốt.
+Thông qua các kết quả thực nghiệm định lượng trên môi trường 2D và hệ thống mê
+cung đa tầng, tính khả thi và hiệu quả vận hành của khung GCS đã được kiểm
+chứng. Trong các kịch bản môi trường 2D, việc đối chiếu giữa hai kỹ thuật phân
+hoạch không gian cho thấy thuật toán Phân hoạch Lồi Xấp xỉ (Approximate Convex
+Decomposition --- ACD) mang lại sự cân bằng tối ưu giữa số lượng vùng lồi sinh
+ra và thời gian hội tụ của bộ giải so với phương pháp Lớp phủ Clique Khả kiến
+(Visible Clique Cover --- VCC). Trên môi trường mê cung có độ phức tạp tổ hợp
+cao, kết quả thực nghiệm làm rõ sự đánh đổi giữa hai mô hình GCS: Linear~GCS
+cho phép phản hồi rất nhanh về mặt hình học, trong khi Bézier~GCS tuy đòi hỏi
+chi phí tính toán cao hơn nhưng tạo ra các quỹ đạo mượt mà, bảo đảm ràng buộc
+vi phân liên tục $C^2$ và tính khả thi vật lý cho rô-bốt.
 
-Một đóng góp trung tâm của đồ án là việc đề xuất và triển khai mô hình bài
-toán Điều khiển Tối ưu kết hợp Multiple Shooting (GCS-DMS) trên nền tảng của
-GCS.
-Khác với GCS nguyên bản chỉ sinh ra quỹ đạo hình học ở mức động học, hướng
-tiếp cận này mô hình hóa trực tiếp phương trình động lực học
-$\dot{\mathbf{x}} = \mathbf{f}(\mathbf{x}, \mathbf{u})$ của hệ thông qua ràng
-buộc defect của multiple shooting, đồng thời đưa tín hiệu điều khiển
-$\mathbf{u}(\cdot)$ vào như một biến quyết định tường minh.
-Hàm cản log-barrier được tích hợp để khuyến khích quỹ đạo nằm sâu trong miền
-trong của các vùng an toàn, từ đó giảm thiểu hiện tượng vi phạm biên vốn xuất
-hiện khi chỉ kiểm tra ràng buộc an toàn tại một tập hữu hạn các điểm lưới.
-Các kết quả thực nghiệm định lượng đã minh chứng tính hiệu quả của phương
-pháp đề xuất trong bối cảnh môi trường tĩnh được sử dụng trong đồ án này.
+Một đóng góp trung tâm của đồ án là việc đề xuất và triển khai mô hình bài toán
+Điều khiển Tối ưu kết hợp Multiple Shooting (GCS-DMS) trên nền tảng của GCS.
+Khác với GCS nguyên bản chỉ sinh ra quỹ đạo hình học ở mức động học, hướng tiếp
+cận này mô hình hóa trực tiếp phương trình động lực học $\dot{\mathbf{x}} =
+    \mathbf{f}(\mathbf{x}, \mathbf{u})$ của hệ thông qua ràng buộc defect của
+multiple shooting, đồng thời đưa tín hiệu điều khiển $\mathbf{u}(\cdot)$ vào
+như một biến quyết định tường minh. Hàm cản log-barrier được tích hợp để khuyến
+khích quỹ đạo nằm sâu trong miền trong của các vùng an toàn, từ đó giảm thiểu
+hiện tượng vi phạm biên vốn xuất hiện khi chỉ kiểm tra ràng buộc an toàn tại
+một tập hữu hạn các điểm lưới. Các kết quả thực nghiệm định lượng đã minh chứng
+tính hiệu quả của phương pháp đề xuất trong bối cảnh môi trường tĩnh được sử
+dụng trong đồ án này.
 
 \section{Những mặt còn hạn chế}
 \label{sec:conclusion_limitations}
 
-Mặc dù đạt được những kết quả trên, đồ án vẫn còn một số hạn chế cần được
-nhìn nhận rõ ràng.
+Mặc dù đạt được những kết quả trên, đồ án vẫn còn một số hạn chế cần được nhìn
+nhận rõ ràng.
 
 Về mặt cấu trúc tối ưu hóa, khi tích hợp động lực học multiple shooting vào
 khung GCS, mô hình GCS-DMS không còn giữ được tính lồi của GCS-Bézier gốc.
 Trong GCS-Bézier, relaxation lồi của phần chọn đường đi thường có integrality
 gap bằng không hoặc rất nhỏ~\cite{MarcucciEtAl2023GCS}, cho phép bộ giải SOCP
-thương mại (Mosek, Gurobi) xử lý hiệu quả.
-Ngược lại, khối ràng buộc defect của multiple shooting là ánh xạ phi tuyến ẩn
-sinh ra bởi tích phân động lực học, khiến bài toán thuộc lớp Quy hoạch Nguyên
-Phi tuyến Hỗn hợp (Mixed-Integer Nonlinear Program --- MINLP) phi lồi---NP-hard
-trong trường hợp tổng quát.
-Điều này đồng nghĩa với chi phí tính toán cao hơn đáng kể và không có bảo đảm
-về độ chặt của relaxation, đòi hỏi các bộ giải chuyên dụng dựa trên
-branch-and-bound kết hợp lời giải Quy hoạch Phi tuyến (NLP) tại các nút tìm
-kiếm.
+thương mại (Mosek, Gurobi) xử lý hiệu quả. Ngược lại, khối ràng buộc defect của
+multiple shooting là ánh xạ phi tuyến ẩn sinh ra bởi tích phân động lực học,
+khiến bài toán thuộc lớp Quy hoạch Nguyên Phi tuyến Hỗn hợp (Mixed-Integer
+Nonlinear Program --- MINLP) phi lồi---NP-hard trong trường hợp tổng quát. Điều
+này đồng nghĩa với chi phí tính toán cao hơn đáng kể và không có bảo đảm về độ
+chặt của relaxation, đòi hỏi các bộ giải chuyên dụng dựa trên branch-and-bound
+kết hợp lời giải Quy hoạch Phi tuyến (NLP) tại các nút tìm kiếm.
 
-Về mặt bảo đảm an toàn liên tục, hàm cản log-barrier được sử dụng trong
-GCS-DMS khuyến khích quỹ đạo tránh xa biên của các vùng an toàn theo nghĩa
-heuristic, nhưng không cung cấp bảo đảm chính xác theo kiểu convex hull như
-trong GCS-Bézier.
-Trong GCS-Bézier, tính chất bao lồi của đường cong Bézier đảm bảo rằng nếu
-toàn bộ điểm điều khiển nằm trong vùng lồi $Q_v$ thì toàn bộ đường cong nằm
-trong $Q_v$---một bảo đảm liên tục chính xác.
-GCS-DMS chỉ đạt được bảo đảm tương tự ở mức gần đúng thông qua phạt logarit,
-chứ không phải qua ràng buộc hình học cứng trên toàn bộ khoảng thời gian.
+Về mặt bảo đảm an toàn liên tục, hàm cản log-barrier được sử dụng trong GCS-DMS
+khuyến khích quỹ đạo tránh xa biên của các vùng an toàn theo nghĩa heuristic,
+nhưng không cung cấp bảo đảm chính xác theo kiểu convex hull như trong
+GCS-Bézier. Trong GCS-Bézier, tính chất bao lồi của đường cong Bézier đảm bảo
+rằng nếu toàn bộ điểm điều khiển nằm trong vùng lồi $Q_v$ thì toàn bộ đường
+cong nằm trong $Q_v$ một bảo đảm liên tục chính xác. GCS-DMS chỉ đạt được bảo
+đảm tương tự ở mức gần đúng thông qua phạt logarit, chứ không phải qua ràng
+buộc hình học cứng trên toàn bộ khoảng thời gian.
 
-Cuối cùng, phạm vi thực nghiệm của đồ án còn giới hạn ở môi trường tĩnh
-và không gian làm việc hai chiều.
-Khả năng tổng quát hóa của phương pháp đối với môi trường động, không gian cấu
-hình ($C$-space) nhiều chiều, và phần cứng rô-bốt thực tế chưa được kiểm chứng
-trong khuôn khổ nghiên cứu này.
+Cuối cùng, phạm vi thực nghiệm của đồ án còn giới hạn ở môi trường tĩnh và
+không gian làm việc hai chiều. Khả năng tổng quát hóa của phương pháp đối với
+môi trường động, không gian cấu hình ($C$-space) nhiều chiều, và phần cứng
+rô-bốt thực tế chưa được kiểm chứng trong khuôn khổ nghiên cứu này.
 
 \section{Hướng phát triển}
 \label{sec:conclusion_future}
 
-Dựa trên những kết quả và hạn chế được xác định ở trên, đồ án đề xuất các
-hướng phát triển tiếp theo nhằm tăng cường hiệu năng và mở rộng phạm vi ứng
-dụng của khung GCS-DMS.
+Dựa trên những kết quả và hạn chế được xác định ở trên, đồ án đề xuất các hướng
+phát triển tiếp theo nhằm tăng cường hiệu năng và mở rộng phạm vi ứng dụng của
+khung GCS-DMS.
 
 \textbf{Hoạch định quỹ đạo trực tuyến với Điều khiển Dự báo Mô hình.}
 Một hướng tiếp theo tự nhiên là tích hợp khung GCS-DMS vào vòng lặp Điều
 khiển Dự báo Mô hình (Model Predictive Control --- MPC) để đáp ứng yêu cầu
 hoạch định quỹ đạo trực tuyến.
 Khả năng warm-start của bộ giải multiple shooting---khởi động từ lời giải của
-bước trước---có thể rút ngắn đáng kể thời gian giải tại mỗi chu kỳ điều khiển,
+bước trước có thể rút ngắn đáng kể thời gian giải tại mỗi chu kỳ điều khiển,
 mở ra khả năng triển khai thời gian thực cho các hệ rô-bốt đòi hỏi phản xạ
 nhanh trước thay đổi của môi trường.
 
-\textbf{Mở rộng sang môi trường động với GCS không---thời gian.}
+\textbf{Mở rộng sang môi trường động với GCS.}
 Khung làm việc hiện tại được xây dựng cho bài toán môi trường tĩnh.
 Hướng phát triển tiếp theo là mở rộng đồ thị tập lồi theo cả trục thời gian,
-hình thành cấu trúc GCS không---thời gian (Spatiotemporal GCS), từ đó biểu
+hình thành cấu trúc GCS động, từ đó biểu
 diễn và giải quyết bài toán né tránh vật cản di động trực tiếp trong không gian
 trạng thái---thời gian mở rộng.
 

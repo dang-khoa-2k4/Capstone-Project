@@ -3,15 +3,15 @@
 
 Công thức MICP trong phần trước xây dựng cấu trúc tổng quát cho bài toán đường
 đi ngắn nhất trên GCS và kỹ thuật nới lỏng phối cảnh tương ứng. Tuy nhiên, dạng
-cụ thể của biến quyết định $x_v$ tại mỗi đỉnh---và theo đó, cách biểu diễn đoạn
-quỹ đạo trong từng vùng lồi---vẫn chưa được đặc tả. Phần này hoàn thiện cầu nối
+cụ thể của biến quyết định $x_v$ tại mỗi đỉnh và theo đó, cách biểu diễn đoạn
+quỹ đạo trong từng vùng lồi vẫn chưa được đặc tả. Phần này hoàn thiện cầu nối
 đó bằng cách tham số hóa mỗi đoạn bằng một đường cong Bézier đa thức, từ đó
 định nghĩa khung \emph{GCS-Bézier} cho bài toán hoạch định chuyển động liên tục.
 
 Lựa chọn đường cong Bézier vì tính chất bao lồi (convex hull property) của họ
 đường cong này cho phép chuyển ràng buộc an toàn hình học liên tục
 $\mathbf{x}(t) \in \mathcal{C}_{\mathrm{free}}$ thành một số hữu hạn ràng buộc
-tuyến tính trên các điểm điều khiển---nền tảng then chốt để đặt toàn bộ bài
+tuyến tính trên các điểm điều khiển nền tảng then chốt để đặt toàn bộ bài
 toán về dạng MICP khả giải. Hình~\ref{fig:GCS-Bézier_pipeline} tóm tắt luồng xử
 lý tổng thể.
 
@@ -172,7 +172,7 @@ dưới dạng phối cảnh:
 \end{equation}
 Đây là dạng tương đương với $\dot{\mathbf{r}}_{v,k}/\dot{h}_{v,k} \in D$ khi
 $\dot{h}_{v,k} > 0$, và lồi đồng thời theo $(\dot{\mathbf{r}}_{v,k},
-    \dot{h}_{v,k})$---nhờ tính chất hàm phối cảnh bảo toàn tính lồi.
+    \dot{h}_{v,k})$ nhờ tính chất hàm phối cảnh bảo toàn tính lồi.
 Các ràng buộc tương tự được đặt lên sai phân bậc hai $\ddot{\mathbf{r}}_{v,k}$
 để giới hạn gia tốc, và bậc ba để giới hạn độ giật (jerk).
 

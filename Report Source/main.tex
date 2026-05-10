@@ -20,7 +20,7 @@
 %=====================================================
 \usepackage{geometry}
 \usepackage{setspace}
-\usepackage{indentfirst}
+% \usepackage{indentfirst}
 \usepackage{ragged2e}
 
 % Định nghĩa bố cục trang
@@ -46,7 +46,7 @@
 
 \thesisheadlayout
 \renewcommand{\baselinestretch}{1.5}
-\setlength\parindent{0pt}
+% \setlength\parindent{0pt}
 
 %=====================================================
 % GÓI TOÁN HỌC
@@ -215,22 +215,21 @@
 
 \begin{titlepage}
     \begin{tikzpicture}[remember picture,overlay,inner sep=0,outer sep=0]
-         \draw[blue!70!black,line width=4pt] ([xshift=-1.5cm,yshift=-2cm]current page.north east) coordinate (A)--([xshift=1.5cm,yshift=-2cm]current page.north west) coordinate(B)--([xshift=1.5cm,yshift=2cm]current page.south west) coordinate (C)--([xshift=-1.5cm,yshift=2cm]current page.south east) coordinate(D)--cycle;
-    
-         \draw ([yshift=0.5cm,xshift=-0.5cm]A)-- ([yshift=0.5cm,xshift=0.5cm]B)--
-         ([yshift=-0.5cm,xshift=0.5cm]B) --([yshift=-0.5cm,xshift=-0.5cm]B)--([yshift=0.5cm,xshift=-0.5cm]C)--([yshift=0.5cm,xshift=0.5cm]C)--([yshift=-0.5cm,xshift=0.5cm]C)-- ([yshift=-0.5cm,xshift=-0.5cm]D)--([yshift=0.5cm,xshift=-0.5cm]D)--([yshift=0.5cm,xshift=0.5cm]D)--([yshift=-0.5cm,xshift=0.5cm]A)--([yshift=-0.5cm,xshift=-0.5cm]A)--([yshift=0.5cm,xshift=-0.5cm]A);
-    
-    
-         \draw ([yshift=-0.3cm,xshift=0.3cm]A)-- ([yshift=-0.3cm,xshift=-0.3cm]B)--
-         ([yshift=0.3cm,xshift=-0.3cm]B) --([yshift=0.3cm,xshift=0.3cm]B)--([yshift=-0.3cm,xshift=0.3cm]C)--([yshift=-0.3cm,xshift=-0.3cm]C)--([yshift=0.3cm,xshift=-0.3cm]C)-- ([yshift=0.3cm,xshift=0.3cm]D)--([yshift=-0.3cm,xshift=0.3cm]D)--([yshift=-0.3cm,xshift=-0.3cm]D)--([yshift=0.3cm,xshift=-0.3cm]A)--([yshift=0.3cm,xshift=0.3cm]A)--([yshift=-0.3cm,xshift=0.3cm]A);
+        \draw[blue!70!black,line width=4pt] ([xshift=-1.5cm,yshift=-2cm]current page.north east) coordinate (A)--([xshift=1.5cm,yshift=-2cm]current page.north west) coordinate(B)--([xshift=1.5cm,yshift=2cm]current page.south west) coordinate (C)--([xshift=-1.5cm,yshift=2cm]current page.south east) coordinate(D)--cycle;
+
+        \draw ([yshift=0.5cm,xshift=-0.5cm]A)-- ([yshift=0.5cm,xshift=0.5cm]B)--
+        ([yshift=-0.5cm,xshift=0.5cm]B) --([yshift=-0.5cm,xshift=-0.5cm]B)--([yshift=0.5cm,xshift=-0.5cm]C)--([yshift=0.5cm,xshift=0.5cm]C)--([yshift=-0.5cm,xshift=0.5cm]C)-- ([yshift=-0.5cm,xshift=-0.5cm]D)--([yshift=0.5cm,xshift=-0.5cm]D)--([yshift=0.5cm,xshift=0.5cm]D)--([yshift=-0.5cm,xshift=0.5cm]A)--([yshift=-0.5cm,xshift=-0.5cm]A)--([yshift=0.5cm,xshift=-0.5cm]A);
+
+        \draw ([yshift=-0.3cm,xshift=0.3cm]A)-- ([yshift=-0.3cm,xshift=-0.3cm]B)--
+        ([yshift=0.3cm,xshift=-0.3cm]B) --([yshift=0.3cm,xshift=0.3cm]B)--([yshift=-0.3cm,xshift=0.3cm]C)--([yshift=-0.3cm,xshift=-0.3cm]C)--([yshift=0.3cm,xshift=-0.3cm]C)-- ([yshift=0.3cm,xshift=0.3cm]D)--([yshift=-0.3cm,xshift=0.3cm]D)--([yshift=-0.3cm,xshift=-0.3cm]D)--([yshift=0.3cm,xshift=-0.3cm]A)--([yshift=0.3cm,xshift=0.3cm]A)--([yshift=-0.3cm,xshift=0.3cm]A);
     \end{tikzpicture}
-    
+
     \begin{center}
         \vspace{-20pt}
         \textbf{ĐẠI HỌC QUỐC GIA THÀNH PHỐ HỒ CHÍ MINH}\\
         \textbf{KHOA KHOA HỌC VÀ KỸ THUẬT MÁY TÍNH}\\
         \vspace{10pt}
-        \includegraphics[width=0.25\linewidth]{image/hcmut.png}\\
+        \includegraphics[width=0.3\linewidth]{image/hcmut.png}\\
         \vspace{8pt}
         \textbf{ĐỒ ÁN TỐT NGHIỆP KỸ THUẬT MÁY TÍNH}\\
         \vspace{8pt}
@@ -238,36 +237,43 @@
         \vspace{15pt}
         \hrule
         \vspace{20pt}
-        \textcolor{blue}{\Large{\textbf{Hoạch định chuyển động cho rô-bốt sử dụng tối ưu lồi}}}\\
+        % \textcolor{blue}{\Large{\textbf{Hoạch định chuyển động cho rô-bốt sử dụng tối ưu lồi}}}\\
+        \textcolor{blue}{\Large{\textbf{HOẠCH ĐỊNH CHUYỂN ĐỘNG CHO RÔ-BỐT SỬ DỤNG TỐI ƯU LỒI}}}\\
         \vspace{20pt}
         \hrule
     \end{center}
 
     \vspace{5pt}
     \begin{center}
-       \large{\textbf{Học kỳ 252}}\\
-       \vspace{10pt}
-        \textbf{Giảng viên hướng dẫn:} PGS. TS Lê Hồng Trang\\
-                                      ThS. Trương Quỳnh Chi    
+        {\Large{\textbf{Học kỳ 252}}} \\
+        \vspace{60pt}
+        \begin{tabular}{rl}
+            \textbf{HỘI ĐỒNG}     & Hội đồng 1A Kỹ thuật Máy tính   \\
+            \textbf{GVHD1}        & PGS. TS Lê Hồng Trang           \\
+            \textbf{GVHD2}        & ThS. Trương Quỳnh Chi           \\
+            \textbf{GV PHẢN BIỆN} & PGS. TS. Trần Văn Hoài          \\
+                                  &                                 \\
+            \textbf{SVTH1}        & Nguyễn Trần Đăng Khoa - 2211635 \\
+            \textbf{SVTH2}        & Hồ Đăng Khoa - 2211588          \\
+        \end{tabular}
     \end{center}
 
-    \vspace{1cm}
-    
-    \begin{adjustbox}{width=0.94\textwidth,center=\textwidth}
-        \small
-        \begin{tabular}{|>{\centering\arraybackslash}m{1cm}|>{\centering\arraybackslash}m{5.3cm}|>{\centering\arraybackslash}m{1.7cm}|>{\centering\arraybackslash}m{4cm}|}
-            \hline
-            \textbf{STT} & \textbf{Họ và tên} & \textbf{MSSV} & \textbf{Ghi chú}\\
-            \hline
-                1 & Nguyễn Trần Đăng Khoa & 2211635 & Phân hoạch lồi; Hiện thực, thực nghiệm\\
-                2 & Hồ Đăng Khoa & 2211588 & Cơ sở lý thuyết; Mô hình hóa bài toán\\
-            \hline
-        \end{tabular}
-    \end{adjustbox}
-    
+    % \begin{adjustbox}{width=0.94\textwidth,center=\textwidth}
+    %     \begin{tabular}{|>{\centering\arraybackslash}m{1cm}|>{\centering\arraybackslash}m{5.3cm}|>{\centering\arraybackslash}m{1.7cm}|>{\centering\arraybackslash}m{4cm}|}
+    %         \hline
+    %         \multicolumn{4}{|c|}{\textbf{Sinh viên thực hiện}} \\
+    %         \hline
+    %         \textbf{STT} & \textbf{Họ và tên} & \textbf{MSSV} & \textbf{Ghi chú}\\
+    %         \hline
+    %             1 & Nguyễn Trần Đăng Khoa & 2211635 & Phân hoạch lồi; Hiện thực, thực nghiệm\\
+    %             2 & Hồ Đăng Khoa & 2211588 & Cơ sở lý thuyết; Mô hình hóa bài toán\\
+    %         \hline
+    %     \end{tabular}
+    % \end{adjustbox}
+
     \begin{center}
+        % ~\\
         ~\\
-        ~\\        
         ~\\
         \textit{Thành phố Hồ Chí Minh, Tháng 5 năm 2026}
     \end{center}
