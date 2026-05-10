@@ -15,7 +15,7 @@ tuyến tính trên các điểm điều khiển nền tảng then chốt để 
 toán về dạng MICP khả giải. Hình~\ref{fig:GCS-Bézier_pipeline} tóm tắt luồng xử
 lý tổng thể.
 
-\begin{figure}[htbp]
+\begin{figure}[!htp]
     \centering
     \includegraphics[width=0.8\textwidth]{experiments/image/beziergcs_pipeline.jpg}
     \caption[Motion planning bằng GCS-Bézier trên đồ thị các tập lồi]{%
@@ -54,8 +54,8 @@ $d$ trên tham số đường $s \in [0,1]$:
     \qquad s \in [0,1],
     \label{eq:bezier_curve}
 \end{equation}
-trong đó $\mathbf{r}_{v,k} \in \mathbb{R}^{n_c}$ là các \emph{điểm điều khiển
-    không gian} và $B_{k,d}(s) = \binom{d}{k} s^k (1-s)^{d-k}$ là đa thức Bernstein
+
+trong đó $\mathbf{r}_{v,k} \in \mathbb{R}^{n_c}$ là các \emph{điểm điều khiển không gian} và $B_{k,d}(s) = \binom{d}{k} s^k (1-s)^{d-k}$ là đa thức Bernstein
 bậc $d$. Hai tính chất cơ bản của cơ sở Bernstein phục vụ trực tiếp bài toán này:
 (i)~\textbf{phân hoạch đơn vị}: $\sum_{k=0}^{d} B_{k,d}(s) = 1$, và
 (ii)~\textbf{không âm}: $B_{k,d}(s) \ge 0$, với mọi $s \in [0,1]$.
