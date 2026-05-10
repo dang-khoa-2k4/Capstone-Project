@@ -181,7 +181,7 @@ Gắn liền mật thiết với tính lồi là khái niệm \textbf{bao lồi}
 \label{fig:convex_hull}
 \end{figure}
 
-Trong bối cảnh quy hoạch chuyển động và luận văn này, chúng tôi tập trung chủ yếu vào hai loại tập lồi cụ thể:
+Trong bối cảnh quy hoạch chuyển động và đồ án này, chúng tôi tập trung chủ yếu vào hai loại tập lồi cụ thể:
 \begin{itemize}
 \item \textbf{Đa diện (Polyhedra):} Được định nghĩa là giao của một số hữu hạn các nửa không gian (halfspaces), biểu diễn dưới dạng $\mathcal{P} = \{x \in \mathbb{R}^n \mid Ax \leq b\}$. Khi một đa diện bị chặn (bounded), nó được gọi là một \textit{khối đa diện} (polytope).
 \item \textbf{Ellipsoid:} Được định nghĩa là ảnh của một hình cầu đơn vị qua một phép biến đổi afin (affine transformation). Chúng thường được biểu diễn dưới dạng $\mathcal{E} = \{x \in \mathbb{R}^n \mid (x-c)^\top Q^{-1} (x-c) \leq 1\}$, trong đó $Q$ là một ma trận xác định dương ($Q \succ 0$).
@@ -247,7 +247,7 @@ Một \textbf{Chương trình Lồi (Convex Program - CP)} được thiết lậ
 \end{subequations}
 trong đó hàm mục tiêu $f$ và tập chấp nhận được (feasible set) $\mathcal{C}$ đều là lồi. Một điểm $x^{\text{opt}}$ là một \textit{nghiệm tối ưu} nếu nó thuộc tập chấp nhận được và $f(x^{\text{opt}}) \leq f(x)$ với mọi $x \in \mathcal{C}$.
 
-Mặc dù tính lồi về mặt lý thuyết không đảm bảo tính hiệu quả một cách tuyệt đối (ví dụ, kiểm tra tính không âm của đa thức là NP-khó mặc dù tập hợp này là một nón lồi), nhưng trong phạm vi luận văn này, chúng tôi sử dụng thuật ngữ ``bài toán tối ưu lồi'' gần như đồng nghĩa với ``bài toán tối ưu giải được một cách hiệu quả''. Phần lớn các bài toán CP thực tế có thể được giải một cách đáng tin cậy bằng các phương pháp điểm trong.
+Mặc dù tính lồi về mặt lý thuyết không đảm bảo tính hiệu quả một cách tuyệt đối (ví dụ, kiểm tra tính không âm của đa thức là NP-khó mặc dù tập hợp này là một nón lồi), nhưng trong phạm vi đồ án này, chúng tôi sử dụng thuật ngữ ``bài toán tối ưu lồi'' gần như đồng nghĩa với ``bài toán tối ưu giải được một cách hiệu quả''. Phần lớn các bài toán CP thực tế có thể được giải một cách đáng tin cậy bằng các phương pháp điểm trong.
 
 \subsubsection{Quy hoạch Nón (Conic Optimization)}
 Một \textbf{Chương trình Nón (Conic Program - KP)} là một lớp con của CP với hàm mục tiêu tuyến tính và các ràng buộc được định nghĩa bởi một nón lồi $\mathcal{K}$:

@@ -3,7 +3,7 @@
 
 Thay vì tiếp cận bài toán tránh vật cản theo cách truyền thống là mô tả các ràng buộc không lồi dựa trên bề mặt vật cản, ta chuyển đổi không gian cấu hình tự do $\mathcal{C}_{\mathrm{free}}$ thành hợp của một tập hữu hạn các vùng lồi bị chặn. Trong mô hình này, các vùng lồi có thể chồng lấn lên nhau, và bài toán hoạch định chuyển động được phát biểu lại dưới dạng một chương trình quy hoạch lồi nguyên hỗn hợp (Mixed-Integer Convex Program -- MICP). Các biến nguyên được sử dụng để gán từng đoạn quỹ đạo vào các vùng lồi an toàn tương ứng; số lượng biến nguyên chỉ phụ thuộc vào số lượng vùng trong phân hoạch -- không phụ thuộc vào số mặt của vật cản. Nhờ đó phương pháp giải quyết hiệu quả các môi trường phức tạp với hàng trăm vật cản. Hơn nữa, việc ràng buộc quỹ đạo nằm trọn trong các vùng lồi đảm bảo tính an toàn liên tục theo thời gian.
 
-Để giải quyết thách thức tính toán của bước phân hoạch, một số phương pháp đã được phát triển. Dưới đây là ba phương pháp được sử dụng trong luận văn này:
+Để giải quyết thách thức tính toán của bước phân hoạch, một số phương pháp đã được phát triển. Dưới đây là ba phương pháp được sử dụng trong đồ án này:
 
 \subsection{Phân hoạch Lồi Xấp xỉ (ACD)}
 
@@ -310,4 +310,4 @@ Phù hợp với & Polygon 2D & $\mathbb{R}^n$ tổng quát & $\mathbb{R}^n$ t�
 \end{tabular}
 \end{table}
 
-Trong luận văn này, bước phân hoạch không gian an toàn được thực hiện bằng một trong các phương pháp trên để tạo ra họ vùng lồi $\{Q_v\}$ làm đầu vào chung cho cả hai hướng tiếp cận GCS-Bézier (Phần~\ref{sec:gcs_approach}) và OCP-DMS (Phần~\ref{sec:ocp_dms_approach}). Chi tiết về tham số và kết quả phân hoạch trên các môi trường thực nghiệm được trình bày ở Chương~\ref{ch:experiments}.
+Trong đồ án này, bước phân hoạch không gian an toàn được thực hiện bằng một trong các phương pháp trên để tạo ra họ vùng lồi $\{Q_v\}$ làm đầu vào chung cho cả hai hướng tiếp cận GCS-Bézier (Phần~\ref{sec:gcs_approach}) và GCS-DMS (Phần~\ref{sec:ocp_dms_approach}). Chi tiết về tham số và kết quả phân hoạch trên các môi trường thực nghiệm được trình bày ở Chương~\ref{ch:experiments}.

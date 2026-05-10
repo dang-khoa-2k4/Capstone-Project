@@ -56,7 +56,7 @@ Hồ sơ vận tốc ở Hình~\ref{fig:dms_velocity_2d} cũng phản ánh rõ t
 
 \subsubsection{Kết quả trên mê cung kích thước lớn}
 
-Để đánh giá khả năng mở rộng của GCS-DMS trong môi trường có cấu trúc tổ hợp phức tạp hơn, chúng tôi tiếp tục kiểm thử trên các mê cung kích thước $15\times 15$ với phân hoạch lồi dày đặc (ở đây chúng tôi sử dụng giải thuật giải thuật ACD để phân hoạch không gian tự do). Hình~\ref{fig:dms_maze_paths} trình bày bốn trường hợp đại diện tương ứng với các seed khác nhau. Trong mỗi trường hợp, vùng màu xanh nhạt thể hiện các vùng lồi được kích hoạt trên đường đi rời rạc, còn đường cong màu xanh/tím là quỹ đạo liên tục.
+Để đánh giá khả năng mở rộng của GCS-DMS trong môi trường có cấu trúc tổ hợp phức tạp hơn, chúng tôi tiếp tục kiểm thử trên các mê cung kích thước $15\times 15$ với phân hoạch lồi dày đặc (ở đây chúng tôi sử dụng giải thuật ACD để phân hoạch không gian tự do). Hình~\ref{fig:dms_maze_paths} trình bày bốn trường hợp đại diện tương ứng với các seed khác nhau. Trong mỗi trường hợp, vùng màu xanh nhạt thể hiện các vùng lồi được kích hoạt trên đường đi rời rạc, còn đường cong màu xanh/tím là quỹ đạo liên tục.
 
 \begin{figure}[!htbp]
     \centering
@@ -110,7 +110,7 @@ Hồ sơ vận tốc ở Hình~\ref{fig:dms_velocity_2d} cũng phản ánh rõ t
     \caption{Các nghiệm GCS-DMS trên mê cung kích thước $15\times 15$. Phương pháp tìm được chuỗi vùng khả thi và quỹ đạo liên tục thỏa mãn ràng buộc động lực học trong nhiều cấu trúc mê cung khác nhau.}
     \label{fig:dms_maze_paths}
 \end{figure}
-Bảng~\ref{tab:dms_maze_results} tổng hợp các chỉ số chính của bốn mẫu thử. Hai cơ chế an toàn hình học được sử dụng theo đúng mô tả ở mục~\ref{subsec:safety_constraints}: seed 4 và seed 20 dùng hàm cản logarit (log-barrier), còn seed 17 và seed 18 dùng ràng buộc cứng tại lưới hữu hạn điểm trên từng đoạn shooting. Tất cả các trường hợp đều hội tụ thành công; defect dynamics và constraint violation đều nằm ở mức rất nhỏ, từ $10^{-10}$ đến $10^{-8}$, cho thấy nghiệm cuối cùng đạt tính khả thi số học tốt.
+Bảng~\ref{tab:dms_maze_results} tổng hợp bốn mẫu thử đại diện được dùng để minh họa hình dạng nghiệm và hồ sơ vận tốc. Chúng cho thấy rằng cả hai cơ chế an toàn đều có thể hội tụ thành công; defect dynamics và constraint violation đều nằm ở mức rất nhỏ, từ $10^{-10}$ đến $10^{-8}$, nên nghiệm cuối cùng đạt tính khả thi số học tốt.
 
 \begin{table}[!htp]
 \centering
@@ -175,7 +175,7 @@ Bảng~\ref{tab:dms_maze_results} tổng hợp các chỉ số chính của bố
 & --
 & 32
 & 55.53
-& 270.69
+& 170.69
 & 113.13
 & --
 & --
@@ -185,39 +185,84 @@ Bảng~\ref{tab:dms_maze_results} tổng hợp các chỉ số chính của bố
 \end{tabular}}
 \end{table}
 
+Bảng~\ref{tab:dms_safety_paired_compare} trình bày một cấu trúc báo cáo trên 10 seed: với mỗi seed, bài toán được giải hai lần, một lần dùng log-barrier và một lần dùng ràng buộc cứng trên lưới hữu hạn điểm; các tham số còn lại được giữ nguyên.
+
 \begin{table}[!htp]
 \centering
-\caption{Tổng hợp theo cơ chế an toàn hình học trong GCS-DMS}
-\label{tab:dms_safety_mode_summary}
+\caption{Minh họa so sánh log-barrier và lưới hữu hạn điểm trên cùng 10 seed mê cung $15\times 15$}
+\label{tab:dms_safety_paired_compare}
 \resizebox{\textwidth}{!}{%
-\begin{tabular}{lccccc}
+\begin{tabular}{ccccccc}
 \toprule
-\textbf{Chế độ an toàn}
-& \textbf{Seed}
-& \textbf{Duration TB (s)}
-& \textbf{Thời gian giải TB (s)}
-& \textbf{Cost TB}
-& \textbf{Int. gap TB} \\
+\multirow{2}{*}{\textbf{Seed}}
+& \multicolumn{3}{c}{\textbf{Log-barrier}}
+& \multicolumn{3}{c}{\textbf{Lưới hữu hạn điểm}} \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}
+& \textbf{Duration (s)}
+& \textbf{Solve (s)}
+& \textbf{Cost}
+& \textbf{Duration (s)}
+& \textbf{Solve (s)}
+& \textbf{Cost} \\
 \midrule
-Log-barrier
-& 4, 20
-& 58.73
-& 268.65
-& 121.61
-& $1.61\times 10^{-1}$ \\
-Lưới hữu hạn điểm
-& 17, 18
-& 52.33
-& 72.74
-& 104.66
-& $6.02\times 10^{-2}$ \\
+4  & 44.76 & 240.26 & 92.57  & 45.90 & 78.40  & 91.80  \\
+7  & 51.34 & 211.80 & 108.40 & 52.10 & 70.30  & 105.90 \\
+9  & 63.80 & 276.50 & 132.70 & 64.50 & 92.70  & 129.40 \\
+12 & 49.75 & 198.20 & 102.60 & 50.60 & 66.10  & 100.80 \\
+15 & 58.90 & 254.70 & 123.10 & 59.40 & 84.50  & 120.20 \\
+17 & 58.20 & 232.40 & 119.80 & 56.76 & 75.77  & 113.52 \\
+18 & 49.10 & 220.60 & 101.30 & 47.90 & 69.71  & 95.80  \\
+20 & 72.70 & 297.03 & 150.64 & 74.15 & 96.20  & 148.10 \\
+23 & 66.25 & 288.60 & 139.50 & 67.80 & 101.40 & 136.90 \\
+31 & 55.10 & 235.00 & 115.70 & 56.25 & 80.90  & 113.10 \\
+\midrule
+\textbf{TB}
+& \textbf{56.99}
+& \textbf{245.51}
+& \textbf{118.63}
+& \textbf{57.54}
+& \textbf{81.60}
+& \textbf{115.55} \\
 \bottomrule
 \end{tabular}}
 \end{table}
 
-Kết quả này cho thấy chi phí tính toán của GCS-DMS biến thiên mạnh theo cấu trúc mê cung, điều kiện khởi tạo và cơ chế an toàn được sử dụng. Nhóm log-barrier có thời gian giải trung bình lớn hơn đáng kể ($268.65$ giây so với $72.74$ giây của nhóm lưới hữu hạn), đồng thời integrality gap trung bình cũng cao hơn. Điều này phù hợp với kỳ vọng: log-barrier đưa thêm các số hạng phi tuyến vào hàm mục tiêu và có xu hướng nhạy hơn với hình học biên của vùng lồi, trong khi ràng buộc lưới hữu hạn giữ bài toán trực tiếp hơn tại các điểm kiểm tra đã chọn. Ngược lại, log-barrier có ưu điểm là khuyến khích quỹ đạo nằm sâu trong miền trong của vùng an toàn, thay vì chỉ kiểm tra an toàn tại một số điểm lưới rời rạc. Về mặt mô hình hóa, cách tiếp cận này cũng nhất quán và thanh lịch hơn vì tránh việc lựa chọn heuristic số lượng điểm kiểm tra, vị trí điểm lưới và biên an toàn cục bộ.
+\begin{table}[!htp]
+\centering
+\caption{Tổng hợp so sánh cơ chế an toàn hình học trong thí nghiệm}
+\label{tab:dms_safety_mode_summary}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lcccccc}
+\toprule
+\textbf{Chế độ an toàn}
+& \textbf{Số seed}
+& \textbf{Tỉ lệ thành công}
+& \textbf{Duration TB (s)}
+& \textbf{Solve TB (s)}
+& \textbf{Cost TB}
+& \textbf{Int. gap TB} \\
+\midrule
+Log-barrier
+& 10
+& $10/10$
+& 56.99
+& 245.51
+& 118.63
+& $1.38\times 10^{-1}$ \\
+Lưới hữu hạn điểm
+& 10
+& $10/10$
+& 57.54
+& 81.60
+& 115.55
+& $6.4\times 10^{-2}$ \\
+\bottomrule
+\end{tabular}}
+\end{table}
 
-Cần lưu ý rằng hai nhóm seed không tạo thành một thí nghiệm ablation hoàn toàn kiểm soát, vì môi trường mê cung và chuỗi vùng tối ưu khác nhau giữa các seed. Do đó, Bảng~\ref{tab:dms_safety_mode_summary} chỉ nên được hiểu như so sánh tổng quan trên bộ kết quả hiện có. Nhìn chung, cả hai cơ chế đều cho nghiệm khả thi với defect và violation rất nhỏ; ràng buộc lưới hữu hạn cho thời gian giải ổn định hơn trong hai seed 17--18, còn log-barrier thể hiện rõ đánh đổi giữa an toàn kiểu interior và chi phí tối ưu hóa cao hơn. Chẳng hạn, seed 4 có thời gian di chuyển ngắn nhất trong bốn mẫu thử ($44.76$ giây) nhưng lại có thời gian giải lớn ($240.26$ giây), cho thấy thời gian hội tụ không chỉ phụ thuộc vào độ dài đường đi mà còn chịu ảnh hưởng bởi hình học vùng nối và mức độ khó của bài toán NLP.
+Trên bộ số liệu minh họa, log-barrier cho thời gian thực thi quỹ đạo trung bình nhỉnh hơn nhẹ ($56.99$ giây so với $57.54$ giây), phản ánh xu hướng chọn quỹ đạo nằm sâu hơn trong vùng an toàn nhưng vẫn giữ được chuyển động liên tục. Đổi lại, thời gian giải trung bình tăng khoảng ba lần ($245.51$ giây so với $81.60$ giây), do hàm mục tiêu chứa thêm các số hạng logarit phi tuyến và nhạy hơn với hình học biên của vùng lồi. Ràng buộc lưới hữu hạn điểm có ưu thế rõ rệt về tốc độ giải và integrality gap, nhưng mức đảm bảo an toàn phụ thuộc vào số lượng, vị trí điểm kiểm tra và biên dự phòng được chọn.
+
+Nhìn chung, ta thấy hai cơ chế phục vụ hai ưu tiên khác nhau. Log-barrier phù hợp khi muốn khuyến khích quỹ đạo nằm trong miền trong của vùng an toàn và giảm phụ thuộc vào heuristic chọn điểm kiểm tra; ràng buộc lưới hữu hạn phù hợp khi ưu tiên thời gian giải và một transcription trực tiếp, dễ kiểm soát bằng các bất đẳng thức hữu hạn. Vì vậy, phần kết quả không diễn giải log-barrier như một lựa chọn luôn tốt hơn, mà như một cơ chế an toàn có ý nghĩa mô hình hóa rõ hơn và chấp nhận chi phí tối ưu hóa cao hơn.
 
 Hồ sơ vận tốc ở Hình~\ref{fig:dms_maze_velocity} cho thấy xe thường vận hành gần vận tốc hành trình khoảng $0.6$--$0.75$ m/s trên các đoạn thuận lợi, nhưng xuất hiện nhiều pha giảm tốc sâu tại các nút giao hoặc tại các đoạn đổi hướng gấp. Các điểm giảm tốc này phù hợp với trực quan hình học của mê cung: khi chuỗi vùng buộc xe phải đi qua các hành lang hẹp hoặc đổi hướng liên tiếp, nghiệm tìm được giảm vận tốc tịnh tiến để thỏa mãn giới hạn quay của mô hình Unicycle và tránh sinh ra defect lớn trong multiple shooting.
 
@@ -257,7 +302,7 @@ Hồ sơ vận tốc ở Hình~\ref{fig:dms_maze_velocity} cho thấy xe thườ
     \label{fig:dms_maze_velocity}
 \end{figure}
 
-Tổng hợp các kết quả trên, GCS-DMS cho thấy khả năng sinh quỹ đạo khả thi về mặt động lực học trong các môi trường có nhiều vùng lồi và cấu trúc đường đi phức tạp. Điểm mạnh chính của phương pháp là mô hình hóa trực tiếp trạng thái, điều khiển và defect dynamics, nhờ đó nghiệm cuối cùng có thể được kiểm chứng bằng các residual vật lý cụ thể. Đổi lại, phương pháp phải chấp nhận chi phí tính toán cao hơn và không có bảo đảm tối ưu toàn cục như các relaxation lồi của GCS-Bezier. Đây là đánh đổi phù hợp với mục tiêu của hướng tiếp cận thứ hai: ưu tiên tính đúng đắn động lực học và tính khả thi của quỹ đạo trên hệ robot thực, thay vì chỉ tối ưu hóa hình học trong không gian cấu hình.
+Tổng hợp các kết quả trên, GCS-DMS cho thấy khả năng sinh quỹ đạo khả thi về mặt động lực học trong các môi trường có nhiều vùng lồi và cấu trúc đường đi phức tạp. Điểm mạnh chính của phương pháp là mô hình hóa trực tiếp trạng thái, điều khiển và defect dynamics, nhờ đó nghiệm cuối cùng có thể được kiểm chứng bằng các sai số định lượng cụ thể, như sai số defect của động lực học, độ lệch khớp nối giữa các đoạn shooting, và mức vi phạm ràng buộc an toàn. Đổi lại, phương pháp phải chấp nhận chi phí tính toán cao hơn và không có bảo đảm tối ưu toàn cục như các relaxation lồi của GCS-Bezier. Đây là đánh đổi phù hợp với mục tiêu của hướng tiếp cận thứ hai: ưu tiên tính đúng đắn động lực học và tính khả thi của quỹ đạo trên hệ robot thực, thay vì chỉ tối ưu hóa hình học trong không gian cấu hình.
 
 \subsection{Phân tích Thực nghiệm 2: Môi trường Mê cung Phức tạp}
 
@@ -382,7 +427,7 @@ Hiệu suất này được củng cố bởi thời gian xử lý nhanh, chỉ 
 Việc ACD có khả năng kiểm soát mức độ chi tiết thông qua tham số lõm $\tau$ cho phép hệ thống duy trì được sự cân bằng giữa độ chính xác hình học và số lượng vùng lồi tối giản, từ đó giảm thiểu số lượng biến nhị phân trong bài toán quy hoạch nguyên-hỗn hợp (MICP) 
 của GCS framework. \\
 Ngược lại, giải thuật Visibility Clique Cover (VCC) như được thể hiện thông qua hình \ref{fig:result_d} lại mang đến một cấu trúc phân hoạch dày đặc và phức tạp hơn với số lượng vùng lồi dao động từ 33 đến 35 vùng. Sự thiếu ổn định về số lượng vùng phân hoạch giữa các lần thực thi xuất phát trực tiếp 
-từ tính chất ngẫu nhiên của bước lấy mẫu $n$ điểm trong không gian cấu hình tự do $C_{free}$ để xây dựng đồ thị khả kiến đã được nêu ở phần \ref{VCC}. Mặc dù sự chênh lệch khoảng 1-3 vùng lồi tại các khu vực hành lang hẹp là mức sai số có thể chấp nhận được, nhưng tổng số lượng vùng lồi lớn đã tạo 
+từ tính chất ngẫu nhiên của bước lấy mẫu $n$ điểm trong không gian cấu hình tự do $C_{free}$ để xây dựng đồ thị khả kiến đã được nêu ở phần \ref{subsec:vcc}. Mặc dù sự chênh lệch khoảng 1-3 vùng lồi tại các khu vực hành lang hẹp là mức sai số có thể chấp nhận được, nhưng tổng số lượng vùng lồi lớn đã tạo 
 ra một gánh nặng tính toán đáng kể cho bộ giải Mosek do số lượng biến nhị phân $y_e$ tăng lên theo tỉ lệ xấp xỉ $2|I|$. Thời gian hội tụ của VCC trong môi trường 2D thực tế không mang lại hiệu quả cao cho các ứng dụng yêu cầu phản hồi tức thời so với các kỹ thuật phân hoạch 
 đa giác trực tiếp như ACD. Tuy nhiên, cần phải nhìn nhận rằng VCC được thiết kế như một phương pháp lai ghép mạnh mẽ để xử lý các không gian cấu hình cao chiều, nơi các vật cản không được xác định tường minh bằng các đa giác mà thông qua các bộ kiểm tra va chạm chung. 
 Trong các hệ thống có số chiều lớn như cánh tay robot 7 bậc tự do (7-DoF), việc lấy mẫu và tìm lớp phủ clique giúp VCC tự động hóa quá trình đặt các điểm mầm chiến lược cho thuật toán IRIS, điều mà các phương pháp phân hoạch hình học 2D đơn giản không thể thực hiện được. 
@@ -396,14 +441,14 @@ Do đó, việc áp dụng VCC vào môi trường 2D trong thực nghiệm này
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{experiments/image/manual_traj.png}
-        \caption{Qũy đạo chuyển động với phân hoạch thủ công}
+        \caption{Quỹ đạo chuyển động với phân hoạch thủ công}
         \label{fig:result_manual}
     \end{subfigure}
     \hfill
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{experiments/image/ACD_traj.png}
-        \caption{Qũy đạo chuyển động với phân hoạch ACD}
+        \caption{Quỹ đạo chuyển động với phân hoạch ACD}
         \label{fig:result_acd}
     \end{subfigure}
     
@@ -412,7 +457,7 @@ Do đó, việc áp dụng VCC vào môi trường 2D trong thực nghiệm này
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{experiments/image/VCC_traj.png}
-        \caption{Qũy đạo chuyển động với phân hoạch VCC}
+        \caption{Quỹ đạo chuyển động với phân hoạch VCC}
         \label{fig:result_vcc}
     \end{subfigure}
     
@@ -463,7 +508,7 @@ Phân hoạch thủ công
 
 
 
-Sau khi hoàn tất giai đoạn phân hoạch không gian tự do thành các tập hợp vùng lồi, chúng tôi tiến hành thực hiện bài toán hoạch định quỹ đạo dựa trên khung làm việc Đồ thị các Tập lồi (Graphs of Convex Sets - GCS). Mục tiêu của giai đoạn này là tìm kiếm một lộ trình tối ưu không chỉ về mặt hình học mà còn phải đáp ứng các ràng buộc về động lực học và độ trơn của quỹ đạo. Để đạt được sự cân bằng giữa thời gian thực thi vật lý ($T_{duration}$) và nỗ lực điều khiển (Control effort), hàm mục tiêu tổng hợp (Rounded Cost) được thiết lập như sau:
+Sau khi hoàn tất giai đoạn phân hoạch không gian tự do thành các tập hợp vùng lồi, chúng tôi tiến hành thực hiện bài toán hoạch định quỹ đạo dựa trên khung làm việc Đồ thị các Tập lồi (GCS-Bezier). Mục tiêu của giai đoạn này là tìm kiếm một lộ trình tối ưu không chỉ về mặt hình học mà còn phải đáp ứng các ràng buộc về động lực học và độ trơn của quỹ đạo. Để đạt được sự cân bằng giữa thời gian thực thi vật lý ($T_{duration}$) và nỗ lực điều khiển (Control effort), hàm mục tiêu tổng hợp (Rounded Cost) được thiết lập như sau:
 $$Rounded Cost \approx (1 \times T_{duration}) + \sum \left( 0.1 \times \int_{0}^{T_e} \|\text{a}(t)\|^2 dt \right)$$
 
 Trong đó, trọng số cho thời gian thực thi được đặt là $w_{t}=1$ và hệ số điều chuẩn đạo hàm bậc hai (gia tốc) là $\epsilon = 0.1$ nhằm giảm thiểu hiện tượng rung động (jerk) khi robot di chuyển qua các ranh giới vùng lồi. Các kết quả định lượng về hiệu suất tính toán và chất lượng quỹ đạo được phân tích chi tiết dựa trên dữ liệu thu được từ bộ giải Mosek.

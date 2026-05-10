@@ -423,7 +423,7 @@ Vì vậy, nếu xét ở mức liên tục theo thời gian, trước khi thay 
 
 Điểm quan trọng là bài toán này \textbf{không thể quy trực tiếp về Mixed-Integer Second Order Cone Problem} (MISOCP) như trong GCS-Bézier của Marcucci và cộng sự~\cite{MarcucciEtAl2023GCS, Marcucci2024Thesis}. Một MISOCP yêu cầu các ràng buộc liên tục có dạng tuyến tính hoặc nón bậc hai lồi. Trong GCS-Bézier, điều này đạt được nhờ tham số hóa quỹ đạo bằng các điểm điều khiển Bézier: ràng buộc nằm trong vùng lồi có thể áp lên các điểm điều khiển thông qua tính chất convex hull, còn các ràng buộc độ dài, vận tốc hoặc gia tốc thường được viết dưới dạng chuẩn Euclid và đưa về SOCP.
 
-Ngược lại, trong mô hình OCP-DMS, ràng buộc defect
+Ngược lại, trong mô hình GCS-DMS, ràng buộc defect
 \[
 s_v^+ - F_v(s_v^-,w_v,\Delta_v)=0
 \]

@@ -1,24 +1,24 @@
-\subsection{BezierGCS: Hoạch định quỹ đạo với đường cong Bézier}
-\label{subsec:beziergcs}
+\subsection{GCS-Bézier: Hoạch định quỹ đạo với đường cong Bézier}
+\label{subsec:GCS-Bézier}
 
 Công thức MICP trong phần trước xây dựng cấu trúc tổng quát cho bài toán đường
 đi ngắn nhất trên GCS và kỹ thuật nới lỏng phối cảnh tương ứng. Tuy nhiên, dạng
 cụ thể của biến quyết định $x_v$ tại mỗi đỉnh---và theo đó, cách biểu diễn đoạn
 quỹ đạo trong từng vùng lồi---vẫn chưa được đặc tả. Phần này hoàn thiện cầu nối
 đó bằng cách tham số hóa mỗi đoạn bằng một đường cong Bézier đa thức, từ đó
-định nghĩa khung \emph{BezierGCS} cho bài toán hoạch định chuyển động liên tục.
+định nghĩa khung \emph{GCS-Bézier} cho bài toán hoạch định chuyển động liên tục.
 
 Lựa chọn đường cong Bézier vì tính chất bao lồi (convex hull property) của họ
 đường cong này cho phép chuyển ràng buộc an toàn hình học liên tục
 $\mathbf{x}(t) \in \mathcal{C}_{\mathrm{free}}$ thành một số hữu hạn ràng buộc
 tuyến tính trên các điểm điều khiển---nền tảng then chốt để đặt toàn bộ bài
-toán về dạng MICP khả giải. Hình~\ref{fig:beziergcs_pipeline} tóm tắt luồng xử
+toán về dạng MICP khả giải. Hình~\ref{fig:GCS-Bézier_pipeline} tóm tắt luồng xử
 lý tổng thể.
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.8\textwidth]{experiments/image/beziergcs_pipeline.jpg}
-    \caption[Motion planning bằng BezierGCS trên đồ thị các tập lồi]{%
+    \caption[Motion planning bằng GCS-Bézier trên đồ thị các tập lồi]{%
     Bài toán lập kế hoạch chuyển động quanh vật cản được quy về bài toán
     đường đi ngắn nhất trong Graphs of Convex Sets.
     \textbf{(A)} Môi trường gốc gồm các vật cản, cấu hình đầu
@@ -39,7 +39,7 @@ lý tổng thể.
     ta thu được quỹ đạo Bézier ghép nối trơn, nằm trong hợp các vùng an toàn lồi
     và nối $\mathbf{x}_{\mathrm{start}}$ tới $\mathbf{x}_{\mathrm{goal}}$.
     }
-    \label{fig:beziergcs_pipeline}
+    \label{fig:GCS-Bézier_pipeline}
 \end{figure}
 
 \subsubsection{Tham số hóa đường cong Bézier trong vùng lồi}
@@ -388,11 +388,11 @@ sau co giãn cho mỗi cạnh hoạt động.
     \label{fig:continuity_conditions}
 \end{figure}
 
-\subsubsection{Bài toán BezierGCS hoàn chỉnh}
-\label{subsubsec:beziergcs_complete}
+\subsubsection{Bài toán GCS-Bézier hoàn chỉnh}
+\label{subsubsec:GCS-Bézier_complete}
 
 Kết hợp cấu trúc luồng mạng từ~\eqref{eq:micp_formulation}, tham số hóa Bézier,
-và các ràng buộc liên tục trên đây, bài toán BezierGCS đầy đủ được phát biểu
+và các ràng buộc liên tục trên đây, bài toán GCS-Bézier đầy đủ được phát biểu
 dưới dạng MICP. Tại mỗi đỉnh $v \in V$, biến quyết định là:
 \[
     x_v = \bigl(\mathbf{r}_{v,0}, \ldots, \mathbf{r}_{v,d},\;
@@ -401,7 +401,7 @@ dưới dạng MICP. Tại mỗi đỉnh $v \in V$, biến quyết định là:
 \]
 
 \begin{subequations}
-    \label{eq:beziergcs_full}
+    \label{eq:GCS-Bézier_full}
     \begin{align}
         \underset{y,\; x}{\mathrm{minimize}} \quad
          & \sum_{e=(u,v) \in E} \tilde{\ell}_e\!\bigl(
@@ -449,15 +449,15 @@ giãn $z_{e,\cdot} = y_e\, x_\cdot$ theo kỹ thuật phối cảnh, ràng buộ
 thành tuyến tính trong biến nâng bậc. Điều kiện biên~\eqref{eq:bgcs_bc} áp đặt
 vị trí đầu và cuối tại đỉnh nguồn $s$ và đỉnh đích $t$.
 
-Sau khi áp dụng nới lỏng phối cảnh toàn bộ, bài toán~\eqref{eq:beziergcs_full}
+Sau khi áp dụng nới lỏng phối cảnh toàn bộ, bài toán~\eqref{eq:GCS-Bézier_full}
 trở thành Quy hoạch Nón Bậc hai Nguyên Hỗn hợp (MI-SOCP), có thể giải bởi các
 bộ giải SOCP/MISOCP thương mại (Gurobi, Mosek) hoặc mã nguồn mở (CLARABEL,
 ECOS) với bảo đảm tính tối ưu toàn cục trong giới hạn dung sai nguyên.
 
-\subsubsection{Ví dụ minh họa: BezierGCS bậc hai trong không gian 2D}
-\label{subsubsec:beziergcs_example2d}
+\subsubsection{Ví dụ minh họa: GCS-Bézier bậc hai trong không gian 2D}
+\label{subsubsec:GCS-Bézier_example2d}
 
-Để minh họa khung BezierGCS, xét bài toán tìm đường đi hình học cho robot điểm
+Để minh họa khung GCS-Bézier, xét bài toán tìm đường đi hình học cho robot điểm
 trong không gian cấu hình hai chiều $\mathbb{R}^2$. Không gian tự do
 $\mathcal{C}_{\mathrm{free}}$ được phân hoạch thành các vùng an toàn lồi
 $\{Q_v\}_{v\in V}$, trong đó mỗi vùng $Q_v$ không giao với vật cản. Từ các vùng
@@ -516,7 +516,7 @@ giác điều khiển:
     \|q_v^t-q_v^m\|_2
     \right).
 \end{equation}
-Khi đó bài toán BezierGCS bậc hai có thể viết gọn dưới dạng
+Khi đó bài toán GCS-Bézier bậc hai có thể viết gọn dưới dạng
 \begin{equation}
     \begin{aligned}
         \min_{\{y_e\},\,\{q_v^s,q_v^m,q_v^t\}}

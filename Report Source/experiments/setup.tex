@@ -49,7 +49,7 @@ Do GCS-Bezier và GCS-DMS giải hai bài toán tối ưu khác nhau, hệ chỉ
 \begin{itemize}
     \item Với GCS-Bezier: thời gian giải, giá trị cost, cost ratio giữa các biến thể mô hình khi có báo cáo, và trạng thái nhị phân của biến luồng sau relaxation/làm tròn.
     \item Với GCS-DMS: trạng thái hội tụ của relaxation/NLP polish, residual của ràng buộc defect cuối cùng $\|s_v^+ - F_v\|_\infty$, connection gap giữa các vùng kề, integrality gap của biến đường đi và mức vi phạm ràng buộc sau tối ưu.
-    \item Với ràng buộc an toàn GCS-DMS: chế độ containment được sử dụng, gồm log-barrier hoặc ràng buộc cứng trên lưới hữu hạn điểm như đã mô tả ở mục~\ref{subsec:safety_constraints}.
+    \item Với ràng buộc an toàn GCS-DMS: cơ chế đảm bảo quỹ đạo nằm trong vùng an toàn, gồm log-barrier hoặc ràng buộc cứng trên lưới hữu hạn điểm như đã mô tả ở mục~\ref{subsec:safety_constraints}.
 \end{itemize}
 
 \subsection{Các thực nghiệm}
@@ -82,9 +82,9 @@ Xét một xe Unicycle di chuyển trong mặt phẳng, có trạng thái $x = (
 Vận tốc thẳng bị giới hạn $v \in [v_{\min}, v_{\max}]$ với $v_{\min}>0$ (xe không lùi), và tốc độ góc lái $|\omega| \le \omega_{\max}$, mô hình hóa giới hạn vật lý của bánh trước.
 
 \textbf{Mô tả thực nghiệm.}
-Thực nghiệm được triển khai theo hai mức độ. Trước hết, một môi trường 2D nhỏ với các vật cản đa giác được dùng để quan sát trực tiếp quá trình hội tụ của Direct Multiple Shooting, bao gồm sự giảm dần của defect dynamics và connection gap qua các vòng lặp IPOPT. Sau đó, phương pháp được kiểm thử trên các mê cung kích thước $15\times 15$ với bốn seed đại diện $\{4,17,18,20\}$. Mỗi mê cung được phân hoạch thành các vùng lồi an toàn trên không gian vị trí $(p_x,p_y)$; chiều góc $\theta$ không tham gia phân hoạch mà xuất hiện trong biến trạng thái và ràng buộc động lực nội bộ của GCS-DMS.
+Thực nghiệm được triển khai theo hai mức độ. Trước hết, một môi trường 2D nhỏ với các vật cản đa giác được dùng để quan sát trực tiếp quá trình hội tụ của Direct Multiple Shooting, bao gồm sự giảm dần của defect dynamics và connection gap qua các vòng lặp IPOPT. Sau đó, phương pháp được kiểm thử trên các mê cung kích thước $15\times 15$ với tối thiểu 10 seed ngẫu nhiên. Mỗi mê cung được phân hoạch thành các vùng lồi an toàn trên không gian vị trí $(p_x,p_y)$; chiều góc $\theta$ không tham gia phân hoạch mà xuất hiện trong biến trạng thái và ràng buộc động lực nội bộ của GCS-DMS.
 
-Hai cơ chế an toàn hình học đã trình bày ở mục~\ref{subsec:safety_constraints} được sử dụng trong nhóm thực nghiệm này. Cụ thể, seed 4 và seed 20 sử dụng hàm cản logarit (log-barrier), trong khi seed 17 và seed 18 sử dụng ràng buộc cứng tại lưới hữu hạn điểm trên từng đoạn shooting. Cách bố trí này nhằm quan sát khác biệt định tính giữa hai cơ chế containment trong cùng framework GCS-DMS.
+Hai cơ chế an toàn hình học đã trình bày ở mục~\ref{subsec:safety_constraints} được đánh giá bằng một thí nghiệm so sánh. Cụ thể, với cùng một seed mê cung, chúng tôi giải hai cấu hình chỉ khác nhau ở cơ chế đảm bảo an toàn hình học: (i) hàm cản logarit (log-barrier), và (ii) ràng buộc cứng tại lưới hữu hạn điểm trên từng đoạn shooting. Cách bố trí này giúp so sánh hai cơ chế an toàn trên cùng hình học, cùng start/goal và cùng phân hoạch, tránh sai lệch do dùng các seed khác nhau.
 
 Trong pha giải, bài toán relaxation tích hợp được giải bằng CasADi/IPOPT. Các chỉ số báo cáo gồm thời gian giải, thời gian thực thi quỹ đạo, chi phí mục tiêu, số vùng được kích hoạt, defect dynamics, connection gap, integrality gap và mức vi phạm ràng buộc. Hồ sơ vận tốc $|v(t)|$ được dùng để kiểm tra định tính hành vi động lực: xe được kỳ vọng giảm tốc tại các nút giao, hành lang hẹp hoặc đoạn đổi hướng mạnh, và tăng tốc trở lại trên các đoạn hình học thuận lợi.
 
@@ -175,12 +175,12 @@ Số chiều cấu hình & 3 & 2 & 2 (GCS-Bézier); 3 (GCS-DMS) \\
 Bậc Bezier (GCS) / liên tục $C^k$ & --- & 6 / $C^2$ & 6 / $C^2$ \\
 % $M_v$ — số nút lưới mỗi vùng (GCS-DMS) & 10 & 5 & 15 \\
 % $K$ — số đường đi ứng viên (GCS-DMS) & 5 & 20 & 10 \\
-$\mu_v$ ban đầu / cuối (log-barrier) & $10^{-2}$ / $10^{-5}$ (seed 4,20) & $10^{-2}$ / $10^{-5}$ & $10^{-2}$ \\
-Chế độ an toàn GCS-DMS & LB: 4,20; lưới: 17,18 & --- & Log-barrier \\
+$\mu_v$ ban đầu / cuối (log-barrier) & $10^{-2}$ / $10^{-5}$ & $10^{-2}$ / $10^{-5}$ & $10^{-2}$ \\
+Chế độ an toàn GCS-DMS & Log-barrier và lưới hữu hạn trên cùng seed & --- & Log-barrier \\
 Trọng số $w_t$ / $w_E$ & 1 / 0.1 & 1 / 0.1 & 1 / 0.1 (GCS-Bézier); xem Bảng~\ref{tab:dms_2d_config} (GCS-DMS) \\
 Vận tốc tối đa $v_{\max}$ & 1 & 1 & 1 (GCS-Bézier); 2 (GCS-DMS) \\
 Tốc độ góc lái $\omega_{\max}$ & $\pi/2$ rad/s & --- & $\pi$ rad/s (GCS-DMS) \\
-Số seed & 4 mê cung + 1 trường hợp 2D & 10 & 1 (cố định) \\
+Số seed & $\ge 10$ seed mê cung $\times$ 2 chế độ + 1 trường hợp 2D & 10 & 1 (cố định) \\
 \bottomrule
 \end{tabular}}
 \end{table}

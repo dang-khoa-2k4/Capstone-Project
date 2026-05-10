@@ -3,13 +3,13 @@
 \section{Tổng kết kết quả đạt được}
 \label{sec:conclusion_summary}
 
-Luận văn đã nghiên cứu và triển khai khung lý thuyết Đồ thị các Tập lồi
+Đồ án đã nghiên cứu và triển khai khung lý thuyết Đồ thị các Tập lồi
 (Graphs of Convex Sets --- GCS) để giải quyết bài toán hoạch định chuyển
 động cho hệ thống rô-bốt trong các môi trường có cấu trúc hình học phức tạp.
 Về mặt lý thuyết, một quy trình hoàn chỉnh đã được xây dựng, bao gồm ba giai
 đoạn liên tiếp: phân hoạch không gian tự do thành hợp của các tập lồi, tham
 số hóa quỹ đạo bằng đường cong Bézier nhằm bảo đảm tính liên tục vi phân
-$C^r$ cho các trạng thái động học cấp cao như vận tốc và gia tốc, và vận dụng
+$C^n$ cho các trạng thái động học cấp cao như vận tốc và gia tốc, và vận dụng
 kỹ thuật nới lỏng phối cảnh để chuyển đổi bài toán tối ưu hóa lồi nguyên hỗn
 hợp (Mixed-Integer Convex Program --- MICP) vốn có độ phức tạp tổ hợp rất
 lớn thành bài toán Lập trình Nón Bậc hai (Second-Order Cone Program ---
@@ -29,8 +29,8 @@ về mặt hình học, trong khi Bézier~GCS tuy đòi hỏi chi phí tính to�
 nhưng tạo ra các quỹ đạo mượt mà, bảo đảm ràng buộc vi phân liên tục $C^2$
 và tính khả thi vật lý cho rô-bốt.
 
-Một đóng góp trung tâm của luận văn là việc đề xuất và triển khai mô hình bài
-toán Điều khiển Tối ưu kết hợp Multiple Shooting (OCP-DMS) trên nền tảng của
+Một đóng góp trung tâm của đồ án là việc đề xuất và triển khai mô hình bài
+toán Điều khiển Tối ưu kết hợp Multiple Shooting (GCS-DMS) trên nền tảng của
 GCS.
 Khác với GCS nguyên bản chỉ sinh ra quỹ đạo hình học ở mức động học, hướng
 tiếp cận này mô hình hóa trực tiếp phương trình động lực học
@@ -41,16 +41,16 @@ Hàm cản log-barrier được tích hợp để khuyến khích quỹ đạo n
 trong của các vùng an toàn, từ đó giảm thiểu hiện tượng vi phạm biên vốn xuất
 hiện khi chỉ kiểm tra ràng buộc an toàn tại một tập hữu hạn các điểm lưới.
 Các kết quả thực nghiệm định lượng đã minh chứng tính hiệu quả của phương
-pháp đề xuất trong bối cảnh môi trường tĩnh được sử dụng trong luận văn này.
+pháp đề xuất trong bối cảnh môi trường tĩnh được sử dụng trong đồ án này.
 
 \section{Những mặt còn hạn chế}
 \label{sec:conclusion_limitations}
 
-Mặc dù đạt được những kết quả trên, luận văn vẫn còn một số hạn chế cần được
+Mặc dù đạt được những kết quả trên, đồ án vẫn còn một số hạn chế cần được
 nhìn nhận rõ ràng.
 
 Về mặt cấu trúc tối ưu hóa, khi tích hợp động lực học multiple shooting vào
-khung GCS, mô hình OCP-DMS không còn giữ được tính lồi của GCS-Bézier gốc.
+khung GCS, mô hình GCS-DMS không còn giữ được tính lồi của GCS-Bézier gốc.
 Trong GCS-Bézier, relaxation lồi của phần chọn đường đi thường có integrality
 gap bằng không hoặc rất nhỏ~\cite{MarcucciEtAl2023GCS}, cho phép bộ giải SOCP
 thương mại (Mosek, Gurobi) xử lý hiệu quả.
@@ -64,16 +64,16 @@ branch-and-bound kết hợp lời giải Quy hoạch Phi tuyến (NLP) tại c�
 kiếm.
 
 Về mặt bảo đảm an toàn liên tục, hàm cản log-barrier được sử dụng trong
-OCP-DMS khuyến khích quỹ đạo tránh xa biên của các vùng an toàn theo nghĩa
+GCS-DMS khuyến khích quỹ đạo tránh xa biên của các vùng an toàn theo nghĩa
 heuristic, nhưng không cung cấp bảo đảm chính xác theo kiểu convex hull như
 trong GCS-Bézier.
 Trong GCS-Bézier, tính chất bao lồi của đường cong Bézier đảm bảo rằng nếu
 toàn bộ điểm điều khiển nằm trong vùng lồi $Q_v$ thì toàn bộ đường cong nằm
 trong $Q_v$---một bảo đảm liên tục chính xác.
-OCP-DMS chỉ đạt được bảo đảm tương tự ở mức gần đúng thông qua phạt logarit,
+GCS-DMS chỉ đạt được bảo đảm tương tự ở mức gần đúng thông qua phạt logarit,
 chứ không phải qua ràng buộc hình học cứng trên toàn bộ khoảng thời gian.
 
-Cuối cùng, phạm vi thực nghiệm của luận văn còn giới hạn ở môi trường tĩnh
+Cuối cùng, phạm vi thực nghiệm của đồ án còn giới hạn ở môi trường tĩnh
 và không gian làm việc hai chiều.
 Khả năng tổng quát hóa của phương pháp đối với môi trường động, không gian cấu
 hình ($C$-space) nhiều chiều, và phần cứng rô-bốt thực tế chưa được kiểm chứng
@@ -82,12 +82,12 @@ trong khuôn khổ nghiên cứu này.
 \section{Hướng phát triển}
 \label{sec:conclusion_future}
 
-Dựa trên những kết quả và hạn chế được xác định ở trên, luận văn đề xuất các
+Dựa trên những kết quả và hạn chế được xác định ở trên, đồ án đề xuất các
 hướng phát triển tiếp theo nhằm tăng cường hiệu năng và mở rộng phạm vi ứng
-dụng của khung GCS-OCP.
+dụng của khung GCS-DMS.
 
 \textbf{Hoạch định quỹ đạo trực tuyến với Điều khiển Dự báo Mô hình.}
-Một hướng tiếp theo tự nhiên là tích hợp khung OCP-DMS vào vòng lặp Điều
+Một hướng tiếp theo tự nhiên là tích hợp khung GCS-DMS vào vòng lặp Điều
 khiển Dự báo Mô hình (Model Predictive Control --- MPC) để đáp ứng yêu cầu
 hoạch định quỹ đạo trực tuyến.
 Khả năng warm-start của bộ giải multiple shooting---khởi động từ lời giải của

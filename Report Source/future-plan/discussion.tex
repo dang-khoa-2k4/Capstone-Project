@@ -1,4 +1,4 @@
-\section{Thảo luận: So sánh GCS-Bézier và OCP-DMS}
+\section{Thảo luận: So sánh GCS-Bézier và GCS-DMS}
 \label{sec:discussion}
 
 Hai hướng tiếp cận được trình bày trong chương này giải quyết cùng một bài toán hoạch định chuyển động~\eqref{eq:planning_problem} từ hai góc độ bổ sung cho nhau, với những đánh đổi rõ ràng về mức độ biểu diễn động lực học, cấu trúc tối ưu hóa, và khả năng giải số.
@@ -8,13 +8,13 @@ Hai hướng tiếp cận được trình bày trong chương này giải quyế
 
 Điểm khác biệt cốt lõi nằm ở cách mô hình hóa quỹ đạo. \textbf{GCS-Bézier} tham số hóa quỹ đạo bằng các điểm điều khiển Bézier---bài toán chỉ biết đến hình dạng quỹ đạo ở mức \emph{động học} (kinematics), không mô hình hóa phương trình động lực học $\dot x = f(x,u)$ của hệ thực. Ràng buộc an toàn liên tục được đảm bảo chính xác thông qua tính chất bao lồi: nếu toàn bộ điểm điều khiển nằm trong vùng lồi $Q_v$, thì toàn bộ đường cong Bézier nằm trong $Q_v$. Nhờ cấu trúc này, bài toán rút gọn về dạng Chương trình Nón Bậc hai Nguyên Hỗn hợp (MISOCP), và relaxation lồi (SOCP) thường có integrality gap bằng không hoặc rất nhỏ~\cite{MarcucciEtAl2023GCS,MarcucciEtAl2023MotionPlanning}.
 
-\textbf{OCP-DMS}, ngược lại, mô hình hóa trực tiếp phương trình $\dot x = f(x,u)$ thông qua ràng buộc defect của multiple shooting:
+\textbf{GCS-DMS}, ngược lại, mô hình hóa trực tiếp phương trình $\dot x = f(x,u)$ thông qua ràng buộc defect của multiple shooting:
 \[
 s_v^+ - F_v(s_v^-, w_v, \Delta_v) = 0,
 \]
 trong đó $F_v$ là nghiệm tại $\tau=1$ của bài toán giá trị ban đầu (IVP) phi tuyến. Hàm $F_v$ không phải biểu thức affine hay nón bậc hai, mà là ánh xạ ẩn sinh ra bởi quá trình tích phân động lực học. Do đó bài toán không thể quy về MISOCP và được phân loại là MIOCP ở cấp liên tục, và MINLP sau khi rời rạc hóa bằng multiple shooting.
 
-\subsection{Ưu điểm của OCP-DMS}
+\subsection{Ưu điểm của GCS-DMS}
 \label{subsec:discussion_ocpdms_pros}
 
 Thứ nhất, quỹ đạo thu được thỏa mãn trực tiếp phương trình động lực học $\dot x = f(x,u)$ của hệ, thay vì chỉ được xấp xỉ ở mức động học bằng đa thức Bézier. Điều này đặc biệt quan trọng đối với các hệ rô-bốt có động lực học phi tuyến rõ rệt, chẳng hạn tay máy với động lực Lagrange, hệ underactuated, hoặc rô-bốt di động chịu ràng buộc nonholonomic.
@@ -23,7 +23,7 @@ Thứ hai, tín hiệu điều khiển $u(\cdot)$ xuất hiện tường minh nh
 
 Thứ ba, khi sử dụng hàm cản log-barrier (mục~\ref{subsubsec:log_barrier}), bài toán khuyến khích quỹ đạo nằm trong miền trong của các vùng an toàn, thay vì chỉ kiểm tra điều kiện an toàn tại một tập hữu hạn các điểm lưới. Đây là bảo đảm liên tục mạnh hơn so với kiểm tra điểm rời rạc.
 
-\subsection{Hạn chế của OCP-DMS}
+\subsection{Hạn chế của GCS-DMS}
 \label{subsec:discussion_ocpdms_cons}
 
 Mô hình không còn giữ được cấu trúc lồi của GCS-Bézier. Trong GCS-Bézier, relaxation lồi của phần chọn đường đi thường có gap rất nhỏ, và trong nhiều trường hợp gap bằng không~\cite{MarcucciEtAl2023GCS}. Với MIOCP/MINLP, khối động lực học multiple shooting là phi tuyến và nói chung không lồi, nên không có bảo đảm tương tự về độ chặt của relaxation.
@@ -35,11 +35,11 @@ Ngoài ra, bài toán thuộc lớp MINLP phi lồi---NP-hard trong trường h�
 
 \begin{table}[htbp]
 \centering
-\caption{So sánh GCS-Bézier và OCP-DMS theo các tiêu chí chính}
+\caption{So sánh GCS-Bézier và GCS-DMS theo các tiêu chí chính}
 \label{tab:comparison}
 \begin{tabular}{lll}
 \toprule
-\textbf{Tiêu chí} & \textbf{GCS-Bézier} & \textbf{OCP-DMS} \\
+\textbf{Tiêu chí} & \textbf{GCS-Bézier} & \textbf{GCS-DMS} \\
 \midrule
 Lớp bài toán & MISOCP & MIOCP / MINLP \\
 Động lực học & Không tường minh & Trực tiếp ($\dot x = f(x,u)$) \\
@@ -52,4 +52,4 @@ Phù hợp khi & Ràng buộc hình học chủ đạo & Động lực học phi
 \end{tabular}
 \end{table}
 
-OCP-DMS phù hợp hơn trong các bài toán mà tính khả thi động lực học là yêu cầu trung tâm và quỹ đạo Bézier động học không đủ đại diện cho hệ thực (ví dụ: tay máy nhiều bậc tự do, xe không toàn phương (nonholonomic), hệ underactuated). Ngược lại, khi ràng buộc động lực học không phải yếu tố quyết định---hoặc khi cần đảm bảo tính tối ưu và tốc độ giải---GCS-Bézier vẫn là lựa chọn có lợi thế rõ rệt nhờ tận dụng được relaxation lồi chặt và các bộ giải SOCP hiệu quả cao.
+GCS-DMS phù hợp hơn trong các bài toán mà tính khả thi động lực học là yêu cầu trung tâm và quỹ đạo Bézier động học không đủ đại diện cho hệ thực (ví dụ: tay máy nhiều bậc tự do, xe không toàn phương (nonholonomic), hệ underactuated). Ngược lại, khi ràng buộc động lực học không phải yếu tố quyết định---hoặc khi cần đảm bảo tính tối ưu và tốc độ giải---GCS-Bézier vẫn là lựa chọn có lợi thế rõ rệt nhờ tận dụng được relaxation lồi chặt và các bộ giải SOCP hiệu quả cao.
