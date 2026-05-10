@@ -1,155 +1,169 @@
 \addto\captionsenglish{%
- \renewcommand\chaptername{Appendix}}
+    \renewcommand\chaptername{Appendix}}
 \appendixtitleon
 \appendixtitletocon
 \begin{appendices}
-\chapter{Phụ lục: Chi tiết hiện thực}
-\label{apd:A}
 
-\section{Chiến lược giải bài toán MIOCP/MINLP}
-\label{subsec:solver_strategy}
+    \chapter{Phụ lục: Phân công công việc}
+    \label{apd:work_distribution}
+    \begin{center}
+        {\large \textbf{Sinh viên thực hiện}}
+        \vspace{5pt}
+        \begin{tabular}{@{}p{1cm}p{5cm}p{2cm}p{6.5cm}@{}}
+            \hline
+            \textbf{STT} & \textbf{Họ và tên}    & \textbf{MSSV} & \textbf{Ghi chú}                       \\
+            \hline
+            1            & Nguyễn Trần Đăng Khoa & 2211635       & Phân hoạch lồi; Hiện thực, thực nghiệm \\
+            2            & Hồ Đăng Khoa          & 2211588       & Cơ sở lý thuyết; Mô hình hóa bài toán  \\
+            \hline
+        \end{tabular}
+    \end{center}
 
-Bài toán MINLP \eqref{eq:joint_obj}--\eqref{eq:joint_binary} thuộc lớp NP-hard và
-không có bộ giải thương mại hiệu suất cao tương đương Mosek/Gurobi cho lớp
-MISOCP. Trong khuôn khổ này, chúng tôi sử dụng một chiến lược heuristic gồm ba bước: giải relaxation liên
-tục tích hợp của MINLP sau rời rạc hóa, trích xuất đường đi rời rạc từ nghiệm
-relaxation, rồi tinh chỉnh quỹ đạo bằng một NLP trên đường đi cố định. Các bài
-toán NLP trong pipeline được xây dựng bằng CasADi và giải bằng IPOPT; các thao
-tác trên đồ thị như tìm đường ngắn nhất hoặc liệt kê đường ứng viên được xử lý
-riêng trên đồ thị vùng.
+    \chapter{Phụ lục: Chi tiết chiến lược giải bài toán MIOCP/MINLP}
+    \label{apd:A}
 
-\paragraph*{Pha 1 — Relaxation liên tục tích hợp của MINLP.}
-Tất cả biến của bài toán \eqref{eq:joint_obj}--\eqref{eq:joint_binary} được gom
-vào một NLP duy nhất sau khi thả lỏng các biến nhị phân
-$y_{uv},p_v\in\{0,1\}$ thành các biến liên tục trong đoạn $[0,1]$. Vector biến
-quyết định gồm luồng cạnh $y_{uv}$, biến kích hoạt vùng $p_v$, trạng thái biên
-$s_v^-,s_v^+$, tham số điều khiển $w_v$, thời lượng vùng $\Delta_v$, trạng thái
-giao diện $z_{uv}$, và biến epigraph chi phí cục bộ $\rho_v$.
+    \section{Chiến lược giải bài toán MIOCP/MINLP}
+    \label{subsec:solver_strategy}
 
-Cơ chế bật/tắt vùng được áp đặt bằng các ràng buộc Big-M dựa trên $p_v$. Cụ thể,
-các biến trạng thái và thời lượng cục bộ được chặn bởi
-\[
--M_s p_v \le s_v^\pm \le M_s p_v,\qquad
-0\le \Delta_v \le M_\Delta p_v,\qquad
-0\le \rho_v \le M_\rho p_v.
-\]
-Với tham số điều khiển, ta dùng dạng
-\[
--M_w p_v \le w_v-\bar w_v \le M_w p_v,
-\]
-trong đó $\bar w_v$ là điều khiển danh nghĩa khi vùng không được kích hoạt. Khi
-$p_v=0$, các biến động lực học của vùng bị tắt được đưa về giá trị danh nghĩa
-và $\Delta_v=0$; do đó endpoint map thỏa
-$F_v(0,\bar w_v,0)=0$, khiến ràng buộc defect
-\eqref{eq:joint_defect} trở thành đẳng thức tầm thường mà không cần gắn thêm
-Big-M trực tiếp vào defect. Trong cài đặt số, $F_v$ được xấp xỉ bằng tích phân
-RK4 trên $N_{\text{int}}$ bước. Hàm mục tiêu được viết dưới dạng
-$\min \sum_v \rho_v$ thông qua epigraph hóa chi phí cục bộ. Các hằng số Big-M
-được chọn từ miền chặn vật lý của trạng thái, điều khiển, thời gian và chi phí;
-giá trị quá lớn có thể làm bài toán NLP kém điều kiện số.
+    Bài toán MINLP \eqref{eq:joint_obj}--\eqref{eq:joint_binary} thuộc lớp NP-hard
+    và không có bộ giải thương mại hiệu suất cao tương đương Mosek/Gurobi cho lớp
+    MISOCP. Trong khuôn khổ này, chúng tôi sử dụng một chiến lược heuristic gồm ba
+    bước: giải relaxation liên tục tích hợp của MINLP sau rời rạc hóa, trích xuất
+    đường đi rời rạc từ nghiệm relaxation, rồi tinh chỉnh quỹ đạo bằng một NLP trên
+    đường đi cố định. Các bài toán NLP trong pipeline được xây dựng bằng CasADi và
+    giải bằng IPOPT; các thao tác trên đồ thị như tìm đường ngắn nhất hoặc liệt kê
+    đường ứng viên được xử lý riêng trên đồ thị vùng.
 
-Ràng buộc hình học bật/tắt hỗ trợ hai chế độ:
-\begin{itemize}
-    \item \emph{Mesh-point hard constraint}: với polytope
-    $Q_v=\{q:A_vq\le b_v\}$, ràng buộc
-    $A_vq\le b_v+M_Q(1-p_v)$ được áp tại hai trạng thái biên $s_v^-,s_v^+$ và
-    tại các điểm mesh nội tại của quỹ đạo RK4. Có thể thêm dung sai biên
-    $\epsilon_b$ và khoảng dự phòng $\eta_{\text{safe}}$ để tránh nghiệm nằm quá
-    sát biên vùng.
-    \item \emph{Log-barrier penalty}: containment cứng vẫn được giữ tại hai
-    trạng thái biên, còn an toàn nội tại được đưa vào hàm mục tiêu bằng số hạng
+    \paragraph*{Pha 1 — Relaxation liên tục tích hợp của MINLP.}
+    Tất cả biến của bài toán \eqref{eq:joint_obj}--\eqref{eq:joint_binary} được gom
+    vào một NLP duy nhất sau khi thả lỏng các biến nhị phân
+    $y_{uv},p_v\in\{0,1\}$ thành các biến liên tục trong đoạn $[0,1]$. Vector biến
+    quyết định gồm luồng cạnh $y_{uv}$, biến kích hoạt vùng $p_v$, trạng thái biên
+    $s_v^-,s_v^+$, tham số điều khiển $w_v$, thời lượng vùng $\Delta_v$, trạng thái
+    giao diện $z_{uv}$, và biến epigraph chi phí cục bộ $\rho_v$.
+
+    Cơ chế bật/tắt vùng được áp đặt bằng các ràng buộc Big-M dựa trên $p_v$. Cụ
+    thể, các biến trạng thái và thời lượng cục bộ được chặn bởi
     \[
-    -\mu \sum_v p_v\sum_{j}
-    \log\!\bigl((b_v)_j+M_Q(1-p_v)-(A_vq)_j\bigr).
+        -M_s p_v \le s_v^\pm \le M_s p_v,\qquad
+        0\le \Delta_v \le M_\Delta p_v,\qquad
+        0\le \rho_v \le M_\rho p_v.
     \]
-    Dịch slack $M_Q(1-p_v)$ được đặt bên trong logarit để vô hiệu hóa vùng không
-    kích hoạt và tránh đánh giá logarit ngoài miền xác định.
-\end{itemize}
-Các ràng buộc ghép nối giao diện $s_u^+=z_{uv}=s_v^-$, điều kiện nguồn/đích, và
-nếu cần cả ràng buộc liên tục điều khiển giữa hai vùng, được bật/tắt bằng Big-M
-theo biến cạnh $y_{uv}$. Khi cạnh $(u,v)$ được kích hoạt, $z_{uv}$ đồng thời
-phải nằm trong cả hai polytope $Q_u$ và $Q_v$.
+    Với tham số điều khiển, ta dùng dạng
+    \[
+        -M_w p_v \le w_v-\bar w_v \le M_w p_v,
+    \]
+    trong đó $\bar w_v$ là điều khiển danh nghĩa khi vùng không được kích hoạt. Khi
+    $p_v=0$, các biến động lực học của vùng bị tắt được đưa về giá trị danh nghĩa
+    và $\Delta_v=0$; do đó endpoint map thỏa $F_v(0,\bar w_v,0)=0$, khiến ràng buộc
+    defect \eqref{eq:joint_defect} trở thành đẳng thức tầm thường mà không cần gắn
+    thêm Big-M trực tiếp vào defect. Trong cài đặt số, $F_v$ được xấp xỉ bằng tích
+    phân RK4 trên $N_{\text{int}}$ bước. Hàm mục tiêu được viết dưới dạng $\min
+        \sum_v \rho_v$ thông qua epigraph hóa chi phí cục bộ. Các hằng số Big-M được
+    chọn từ miền chặn vật lý của trạng thái, điều khiển, thời gian và chi phí; giá
+    trị quá lớn có thể làm bài toán NLP kém điều kiện số.
 
-\paragraph*{Khởi tạo (warm start).}
-Để cải thiện khả năng hội tụ của IPOPT, nghiệm khởi tạo được xây dựng từ một
-đường đi hình học $\pi_0$ trên đồ thị vùng. Cụ thể, $\pi_0$ là đường ngắn nhất
-từ $\sigma$ đến $\tau$ theo trọng số khoảng cách giữa tâm các vùng. Với mỗi vùng
-$v\in\pi_0$, các trạng thái $s_v^-$ và $s_v^+$ được đặt tại các điểm neo trên
-giao của hai vùng kề nhau; nếu giao bị thoái hóa, dùng trung điểm giữa hai tâm
-vùng làm xấp xỉ. Góc hướng $\theta$ được suy từ vector nối điểm vào và điểm ra,
-$\Delta_v$ được ước lượng từ chiều dài đoạn chia cho vận tốc tối đa, còn $w_v$
-được đặt bằng điều khiển danh nghĩa. Các biến luồng được khởi tạo bằng
-$y_{uv}=1,p_v=1$ trên $\pi_0$ và bằng $0$ trên các cạnh, vùng còn lại.
+    Ràng buộc hình học bật/tắt hỗ trợ hai chế độ:
+    \begin{itemize}
+        \item \emph{Mesh-point hard constraint}: với polytope
+              $Q_v=\{q:A_vq\le b_v\}$, ràng buộc
+              $A_vq\le b_v+M_Q(1-p_v)$ được áp tại hai trạng thái biên $s_v^-,s_v^+$ và
+              tại các điểm mesh nội tại của quỹ đạo RK4. Có thể thêm dung sai biên
+              $\epsilon_b$ và khoảng dự phòng $\eta_{\text{safe}}$ để tránh nghiệm nằm quá
+              sát biên vùng.
+        \item \emph{Log-barrier penalty}: containment cứng vẫn được giữ tại hai
+              trạng thái biên, còn an toàn nội tại được đưa vào hàm mục tiêu bằng số hạng
+              \[
+                  -\mu \sum_v p_v\sum_{j}
+                  \log\!\bigl((b_v)_j+M_Q(1-p_v)-(A_vq)_j\bigr).
+              \]
+              Dịch slack $M_Q(1-p_v)$ được đặt bên trong logarit để vô hiệu hóa vùng không
+              kích hoạt và tránh đánh giá logarit ngoài miền xác định.
+    \end{itemize}
+    Các ràng buộc ghép nối giao diện $s_u^+=z_{uv}=s_v^-$, điều kiện nguồn/đích, và
+    nếu cần cả ràng buộc liên tục điều khiển giữa hai vùng, được bật/tắt bằng Big-M
+    theo biến cạnh $y_{uv}$. Khi cạnh $(u,v)$ được kích hoạt, $z_{uv}$ đồng thời
+    phải nằm trong cả hai polytope $Q_u$ và $Q_v$.
 
-\paragraph*{Continuation trên tham số rào.}
-Khi sử dụng log-barrier, chúng tôi áp dụng kỹ thuật continuation trên tham số
-$\mu$~\cite{BoydVandenberghe2004}. Cụ thể, giải một dãy NLP với $\mu$ giảm dần
-từ $\mu_0=10^{-2}$ về $\mu_{\min}=10^{-5}$, dùng nghiệm ở bước trước làm khởi
-tạo cho bước tiếp theo. Số vòng continuation và hệ số giảm $\mu$ là các tham số
-cấu hình. Với chế độ mesh-point hard constraint, bước continuation này được bỏ
-qua.
+    \paragraph*{Khởi tạo (warm start).}
+    Để cải thiện khả năng hội tụ của IPOPT, nghiệm khởi tạo được xây dựng từ một
+    đường đi hình học $\pi_0$ trên đồ thị vùng. Cụ thể, $\pi_0$ là đường ngắn nhất
+    từ $\sigma$ đến $\tau$ theo trọng số khoảng cách giữa tâm các vùng. Với mỗi vùng
+    $v\in\pi_0$, các trạng thái $s_v^-$ và $s_v^+$ được đặt tại các điểm neo trên
+    giao của hai vùng kề nhau; nếu giao bị thoái hóa, dùng trung điểm giữa hai tâm
+    vùng làm xấp xỉ. Góc hướng $\theta$ được suy từ vector nối điểm vào và điểm ra,
+    $\Delta_v$ được ước lượng từ chiều dài đoạn chia cho vận tốc tối đa, còn $w_v$
+    được đặt bằng điều khiển danh nghĩa. Các biến luồng được khởi tạo bằng
+    $y_{uv}=1,p_v=1$ trên $\pi_0$ và bằng $0$ trên các cạnh, vùng còn lại.
 
-\paragraph*{Pha 2 — Trích xuất đường đi rời rạc.}
-Sau khi NLP relaxation hội tụ, nghiệm $y^\star\in[0,1]^{|E|}$ được chuyển thành
-một đường đi rời rạc $\pi^\star$. Trước tiên, ta duyệt tham lam từ $\sigma$:
-tại mỗi đỉnh, chọn cạnh ra có $y_{uv}^\star$ lớn nhất nếu giá trị này vượt
-ngưỡng $0.5$; nếu không có cạnh nào đạt ngưỡng, hạ ngưỡng xuống $10^{-3}$ để
-tránh dừng sớm. Nếu thủ tục tham lam không đến được $\tau$, hoặc độ lệch nguyên
-\[
-\delta_{\mathrm{int}}
-=\max_{e\in E}\min\{y_e^\star,\,1-y_e^\star\}
-\]
-lớn hơn $10^{-3}$, ta thay bằng đường đi ngắn nhất trên đồ thị con
-$\{e:y_e^\star>10^{-6}\}$ với trọng số $-\log y_e^\star$. Cách làm này ưu tiên
-các cạnh có giá trị luồng lớn trong nghiệm relaxation, nhưng vẫn trả về một
-đường đi rời rạc hợp lệ.
+    \paragraph*{Continuation trên tham số rào.}
+    Khi sử dụng log-barrier, chúng tôi áp dụng kỹ thuật continuation trên tham số
+    $\mu$~\cite{BoydVandenberghe2004}. Cụ thể, giải một dãy NLP với $\mu$ giảm dần
+    từ $\mu_0=10^{-2}$ về $\mu_{\min}=10^{-5}$, dùng nghiệm ở bước trước làm khởi
+    tạo cho bước tiếp theo. Số vòng continuation và hệ số giảm $\mu$ là các tham số
+    cấu hình. Với chế độ mesh-point hard constraint, bước continuation này được bỏ
+    qua.
 
-\paragraph*{Pha 3 — Polish quỹ đạo trên đường đi cố định.}
-Nghiệm relaxation có thể còn phân số, nên các trạng thái nối $s_u^+$ và $s_v^-$
-trên hai vùng liên tiếp của $\pi^\star$ có thể chưa khớp hoàn toàn. Ta đo sai
-lệch này bằng \emph{connection gap}. Nếu
-$\max\{\delta_{\mathrm{int}},\delta_{\mathrm{conn}}\}$ vượt ngưỡng cấu hình,
-hoặc nếu muốn loại bỏ hoàn toàn ảnh hưởng của Big-M, ta cố định đường đi
-$\pi^\star$ và giải lại một NLP \emph{fixed-path}. Bài toán này chỉ giữ các biến
-liên tục trên các vùng thuộc $\pi^\star$; các ràng buộc ghép nối giao diện
-trở thành đẳng thức cứng, kèm điều kiện biên start/goal, ràng buộc defect
-multiple shooting, và ràng buộc containment theo cùng chế độ ở Pha 1. Đây là
-dạng direct multiple shooting tiêu chuẩn trên một chuỗi vùng đã biết
-~\cite{BockPlitt1984, DiehlEtAl2006}. Nghiệm relaxation được dùng
-làm khởi tạo cho NLP fixed-path; nếu dùng log-barrier, continuation trên $\mu$
-được tiếp tục áp dụng trong bước polish.
+    \paragraph*{Pha 2 — Trích xuất đường đi rời rạc.}
+    Sau khi NLP relaxation hội tụ, nghiệm $y^\star\in[0,1]^{|E|}$ được chuyển thành
+    một đường đi rời rạc $\pi^\star$. Trước tiên, ta duyệt tham lam từ $\sigma$:
+    tại mỗi đỉnh, chọn cạnh ra có $y_{uv}^\star$ lớn nhất nếu giá trị này vượt
+    ngưỡng $0.5$; nếu không có cạnh nào đạt ngưỡng, hạ ngưỡng xuống $10^{-3}$ để
+    tránh dừng sớm. Nếu thủ tục tham lam không đến được $\tau$, hoặc độ lệch nguyên
+    \[
+        \delta_{\mathrm{int}}
+        =\max_{e\in E}\min\{y_e^\star,\,1-y_e^\star\}
+    \]
+    lớn hơn $10^{-3}$, ta thay bằng đường đi ngắn nhất trên đồ thị con
+    $\{e:y_e^\star>10^{-6}\}$ với trọng số $-\log y_e^\star$. Cách làm này ưu tiên
+    các cạnh có giá trị luồng lớn trong nghiệm relaxation, nhưng vẫn trả về một
+    đường đi rời rạc hợp lệ.
 
-% \paragraph*{Fallback bằng các đường đi ứng viên.}
-% Nếu polish trên $\pi^\star$ thất bại, ví dụ IPOPT không hội tụ hoặc residual của
-% ràng buộc vượt ngưỡng cho phép, thuật toán xét thêm tối đa $K$ đường đi đơn ứng
-% viên từ $\sigma$ đến $\tau$. Các đường này được liệt kê theo thứ tự tăng dần của
-% chi phí hình học bằng thuật toán Yen~\cite{Yen1971}; trong cài đặt, thủ tục này
-% được thực hiện bằng \texttt{networkx.shortest\_simple\_paths}. Với từng đường
-% ứng viên, ta giải NLP fixed-path như ở Pha 3 và chọn nghiệm khả thi có chi phí
-% thấp nhất trong số các nghiệm hội tụ. Tham số $K$ kiểm soát trực tiếp đánh đổi
-% giữa độ tin cậy của fallback và thời gian tính toán.
+    \paragraph*{Pha 3 — Polish quỹ đạo trên đường đi cố định.}
+    Nghiệm relaxation có thể còn phân số, nên các trạng thái nối $s_u^+$ và $s_v^-$
+    trên hai vùng liên tiếp của $\pi^\star$ có thể chưa khớp hoàn toàn. Ta đo sai
+    lệch này bằng \emph{connection gap}. Nếu
+    $\max\{\delta_{\mathrm{int}},\delta_{\mathrm{conn}}\}$ vượt ngưỡng cấu hình,
+    hoặc nếu muốn loại bỏ hoàn toàn ảnh hưởng của Big-M, ta cố định đường đi
+    $\pi^\star$ và giải lại một NLP \emph{fixed-path}. Bài toán này chỉ giữ các biến
+    liên tục trên các vùng thuộc $\pi^\star$; các ràng buộc ghép nối giao diện
+    trở thành đẳng thức cứng, kèm điều kiện biên start/goal, ràng buộc defect
+    multiple shooting, và ràng buộc containment theo cùng chế độ ở Pha 1. Đây là
+    dạng direct multiple shooting tiêu chuẩn trên một chuỗi vùng đã biết
+    ~\cite{BockPlitt1984, DiehlEtAl2006, Betts2010}. Nghiệm relaxation được dùng
+    làm khởi tạo cho NLP fixed-path; nếu dùng log-barrier, continuation trên $\mu$
+    được tiếp tục áp dụng trong bước polish.
 
-% \paragraph*{Lý do không dùng bộ giải MINLP đơn khối.}
-% Các bộ giải MINLP đa năng như Bonmin hay Juniper~\cite{LubinEtAl2018} thường
-% thực hiện branch-and-bound trên biến nhị phân và giải một NLP tại mỗi nút của
-% cây tìm kiếm~\cite{Wolsey1999}. Cách tiếp cận này đúng về mặt mô hình hóa, nhưng
-% không phù hợp với mục tiêu tính toán của bài toán hiện tại. Thứ nhất, việc giải
-% lặp lại một NLP lớn tại nhiều nút có chi phí cao hơn đáng kể so với giải một
-% relaxation tích hợp rồi chỉ polish trên một số ít đường đi cố định. Thứ hai,
-% phần rời rạc của bài toán có cấu trúc luồng đơn vị từ $\sigma$ đến $\tau$; khi
-% relaxation đã cung cấp thông tin tốt về các cạnh có khả năng được chọn, việc
-% trích xuất và kiểm tra một số đường ứng viên thường rẻ hơn so với khám phá toàn
-% bộ cây branch-and-bound.
+    % \paragraph*{Fallback bằng các đường đi ứng viên.}
+    % Nếu polish trên $\pi^\star$ thất bại, ví dụ IPOPT không hội tụ hoặc residual của
+    % ràng buộc vượt ngưỡng cho phép, thuật toán xét thêm tối đa $K$ đường đi đơn ứng
+    % viên từ $\sigma$ đến $\tau$. Các đường này được liệt kê theo thứ tự tăng dần của
+    % chi phí hình học bằng thuật toán Yen~\cite{Yen1971}; trong cài đặt, thủ tục này
+    % được thực hiện bằng \texttt{networkx.shortest\_simple\_paths}. Với từng đường
+    % ứng viên, ta giải NLP fixed-path như ở Pha 3 và chọn nghiệm khả thi có chi phí
+    % thấp nhất trong số các nghiệm hội tụ. Tham số $K$ kiểm soát trực tiếp đánh đổi
+    % giữa độ tin cậy của fallback và thời gian tính toán.
 
-% Chiến lược trên không đảm bảo tối ưu toàn cục. IPOPT chỉ tìm nghiệm dừng địa
-% phương cho các NLP phi lồi, và đường đi tối ưu toàn cục của MINLP có thể không
-% được chọn bởi thủ tục trích xuất hoặc không nằm trong tập $K$ đường ứng viên.
-% Do đó, nghiệm cuối cùng được hiểu là nghiệm khả thi hoặc tối ưu địa phương trong
-% tập đường đi đã xét. Đây là đánh đổi có chủ đích: giảm bảo đảm tối ưu toàn cục
-% để đổi lấy thời gian giải khả thi trên các đồ thị có hàng chục đến hàng trăm
-% vùng. Chất lượng nghiệm, ảnh hưởng của $K$, các ngưỡng
-% $\delta_{\mathrm{int}}$, $\delta_{\mathrm{conn}}$, chế độ containment, và thời
-% gian tính toán sẽ được đánh giá trong chương thực nghiệm.
+    % \paragraph*{Lý do không dùng bộ giải MINLP đơn khối.}
+    % Các bộ giải MINLP đa năng như Bonmin hay Juniper~\cite{LubinEtAl2018} thường
+    % thực hiện branch-and-bound trên biến nhị phân và giải một NLP tại mỗi nút của
+    % cây tìm kiếm~\cite{Wolsey1999}. Cách tiếp cận này đúng về mặt mô hình hóa, nhưng
+    % không phù hợp với mục tiêu tính toán của bài toán hiện tại. Thứ nhất, việc giải
+    % lặp lại một NLP lớn tại nhiều nút có chi phí cao hơn đáng kể so với giải một
+    % relaxation tích hợp rồi chỉ polish trên một số ít đường đi cố định. Thứ hai,
+    % phần rời rạc của bài toán có cấu trúc luồng đơn vị từ $\sigma$ đến $\tau$; khi
+    % relaxation đã cung cấp thông tin tốt về các cạnh có khả năng được chọn, việc
+    % trích xuất và kiểm tra một số đường ứng viên thường rẻ hơn so với khám phá toàn
+    % bộ cây branch-and-bound.
 
+    % Chiến lược trên không đảm bảo tối ưu toàn cục. IPOPT chỉ tìm nghiệm dừng địa
+    % phương cho các NLP phi lồi, và đường đi tối ưu toàn cục của MINLP có thể không
+    % được chọn bởi thủ tục trích xuất hoặc không nằm trong tập $K$ đường ứng viên.
+    % Do đó, nghiệm cuối cùng được hiểu là nghiệm khả thi hoặc tối ưu địa phương trong
+    % tập đường đi đã xét. Đây là đánh đổi có chủ đích: giảm bảo đảm tối ưu toàn cục
+    % để đổi lấy thời gian giải khả thi trên các đồ thị có hàng chục đến hàng trăm
+    % vùng. Chất lượng nghiệm, ảnh hưởng của $K$, các ngưỡng
+    % $\delta_{\mathrm{int}}$, $\delta_{\mathrm{conn}}$, chế độ containment, và thời
+    % gian tính toán sẽ được đánh giá trong chương thực nghiệm.
 
 \end{appendices}

@@ -430,38 +430,3 @@ s_v^+ - F_v(s_v^-,w_v,\Delta_v)=0
 phụ thuộc vào endpoint map $F_v$, tức nghiệm tại $\tau=1$ của IVP phi tuyến \eqref{eq:local_ivp_ocp}. Nói cách khác, $F_v$ không phải là một biểu thức affine, đa thức lồi, hay nón bậc hai; nó là một hàm ẩn sinh ra bởi quá trình tích phân động lực học. Ngay cả khi $f$ trơn, ánh xạ này nói chung vẫn phi tuyến và không lồi theo $(s_v^-,w_v,\Delta_v)$. Ngoài ra, việc đưa $\Delta_v$ vào phương trình chuẩn hóa thời gian qua tích $\Delta_v f(x_v,u_v)$ cũng tạo thêm quan hệ phi tuyến giữa thời lượng và động lực học. Nếu dùng log-barrier, các số hạng $-\log((b_v)_j-(A_vx)_j)$ trong hàm mục tiêu tiếp tục làm mất cấu trúc conic lồi.
 
 Do đó, chỉ trong các trường hợp rất đặc biệt, chẳng hạn động lực học tuyến tính đơn giản, thời lượng cố định, và ràng buộc hình học được viết hoàn toàn bằng các chuẩn lồi, bài toán mới có thể được xấp xỉ hoặc biến đổi về một lớp lồi hỗn hợp nguyên. Với hệ động lực học tổng quát đang xét, phân loại đúng của mô hình là MIOCP ở cấp liên tục và MINLP sau rời rạc hóa. Hệ quả trực tiếp là ta không còn thừa hưởng bảo đảm convex relaxation chặt và hiệu năng giải của các bộ giải MISOCP như Mosek/Gurobi; thay vào đó, cần dùng chiến lược giải phù hợp với MINLP phi lồi, như tách pha chọn đường đi và pha tối ưu quỹ đạo liên tục được trình bày ở mục~\ref{subsec:solver_strategy}.
-
-\subsection{Xử lý biến nhị phân trong thực thi}
-\label{subsec:solver_strategy}
-
-Trong thực thi, bài toán MINLP tổng hợp~\eqref{eq:joint_obj}--\eqref{eq:joint_binary} được xây dựng bằng CasADi~\cite{Andersson2019} và giải bằng IPOPT.
-Vì IPOPT là một bộ giải điểm trong (interior-point) dành riêng cho bài toán tối ưu phi tuyến liên tục, nó không hỗ trợ biến nguyên theo nghĩa gốc: bộ giải không thực hiện phân nhánh hay liệt kê trên miền rời rạc, và chỉ chấp nhận bài toán được đặc tả hoàn toàn bằng ràng buộc liên tục.
-Phần này trình bày cách ràng buộc nhị phân được xử lý và lý do tại sao relaxation liên tục vẫn dẫn đến nghiệm hội tụ về $\{0,1\}$ nhờ cấu trúc đặc biệt của hệ ràng buộc luồng mạng.
-
-\subsubsection{Relaxation liên tục của ràng buộc nhị phân}
-
-Để đưa bài toán về dạng NLP thuần túy có thể tiếp nhận bởi IPOPT, ràng buộc nhị phân~\eqref{eq:joint_binary} được thay thế bằng ràng buộc liên tục:
-\begin{equation}
-    y_{uv} \in \{0,1\}
-    \;\longrightarrow\;
-    y_{uv} \in [0,1],
-    \qquad \forall (u,v) \in E,
-    \label{eq:binary_relax}
-\end{equation}
-và tương tự $p_v \in \{0,1\}$ được relax thành $p_v \in [0,1]$ với mọi $v \in V_r$.
-Sau bước này, bài toán~\eqref{eq:joint_obj}--\eqref{eq:joint_binary} trở thành một NLP phi lồi hữu hạn chiều có thể giải trực tiếp bằng IPOPT, gọi là \emph{continuous relaxation} của MINLP gốc.
-Về nguyên tắc, relaxation mở rộng miền khả thi để bao gồm các điểm phân số $y_{uv} \in (0,1)$, vốn không có ý nghĩa vật lý trong bài toán quy hoạch đường đi.
-Tuy nhiên, như được phân tích dưới đây, cấu trúc đặc biệt của hệ ràng buộc luồng mạng đảm bảo rằng trong hầu hết trường hợp, nghiệm của bài toán relaxed vẫn tự nhiên hội tụ về tập nhị phân.
-
-\subsubsection{Hội tụ tự nhiên về nghiệm nguyên nhờ cấu trúc luồng mạng}
-
-Mặc dù relaxation~\eqref{eq:binary_relax} mở rộng miền sang phần phân số, hệ ràng buộc network flow~\eqref{eq:joint_source_sink}--\eqref{eq:joint_acyc} áp đặt một cấu trúc đại số đặc biệt lên polytope khả thi của các biến $(y, p)$, khiến mọi đỉnh cực trị (extreme point) của polytope đó đều là vector nhị phân.
-
-Để thấy điều này, hãy xét polytope $\mathcal{P} \subset [0,1]^{|E|+|V_r|}$ được xác định bởi hệ ràng buộc~\eqref{eq:joint_source_sink}--\eqref{eq:joint_acyc} khi các biến $y$ và $p$ được coi là liên tục.
-Ma trận ràng buộc của bài toán luồng mạng trên đồ thị có hướng là ma trận incidence đỉnh--cạnh, vốn là ma trận \emph{totally unimodular} (TU)~\cite{Wolsey1999}: mọi minor vuông của nó có định thức thuộc $\{-1, 0, 1\}$.
-Kết hợp với vế phải nguyên của các ràng buộc source/sink~\eqref{eq:joint_source_sink} (giá trị bằng 1), tính TU đảm bảo rằng mọi đỉnh cực trị của polytope lồi $\mathcal{P}$ đều là vector nguyên~\cite{Wolsey1999}, và do $y_{uv} \in [0,1]$, các đỉnh này chính xác là các vector $\{0,1\}^{|E|}$ tương ứng với các đường đi đơn giản từ $\sigma$ đến $\tau$ trên đồ thị $G$.
-
-Vì vậy, khi IPOPT tối thiểu hóa hàm mục tiêu~\eqref{eq:joint_obj} trên $\mathcal{P}$, bộ giải hội tụ về vùng biên của miền khả thi và, với hàm mục tiêu không suy biến, tìm đến một đỉnh cực trị nhị phân --- tức một đường đi đơn giản xác định trên đồ thị.
-Do đó, trong hầu hết các thực nghiệm, các biến $y_{uv}$ hội tụ về $\{0,1\}$ mà không cần áp dụng branch-and-bound hay chiến lược làm tròn bổ sung.
-
-
