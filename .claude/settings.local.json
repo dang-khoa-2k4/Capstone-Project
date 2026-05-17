@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(Get-ChildItem *)",
-      "Skill(latex-posters)"
+      "Skill(latex-posters)",
+      "Bash(grep *)"
     ]
   }
 }

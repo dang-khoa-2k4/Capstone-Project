@@ -248,7 +248,7 @@
 
 % \end{frame}
 
-\begin{frame}{Bài toán hoạch định chuyển động}
+\begin{frame}{GCS vượt trội về tối ưu toàn cục và tích hợp ràng buộc động học}
     \begin{columns}[T,onlytextwidth]
         \begin{column}{0.33\textwidth}
             \centering
@@ -267,7 +267,7 @@
             \begin{itemize}
                 \small
                 \item RRT (Rapidly-exploring Random Tree)
-                % \item RRT* (optimal variant)
+                      % \item RRT* (optimal variant)
                 \item PRM (Probabilistic Roadmap)
             \end{itemize}
             \begin{figure}
@@ -338,31 +338,29 @@
 
 % \end{frame}
 
-\begin{frame}{Phân hoạch không gian an toàn lồi}
+\begin{frame}{Phân hoạch lồi chia $\mathcal{C}_{\text{free}}$ thành tập hữu hạn vùng $\{Q_v\}$ không va chạm}
     \begin{columns}[T,onlytextwidth]
         \begin{column}{0.5\textwidth}
             \centering
-
             \includegraphics[width=0.8\linewidth]{./imgs/decompose-ex-2.png}
-            \captionof{figure}{Phân hoạch không gian an toàn lồi~\cite{marcucci2023motion}}
+            \captionof{figure}{Mỗi vùng màu là một $Q_v$ lồi, đóng, không va chạm~\cite{marcucci2023motion}}
         \end{column}
         \begin{column}{0.5\textwidth}
-            \begin{block}{Phân hoạch lồi (Convex Decomposition)}
-                \textbf{Phân hoạch lồi} là quá trình chia một hình học phức tạp (không lồi) thành một tập hợp các \textbf{vùng con lồi}.
-            \end{block}
+            Chia $\mathcal{C}_{\text{free}}$ thành $\{Q_v\}$ sao cho
+            $\bigcup_v Q_v \supseteq \mathcal{C}_{\text{free}}$.
 
-            \vspace{0.5em}
-
+            \vspace{0.4em}
             \textbf{Mục tiêu:}
             \begin{itemize}
-                \item Tối thiểu hóa số lượng vùng lồi, vùng lồi lớn nhất có thể.
-                \item Các vùng lồi con bao toàn bộ không gian.
+                \item Số vùng tối thiểu, mỗi vùng lớn nhất có thể
+                \item Phủ toàn bộ không gian tự do
             \end{itemize}
 
-            \textbf{Ý nghĩa:}
+            \vspace{0.3em}
+            \textbf{Ý nghĩa trong GCS:}
             \begin{itemize}
-                \item Tạo ra các vùng tránh vật cản.
-                \item Tiền đề cho mô hình hóa.
+                \item Mỗi $Q_v$ $\rightarrow$ một đỉnh trong đồ thị
+                \item Chất lượng phân hoạch quyết định chất lượng nghiệm
             \end{itemize}
         \end{column}
     \end{columns}
@@ -390,7 +388,7 @@
         \begin{column}{0.45\textwidth}
             \centering
             \includegraphics[width=\linewidth]{./imgs/ACD-1.png}
-            \captionof{figure}{Giải thuật phân hoạch xấp xỉ ACD}
+            \captionof{figure}{ACD tự động tạo vùng lồi xấp xỉ với số vùng gần tối thiểu}
         \end{column}
     \end{columns}
     \vspace{0.5em}
@@ -429,72 +427,63 @@
 
 \section{Bài toán tối ưu hóa}
 
-\begin{frame}{Bài toán tìm đường đi ngắn nhất (SPP) trong GCS}
-    
-    \textbf{Mục tiêu:} Tìm đường đi chi phí tối thiểu $\sigma \to \tau$ trên GCS
-        % \vspace{0.5em}
+\begin{frame}{Tiếp cận 1: Bài toán tối ưu hóa trong GCS}
 
-        \begin{columns}[T,onlytextwidth]
-            \begin{column}{0.5\textwidth}
-                \[
-                    \min \sum_{e=(u,v)\in \mathcal{E}} \ell_e(x_u,x_v)\, y_e
-                \]
-                \begin{itemize}
-                    \item \textbf{Bảo toàn luồng:}
-                          \[
-                              \sum_{e\in\mathcal{I}^{out}_v} y_e - \sum_{e\in\mathcal{I}^{in}_v} y_e
-                              =
-                              \begin{cases}
-                                  1  & v=\sigma \\
-                                  -1 & v=\tau \\
-                                  0  & \text{còn lại}
-                              \end{cases}
-                          \]
-                    \item \textbf{Loại vòng lặp:} $\sum_{e\in\mathcal{I}^{out}_v} y_e \le 1$
-                    \item \textbf{Biên:} $x_{\sigma} = x_{\text{start}},\; x_{\tau} = x_{\text{goal}}$
-                          % \item \textbf{An toàn:} $y_e>0 \implies x_v \in \mathcal{X}_v$
-                          % \item \textbf{Liên kết:} $y_e=1 \implies (x_u,x_v) \in \mathcal{X}_e$
-                \end{itemize}
-            \end{column}
-        \begin{column}{0.5\textwidth}
+    \begin{columns}[T,onlytextwidth]
+        \begin{column}{0.48\textwidth}
             \centering
-            \includegraphics[width=0.8\linewidth]{./imgs/gcs-frame-2.png}
-            \captionof{figure}{SPP trong GCS\footnotemark}
+            \textbf{Bài toán rời rạc}
+            \[
+                y_e \in \{0,1\},\quad e\in\mathcal E
+            \]
+            \[
+                \sum_{e\in\mathcal I^{out}_v} y_e
+                -
+                \sum_{e\in\mathcal I^{in}_v} y_e
+                =
+                \begin{cases}
+                    1  & v=\sigma       \\
+                    -1 & v=\tau         \\
+                    0  & \text{còn lại}
+                \end{cases}
+            \]
+        \end{column}
+
+        \begin{column}{0.02\textwidth}
+            \centering
+            \rule{0.4pt}{0.6\textheight}
+        \end{column}
+
+        \begin{column}{0.48\textwidth}
+            \centering
+            \textbf{Bài toán liên tục}
+            \[
+                \min_{q,T}
+                aT
+                + b\int_0^T \|\dot q(t)\|_2dt
+                + c\int_0^T \|\dot q(t)\|_2^2dt
+            \]
+            \begin{itemize}
+                \item $q(t)\in \bigcup_i Q_i$
+                \item $\dot q(t)\in\mathcal D$
+                \item $q(0)=q_{init},\;q(T)=q_{final}$
+            \end{itemize}
         \end{column}
     \end{columns}
 
-    % \captionof{figure}{SPP in GCS\footnotemark}
+    \vspace{-0.2em}
+    \[
+        \Rightarrow
+        \min \sum_{e=(u,v)\in\mathcal E}
+        \ell_e(x_u,x_v)y_e
+    \]
 
-    % \footnotetext{Nguồn: Shao Yuan et al., ``GCS*: Forward Heuristic Search on Implicit Graphs of Convex Sets''}
-    \footnotetext{Nguồn: Marcucci et al., ``Motion Planning around Obstacles with Convex Optimization''}
-
-\end{frame}
-
-\begin{frame}{Hoạch định chuyển động}
-    \textbf{Mô hình hóa bài toán:}
-    % \vspace{0.1cm}
-    \begin{equation*}
-        \min_{q, T} \underbrace{aT}_{\text{Thời gian}} + \underbrace{b \int_{0}^{T} \|\dot{q}(t)\|_2 dt}_{\text{Độ dài}} + \underbrace{c \int_{0}^{T} \|\dot{q}(t)\|_2^2 dt}_{\text{Năng lượng}}
-    \end{equation*}
-    % \vspace{-0.2cm}
-    \begin{itemize}
-        \item \textbf{An toàn:} $q(t) \in \bigcup_{i \in \mathcal{I}} \mathcal{Q}_i$ (phân hoạch lồi)
-        \item \textbf{Vật lý:} $\dot{q}(t) \in \mathcal{D}$ (tập vận tốc lồi), $q \in \mathcal{C}^\eta$ (trơn)
-        \item \textbf{Ràng buộc biên:} $q(0) = q_{init}, \dot{q}(0) = v_{init}$; $q(T) = q_{final}, \dot{q}(T) = v_{final}$
-              % \item \textbf{Lồi hóa:} hàm phối cảnh xử lý $T$ như biến quyết định
-    \end{itemize}
-
-    % \vspace{1em}
-    % Cấu trúc lại qua tọa độ đường $s \in [0, 1]$: $q(t) = r(s)$ với $t = h(s)$
-    % \begin{equation*}
-    %     r(s) = \sum_{k=0}^{d} \beta_{k,d}(s)r_k, \quad h(s) = \sum_{k=0}^{d} \beta_{k,d}(s)h_k
-    % \end{equation*}
 \end{frame}
 
 \begin{frame}{Hoạch định chuyển động sử dụng mô hình SPP trong GCS}
     \begin{columns}[T,onlytextwidth]
         \begin{column}{0.55\textwidth}
-            Mục tiêu: Tìm quỹ đạo tối ưu $\sigma \to \tau$ trên GCS
+            \textbf{Mục tiêu:} tìm quỹ đạo tối ưu $\sigma \to \tau$ trên GCS
             \begin{itemize}
                 \item Phân hoạch không gian thành các vùng an toàn lồi $\{Q_v \subset R^2\}$
                 \item Thiết lập đồ thị liền kề GCS $G=(V,\mathcal{E})$
@@ -554,53 +543,6 @@
     \footnotetext{Nguồn: Marcucci et al., ``Motion Planning around Obstacles with Convex Optimization''}
 \end{frame}
 
-% \begin{frame}{Đặc tính NP-hard và Nới lỏng Lồi}
-%     \textbf{Bài toán:}
-%     \begin{align}
-%         \text{minimize} \quad   & \sum_{e=(u,v) \in
-%         \mathcal{E}} y_e \ell_e(x_u, x_v) \label{eq:gcs_obj_milp}                                                                                                                \\
-%         \text{subject to} \quad & \sum_{e \in \mathcal{E}^+(u)} y_e - \sum_{e \in \mathcal{E}^-(u)} y_e = \delta_u, \quad \forall u \in \mathcal{V} \label{eq:flow_conservation} \\
-%                                 & (x_u, x_v) \in X_e, \quad \forall e=(u,v) \in \mathcal{E} \label{eq:edge_constraint}                                                           \\
-%                                 & x_v \in X_v, \quad \forall v \in \mathcal{V} \label{eq:vertex_constraint}                                                                      \\
-%                                 & y_e \in \{0, 1\}, \quad \forall e \in \mathcal{E} \label{eq:binary_variable}
-%     \end{align}
-
-%     \begin{itemize}
-%         \item Lập trình hỗn hợp nguyên lồi (Mixed-Integer Convex Program - MICP),
-%               NP-hard~\cite{marcucci2023motion}
-%         \item \textbf{Giải pháp:} Nới lỏng $\rightarrow$ bài toán lồi chặt~\cite{marcucci2023motion,marcucci2024shortest}
-%     \end{itemize}
-
-% \end{frame}
-
-% % \section{Phương pháp Rounding}
-% \begin{frame}{Nới lỏng lồi (Convex Relaxation) và Giải thuật Làm tròn}
-%     \textbf{Chiến lược nới lỏng bài toán MICP:}
-%     \begin{itemize}
-%         \item Hàm chi phí phi lồi và ràng buộc rời rạc $\rightarrow$ lồi: kỹ thuật hàm phối
-%               cảnh~\cite{marcucci2023motion,marcucci2024shortest}.
-%         \item Ràng buộc phi lồi $\rightarrow$ hệ ràng buộc lồi chặt $\Rightarrow$ tối ưu
-%               lồi~\cite{marcucci2023motion,marcucci2024shortest}.
-%     \end{itemize}
-%     \textbf{Kết quả nới lỏng:}
-%     \begin{itemize}
-%         \item Kết quả cho ra thường chặt: $C_{relax} \approx C_{opt}$
-%         \item Nếu không chặt (Loose Relaxation): làm tròn ngẫu nhiên
-%         \item \textbf{Đánh giá:}
-%               \begin{itemize}
-%                   \item Khoảng cách tối ưu: $\delta_{opt} = \frac{C_{round} - C_{opt}}{C_{opt}}$
-%                   \item Ước lượng qua nới lỏng: $\delta_{relax} = \frac{C_{round} - C_{relax}}{C_{relax}}$
-%               \end{itemize}
-%     \end{itemize}
-
-%     \textbf{Làm tròn ngẫu nhiên:}
-%     \begin{enumerate}
-%         \item Khởi tạo từ nguồn $\sigma$
-%         \item Tại nút $v$: chọn cạnh $e=(v \to w)$ theo xác suất $\propto y_e^*$
-%         \item Quay lui nếu ngõ cụt, đến đích $\tau$~\cite{marcucci2023motion}
-%     \end{enumerate}
-% \end{frame}
-
 % \begin{frame}{Sinh quỹ đạo liên tục}
 %     \textbf{Sau khi chọn được đường đi rời rạc $p$:}
 %     \begin{enumerate}
@@ -644,213 +586,359 @@
 % \end{multicols}
 % \end{frame}
 
+% Nguồn nội dung: report_v4 mô tả mục tiêu ghép GCS + direct multiple shooting và endpoint map/defect constraint; beamer mms_beamer trình bày local shooting block, flow formulation và continuity/interface constraints.    
+
+% \begin{frame}{Hàm mục tiêu cục bộ trên một vùng active}
+%     \small
+
+%     Với mỗi vùng lồi active $v$, ta gán một shooting block có thời lượng $\Delta_v$
+%     và quỹ đạo cục bộ $x_v(\tau)$ trên miền chuẩn hoá $\tau\in[0,1]$.
+
+%     \[
+%         q_v(\tau) := \pi(x_v(\tau)),
+%         \qquad
+%         u_v(\tau) := U_v(\tau;w_v),
+%     \]
+%     trong đó $q_v$ là phần cấu hình hình học của trạng thái và $w_v$ là vector tham
+%     số hữu hạn chiều của điều khiển.
+
+%     \vspace{0.4em}
+
+%     Chi phí tức thời được chọn là
+%     \[
+%         \ell(x(t),u(t)) =
+%         w_L|\dot q(t)|^2 + w_E|u(t)|^2, \qquad w_L,w_E>0.
+%     \]
+
+%     Chi phí local trên vùng $v$:
+%     \[
+%         J_v(s_v^-,w_v,\Delta_v) =
+%         a\Delta_v + \int_0^1 \Delta_v \left( w_L \left| \frac{1}{\Delta_v}
+%         \frac{dq_v}{d\tau}(\tau) \right|^2 + w_E|u_v(\tau)|^2 \right)d\tau .
+%     \]
+
+%     \[
+%         \frac{1}{\Delta_v}\frac{dq_v}{d\tau}=\dot q_v,
+%         \qquad
+%         \Delta_v\,d\tau = dt.
+%     \]
+
+% \end{frame}
+
+% ===================== Slide DMS-1: GCS-DMS = MINLP (overview) =====================
+\begin{frame}{GCS-DMS gộp graph problem và OCP cục bộ thành một bài toán MINLP}
+    \small
+
+    \begin{columns}[T, onlytextwidth]
+        \begin{column}{0.48\textwidth}
+            \centering \textbf{graph problem - network flow}
+
+            \begin{itemize}
+                \item $y_{uv}\in\{0,1\}$: cạnh $(u,v)$ được chọn
+                \item $p_v\in\{0,1\}$: vùng $v$ được kích hoạt
+                \item Bảo toàn luồng: ${\displaystyle\sum_{\mathrm{in}}} y =
+                              {\displaystyle\sum_{\mathrm{out}}} y = p_v$
+                \item Interface $z_{uv}\!\in\!Q_u\!\cap\! Q_v$,\; $s_u^+ = s_v^- = z_{uv}$
+            \end{itemize}
+
+            % \vspace{0.2cm}
+            \[
+                J_{\mathrm{total}} = \sum_{v\in V_r} p_v\, J_v(s_v^-,w_v,\Delta_v)
+            \]
+        \end{column}
+
+        \begin{column}{0.02\textwidth}
+            \centering \rule{0.4pt}{0.55\textheight}
+        \end{column}
+
+        \begin{column}{0.47\textwidth}
+            \centering \textbf{OCP trên vùng $v$ (khi $p_v=1$)}
+
+            \vspace{0.2cm}
+            \[
+                J_v =
+                \underbrace{a\Delta_v}_{\text{thời lượng}}
+                +
+                \underbrace{
+                w_L\!\int_0^1 \tfrac{1}{\Delta_v}
+                \!\left|\tfrac{dq_v}{d\tau}\right|^{\!2}\!d\tau
+                }_{\text{vận tốc hình học}}
+                +
+                \underbrace{
+                    w_E\!\int_0^1 \Delta_v|u_v|^2d\tau
+                }_{\text{năng lượng điều khiển}}
+            \]
+
+            \vspace{0.1cm}
+            \footnotesize
+            $q_v(\tau):=\pi(x_v(\tau))$;\quad
+            $\tfrac{1}{\Delta_v}\tfrac{dq_v}{d\tau}=\dot q_v$;\quad
+            $\Delta_v d\tau=dt$
+        \end{column}
+    \end{columns}
+
+    \vspace{0.15cm}
+    \begin{alertblock}{Phân loại bài toán}
+        Biến nhị phân $p_v,y_{uv}$ + OCP phi tuyến $\;\Rightarrow\;$
+        \textbf{MIOCP} (liên tục theo thời gian) \;/\;
+        \textbf{MINLP} (sau khi DMS rời rạc hóa điều khiển)
+    \end{alertblock}
+
+\end{frame}
+
+% ===================== Slide DMS-2: DMS - IVP & Defect =====================
+\begin{frame}{DMS tham số hóa đoạn quỹ đạo, buộc tính liên tục qua defect constraint}
+    \small
+
+    \begin{columns}[T, onlytextwidth]
+        \begin{column}{0.50\textwidth}
+            \textbf{Biến quyết định trên mỗi vùng $v \in V_r$:}
+            \begin{itemize}
+                \item $s_v^- \in \mathbb{R}^{n_x}$ - trạng thái vào (điểm bắn)
+                \item $s_v^+ \in \mathbb{R}^{n_x}$ - trạng thái ra (độc lập)
+                \item $\Delta_v \ge 0$ - thời lượng đoạn
+                \item $w_v$ - tham số hóa điều khiển $u_v(\tau) = \mathcal{U}_v(\tau;w_v)$
+            \end{itemize}
+
+            \vspace{0.3cm}
+            \textbf{IVP cục bộ} (thời gian chuẩn hóa $\tau\in[0,1]$):
+            \[
+                \frac{dx_v}{d\tau} = \Delta_v f\!\bigl(x_v(\tau),\,u_v(\tau)\bigr),
+                \quad x_v(0) = s_v^-
+            \]
+        \end{column}
+
+        \begin{column}{0.46\textwidth}
+            \begin{alertblock}{Ràng buộc defect - then chốt DMS}
+                \[
+                    s_v^+ \;-\; \underbrace{F_v(s_v^-,\,w_v,\,\Delta_v)}_{\displaystyle x_v(1)} \;=\; 0
+                \]
+                Tính liên tục áp đặt \emph{sau} tích phân, không cần tích phân tuần tự.
+            \end{alertblock}
+        \end{column}
+    \end{columns}
+
+\end{frame}
+
+% ===================== Slide DMS-3: Solver (2 pha) + Safety + Output =====================
+\begin{frame}{Giải MINLP; ràng buộc an toàn qua lấy mẫu hoặc log-barrier}
+    \footnotesize
+
+    \begin{columns}[T, onlytextwidth]
+        \begin{column}{0.52\textwidth}
+            \textbf{Pha 1 - Chọn đường đi:}
+            \begin{itemize}
+                \item Relax $y_{uv}\in\{0,1\}$ sang $[0,1]$
+                \item Giải convex problem trên toàn GCS
+                \item Làm tròn để cố định chuỗi vùng $Q_{v_1}\to\cdots\to Q_{v_K}$
+            \end{itemize}
+
+            \vspace{0.15cm}
+            \textbf{Pha 2 - Tối ưu quỹ đạo:}
+            \begin{itemize}
+                \item Warm-start từ pha 1
+                \item Tối ưu đồng thời $(s_v^\pm,\,w_v,\,\Delta_v)$ trên các vùng active
+            \end{itemize}
+
+            \vspace{0.15cm}
+            \textbf{Cơ chế an toàn continuous-time:}
+            \begin{itemize}
+                \item \textbf{Lấy mẫu:} $A_v x_v(\tau_k)\!\le\! b_v\!-\!\varepsilon_v$ -
+                      đơn giản, có blind spot giữa node
+                \item \textbf{Log-barrier:} $-\mu_v\!\int\!\textstyle\sum_j\!\log(b_j\!-\!a_j^\top x_v)\,d\tau$ -
+                      liên tục, nhạy với $\mu_v$
+            \end{itemize}
+        \end{column}
+
+        \begin{column}{0.44\textwidth}
+            \textbf{Đầu ra:}
+            \begin{itemize}
+                \item Chuỗi vùng $Q_{v_1},\ldots,Q_{v_K}$ được kích hoạt
+                \item $x^\star(\cdot)$: quỹ đạo \textbf{liên tục}, an toàn
+                \item $u^\star(\cdot)$: tín hiệu điều khiển hợp lệ
+                \item $T^\star = \textstyle\sum_v \Delta_v^\star$: thời gian tổng
+            \end{itemize}
+
+            \vspace{0.3cm}
+            \textbf{Ba bảo đảm cùng lúc:}
+            \begin{itemize}
+                \item \textbf{Liên tục:} defect $= 0$ tại mọi giao điểm
+                \item \textbf{An toàn:} $x^\star(t)\in Q_{v(t)},\;\forall t$
+                \item \textbf{Động lực học:} IVP thỏa trên từng vùng
+            \end{itemize}
+        \end{column}
+    \end{columns}
+
+\end{frame}
+
 \section{Thực nghiệm}
 
 % =====================================================================
 % Slide 1: Setup overview
 % =====================================================================
 \begin{frame}{Thiết lập thực nghiệm}
-\vspace{-0.6em}
+    \vspace{-0.6em}
 
-{\scriptsize\color{black!65}
-Hai formulation được chạy trong cùng cấu hình; mỗi thực nghiệm kiểm tra một khía cạnh riêng của bài toán.
-}
+    {\scriptsize\color{black!65}
+        Hai formulation được chạy trong cùng cấu hình; mỗi thực nghiệm kiểm tra một khía cạnh riêng của bài toán.
+    }
 
-\vspace{0.35em}
+    \vspace{0.35em}
 
-\begin{columns}[T,onlytextwidth]
-% ================= LEFT =================
-\begin{column}{0.55\textwidth}
-\begin{block}{Stack triển khai}
-\vspace{-0.55em}
-\scriptsize
-\centering
-\setlength{\tabcolsep}{3.5pt}
-\renewcommand{\arraystretch}{1.12}
+    \begin{columns}[T,onlytextwidth]
+        % ================= LEFT =================
+        \begin{column}{0.55\textwidth}
+            \vspace{-0.2em}
+            \scriptsize
+            \centering
+            \setlength{\tabcolsep}{3.5pt}
+            \renewcommand{\arraystretch}{1.12}
 
-\begin{tabular}{@{}lll@{}}
-\toprule
-\textbf{Pha} &
-\textbf{\textcolor{blue!75!black}{GCS-Bézier}} &
-\textbf{\textcolor{teal!70!black}{GCS-DMS}} \\
-\midrule
-Phân hoạch & \multicolumn{2}{c}{ACD / IRIS / VCC (Drake)} \\
-Solver     & Mosek (SOCP)   & CasADi + IPOPT (NLP) \\
-Ngôn ngữ   & Python (Drake) & Python \\
-\bottomrule
-\end{tabular}
+            \begin{tabular}{@{}l | c | c @{}}
+                \toprule
+                \textbf{Pha}                                   &
+                \textbf{\textcolor{blue!75!black}{GCS-Bézier}} &
+                \textbf{\textcolor{teal!70!black}{GCS-DMS}}                                                                          \\
+                \midrule
+                Phân hoạch                                     & \multicolumn{2}{c}{ACD / IRIS / VCC (Drake)}                        \\
+                Solver                                         & Mosek (SOCP)                                 & CasADi + IPOPT (NLP) \\
+                Ngôn ngữ                                       & Python (Drake)                               & Python               \\
+                \bottomrule
+            \end{tabular}
 
-\vspace{0.35em}
-{\tiny
-\textbf{Phần cứng:} AMD Ryzen 7 4800H @ 2.9 GHz; 16 GB RAM; Ubuntu 24.04.
-}
-\end{block}
-\end{column}
+            \vspace{0.35em}
+            {\tiny
+                \textbf{Phần cứng:} AMD Ryzen 7 4800H @ 2.9 GHz; 16 GB RAM; Ubuntu 24.04.
+            }
+        \end{column}
 
-% ================= RIGHT =================
-\begin{column}{0.43\textwidth}
-\vspace{-0.55em}
-\centering
-\includegraphics[
-    width=0.6\linewidth,
-    % height=0.26\textheight,
-    keepaspectratio
-]{./imgs/2d-env.png}
-\end{column}
-\end{columns}
+        % ================= RIGHT =================
+        \begin{column}{0.43\textwidth}
+            \vspace{-0.55em}
+            \centering
+            \includegraphics[
+                width=0.6\linewidth,
+                % height=0.26\textheight,
+                keepaspectratio ]{./imgs/2d-env.png}
+        \end{column}
+    \end{columns}
 
-\vspace{-0.25em}
+    \vspace{-0.25em}
 
-\begin{beamercolorbox}[wd=\textwidth,sep=1.5pt,rounded=true]{block title example}
-{\footnotesize\textbf{Thực nghiệm:}}
-\end{beamercolorbox}
+    {\footnotesize\textbf{Thực nghiệm:}}
 
-\vspace{0.25em}
+    \vspace{0.25em}
 
-\begin{columns}[T,onlytextwidth]
-% ================= CARD 1 =================
-\begin{column}{0.32\textwidth}
-\centering
-\begin{tikzpicture}
-\node[
-    fill=teal!8,
-    draw=teal!45,
-    rounded corners=2pt,
-    inner sep=3pt,
-    minimum height=1.05cm,
-    text width=0.92\linewidth,
-    align=left
-] {
-{\scriptsize\textbf{\textcolor{teal!70!black}{TN3 -- 2D đơn giản}}}\\[-0.15em]
-{\tiny Manual / ACD / VCC}\\[-0.15em]
-{\tiny Tác động của thuật toán phân hoạch.}
-};
-\end{tikzpicture}
-\end{column}
+    \begin{columns}[T,onlytextwidth]
 
-% ================= CARD 2 =================
-\begin{column}{0.32\textwidth}
-\centering
-\begin{tikzpicture}
-\node[
-    fill=blue!8,
-    draw=blue!45,
-    rounded corners=2pt,
-    inner sep=3pt,
-    minimum height=1.05cm,
-    text width=0.92\linewidth,
-    align=left
-] {
-{\scriptsize\textbf{\textcolor{blue!75!black}{TN2 -- Maze $25\!\times\!25$}}}\\[-0.15em]
-{\tiny 10 mẫu ngẫu nhiên}\\[-0.15em]
-{\tiny Mở rộng tổ hợp của GCS-Bézier.}
-};
-\end{tikzpicture}
-\end{column}
+        % ================= COL 1 =================
+        \begin{column}{0.32\textwidth}
+            \raggedright
+            {\scriptsize\textbf{TN1 -- Unicycle}}\\[-0.15em]
+            {\footnotesize 2D + maze $15\!\times\!15$}\\[-0.15em]
+            {\footnotesize GCS-DMS với động lực học phi tuyến.}
+        \end{column}
 
-% ================= CARD 3 =================
-\begin{column}{0.32\textwidth}
-\centering
-\begin{tikzpicture}
-\node[
-    fill=red!6!yellow!8,
-    draw=red!55!yellow!45,
-    rounded corners=2pt,
-    inner sep=3pt,
-    minimum height=1.05cm,
-    text width=0.92\linewidth,
-    align=left
-] {
-{\scriptsize\textbf{\textcolor{red!65!yellow!45!black}{TN1 -- Unicycle}}}\\[-0.15em]
-{\tiny 2D + maze $15\!\times\!15$}\\[-0.15em]
-{\tiny GCS-DMS với động lực học phi tuyến.}
-};
-\end{tikzpicture}
-\end{column}
-\end{columns}
+        % ================= COL 2 =================
+        \begin{column}{0.32\textwidth}
+            \raggedright
+            {\scriptsize\textbf{TN2 -- Maze $25\!\times\!25$}}\\[-0.15em]
+            {\footnotesize 10 mẫu ngẫu nhiên}\\[-0.15em]
+            {\footnotesize Mở rộng tổ hợp của GCS-Bézier.}
+        \end{column}
+
+        % ================= COL 3 =================
+        \begin{column}{0.32\textwidth}
+            \raggedright
+            {\scriptsize\textbf{TN3 -- 2D đơn giản}}\\[-0.15em]
+            {\footnotesize Manual / ACD / VCC}\\[-0.15em]
+            {\footnotesize Tác động của thuật toán phân hoạch.}
+        \end{column}
+
+    \end{columns}
 
 \end{frame}
 % =====================================================================
 % Slide 2: Evaluation metrics
 % =====================================================================
-\begin{frame}{Chỉ số đánh giá}
-\vspace{-0.45em}
+% \begin{frame}{Chỉ số đánh giá}
+%     \vspace{-0.45em}
 
-{\scriptsize\color{black!65}
-Hai formulation giải hai bài toán khác nhau $\Rightarrow$ chỉ số dùng để
-\textbf{kiểm chứng từng mô hình}, không xếp hạng trực tiếp.
-}
+%     {\scriptsize\color{black!65}
+%         Hai formulation giải hai bài toán khác nhau $\Rightarrow$ chỉ số dùng để
+%         \textbf{kiểm chứng từng mô hình}, không xếp hạng trực tiếp.
+%     }
 
-\vspace{0.45em}
+%     \vspace{0.45em}
 
-\begin{columns}[T,onlytextwidth]
+%     \begin{columns}[T,onlytextwidth]
 
-% ================= COL 1 =================
-\begin{column}{0.32\textwidth}
-\begin{block}{Chi phí tính toán}
+%         % ================= COL 1 =================
+%         \begin{column}{0.32\textwidth}
+%             \begin{block}{Chi phí tính toán}
 
-\scriptsize
-\begin{itemize}
-    \setlength\itemsep{0.22em}
-    \item $t_{\text{decomp}}$: thời gian phân hoạch
-    \item $t_{\text{solve}}$: thời gian giải tối ưu
-    \item $N_{\text{region}}$: số vùng toàn cục / kích hoạt
-\end{itemize}
-\vspace{-0.35em}
-\end{block}
-\end{column}
+%                 \scriptsize
+%                 \begin{itemize}
+%                     \setlength\itemsep{0.22em}
+%                     \item $t_{\text{decomp}}$: thời gian phân hoạch
+%                     \item $t_{\text{solve}}$: thời gian giải tối ưu
+%                     \item $N_{\text{region}}$: số vùng toàn cục / kích hoạt
+%                 \end{itemize}
+%                 \vspace{-0.35em}
+%             \end{block}
+%         \end{column}
 
-% ================= COL 2 =================
-\begin{column}{0.32\textwidth}
-\begin{exampleblock}{Chất lượng quỹ đạo}
+%         % ================= COL 2 =================
+%         \begin{column}{0.32\textwidth}
+%             \begin{exampleblock}{Chất lượng quỹ đạo}
 
-\scriptsize
-\begin{itemize}
-    \setlength\itemsep{0.22em}
-    \item $T_{\text{exec}}$: thời gian thực thi
-    \item $C_{\text{path}}$ / $C_{\text{DMS}}$: giá trị mục tiêu
-    \item $|v(t)|$: hồ sơ vận tốc
-\end{itemize}
-\vspace{-0.35em}
-\end{exampleblock}
-\end{column}
+%                 \scriptsize
+%                 \begin{itemize}
+%                     \setlength\itemsep{0.22em}
+%                     \item $T_{\text{exec}}$: thời gian thực thi
+%                     \item $C_{\text{path}}$ / $C_{\text{DMS}}$: giá trị mục tiêu
+%                     \item $|v(t)|$: hồ sơ vận tốc
+%                 \end{itemize}
+%                 \vspace{-0.35em}
+%             \end{exampleblock}
+%         \end{column}
 
-% ================= COL 3 =================
-\begin{column}{0.32\textwidth}
-\begin{alertblock}{Tính khả thi}
+%         % ================= COL 3 =================
+%         \begin{column}{0.32\textwidth}
+%             \begin{alertblock}{Tính khả thi}
 
-\scriptsize
-\begin{itemize}
-    \setlength\itemsep{0.22em}
-    \item Optimality gap của GCS-Bézier
-    \item Defect / connection gap của DMS
-    \item Violation và integrality gap
-\end{itemize}
-\vspace{-0.35em}
-\end{alertblock}
-\end{column}
+%                 \scriptsize
+%                 \begin{itemize}
+%                     \setlength\itemsep{0.22em}
+%                     \item Optimality gap của GCS-Bézier
+%                     \item Defect / connection gap của DMS
+%                     \item Violation và integrality gap
+%                 \end{itemize}
+%                 \vspace{-0.35em}
+%             \end{alertblock}
+%         \end{column}
 
-\end{columns}
+%     \end{columns}
 
-\vspace{0.35em}
+%     \vspace{0.35em}
 
-\begin{beamercolorbox}[
-    wd=\textwidth,
-    sep=3pt,
-    rounded=true
-]{block title example}
-{\scriptsize
-\textbf{Ghi chú:}
-Một số chỉ số chỉ có nghĩa với một mô hình; chỉ số chung chỉ đóng vai trò mô tả.
-}
-\end{beamercolorbox}
+%     \begin{beamercolorbox}[
+%             wd=\textwidth,
+%             sep=3pt,
+%             rounded=true
+%         ]{block title example}
+%         {\scriptsize
+%             \textbf{Ghi chú:}
+%             Một số chỉ số chỉ có nghĩa với một mô hình; chỉ số chung chỉ đóng vai trò mô tả.
+%         }
+%     \end{beamercolorbox}
 
-\end{frame}
+% \end{frame}
 
 % =====================================================================
 % TN3 - Slide 1: Decomposition visualization
 % =====================================================================
-\begin{frame}{TN3 — Ba phương pháp phân hoạch lồi (đầu vào)}
+\begin{frame}{TN3 - Ba phương pháp phân hoạch lồi (đầu vào)}
     \centering
     {\footnotesize Cùng môi trường 2D, cùng $q_0/q_T$, khác chiến lược phân hoạch.}
 
@@ -874,16 +962,14 @@ Một số chỉ số chỉ có nghĩa với một mô hình; chỉ số chung c
         {\scriptsize Phủ 96\%; $t_{\text{decomp}}=5.78$ s}
     \end{minipage}
 
-    % \vspace{0.5em}
-    \begin{exampleblock}{Quan sát}
-        \footnotesize ACD bám sát mức tối thiểu của Manual với chi phí tự động hóa thấp; VCC tạo cấu trúc dày đặc hơn $\Rightarrow$ đồ thị GCS nhiều cạnh hơn.
-    \end{exampleblock}
+    \vspace{0.3em}
+    \footnotesize \textbf{Nhận xét:} ACD bám sát Manual với chi phí tự động hóa thấp; VCC cấu trúc dày hơn $\Rightarrow$ GCS nhiều cạnh, giải chậm hơn.
 \end{frame}
 
 % =====================================================================
 % TN3 - Slide 2: GCS-Bezier trajectories + table
 % =====================================================================
-\begin{frame}{TN3 — Tác động lên GCS-Bézier}
+\begin{frame}{TN3 - Tác động lên GCS-Bézier}
     \begin{columns}[T,onlytextwidth]
         \begin{column}{0.46\textwidth}
             \centering
@@ -909,23 +995,22 @@ Một số chỉ số chỉ có nghĩa với một mô hình; chỉ số chung c
                 \centering\footnotesize
                 \begin{tabular}{lcccc}
                     \toprule
-                    & \textbf{Vùng} & \textbf{Solve (s)} & \textbf{Path cost} & \textbf{Tổng (s)} \\
+                           & \textbf{Vùng} & \textbf{Solve (s)} & \textbf{Path cost} & \textbf{Tổng (s)} \\
                     \midrule
-                    Manual & 12 & \textbf{3.90}  & 27.88           & \textbf{3.90}   \\
-                    ACD    & 15 & 4.31           & 24.63           & 4.32            \\
-                    VCC    & 33 & 269.94         & \textbf{24.44}  & 275.72          \\
+                    Manual & 12            & \textbf{3.90}      & 27.88              & \textbf{3.90}     \\
+                    ACD    & 15            & 4.31               & 24.63              & 4.32              \\
+                    VCC    & 33            & 269.94             & \textbf{24.44}     & 275.72            \\
                     \bottomrule
                 \end{tabular}
             \end{table}
-            \vspace{-0.4em}
-            \begin{alertblock}{Bài học}
-                \scriptsize
+            \vspace{-0.2em}
+            {\footnotesize
                 \begin{itemize}
-                    \item \textbf{ACD cân bằng nhất:} tự động, $C_{\text{path}}$ gần VCC, nhanh hơn $\sim$64$\times$.
-                    \item VCC: $t_{\text{solve}}$ \textbf{bùng nổ} do số biến nhị phân $\propto|\mathcal{E}|$ tăng phi tuyến.
-                    \item Manual: nhanh nhưng \textit{không tự động} $\Rightarrow$ không khả thi cho rô-bốt tự hành.
+                    \item \textbf{ACD cân bằng nhất:} tự động, $C_{\text{path}}$ gần VCC, nhanh hơn $\sim$64$\times$
+                    \item \textbf{VCC:} $t_{\text{solve}}$ rất cao - số biến nhị phân $\propto|\mathcal{E}|$ tăng phi tuyến
+                    \item \textbf{Manual:} nhanh nhưng không tự động $\Rightarrow$ không khả thi cho rô-bốt tự hành
                 \end{itemize}
-            \end{alertblock}
+            }
         \end{column}
     \end{columns}
 \end{frame}
@@ -933,90 +1018,84 @@ Một số chỉ số chỉ có nghĩa với một mô hình; chỉ số chung c
 % =====================================================================
 % TN3 - Slide 3: GCS-DMS on same decompositions
 % =====================================================================
-\begin{frame}{TN3 — Tác động lên GCS-DMS (Unicycle)}
-\vspace{-0.55em}
+\begin{frame}{TN3 - Tác động lên GCS-DMS (Unicycle)}
+    \vspace{-0.55em}
 
-\begin{columns}[T,onlytextwidth]
+    \begin{columns}[T,onlytextwidth]
 
-% ================= LEFT: FIGURES =================
-\begin{column}{0.61\textwidth}
-\centering
+        % ================= LEFT: FIGURES =================
+        \begin{column}{0.61\textwidth}
+            \centering
 
-\begin{minipage}[t]{0.49\linewidth}
-    \centering
-    \includegraphics[
-        height=3.5cm,
-        keepaspectratio
-    ]{./imgs/dms/2d_dms_manual.png}\\[-0.2em]
-    {\tiny\bfseries Manual}
-\end{minipage}
-\hfill
-\begin{minipage}[t]{0.49\linewidth}
-    \centering
-    \includegraphics[
-        height=3.5cm,
-        keepaspectratio
-    ]{./imgs/dms/2d_dms_acd.png}\\[-0.2em]
-    {\tiny\bfseries ACD}
-\end{minipage}
+            \begin{minipage}[t]{0.49\linewidth}
+                \centering
+                \includegraphics[
+                    height=3.5cm,
+                    keepaspectratio
+                ]{./imgs/dms/2d_dms_manual.png}\\[-0.2em]
+                {\tiny\bfseries Manual}
+            \end{minipage}
+            \hfill
+            \begin{minipage}[t]{0.49\linewidth}
+                \centering
+                \includegraphics[
+                    height=3.5cm,
+                    keepaspectratio
+                ]{./imgs/dms/2d_dms_acd.png}\\[-0.2em]
+                {\tiny\bfseries ACD}
+            \end{minipage}
 
-\vspace{0.05em}
+            \vspace{0.05em}
 
-\begin{minipage}[t]{0.58\linewidth}
-    \centering
-    \includegraphics[
-        height=3cm,
-        keepaspectratio
-    ]{./imgs/dms/2d_dms_vcc.png}\\[-0.2em]
-    {\tiny\bfseries VCC}
-\end{minipage}
+            \begin{minipage}[t]{0.58\linewidth}
+                \centering
+                \includegraphics[
+                    height=3cm,
+                    keepaspectratio
+                ]{./imgs/dms/2d_dms_vcc.png}\\[-0.2em]
+                {\tiny\bfseries VCC}
+            \end{minipage}
 
-\end{column}
+        \end{column}
 
-% ================= RIGHT: TABLE + NOTE =================
-\begin{column}{0.37\textwidth}
-\vspace{0.25em}
+        % ================= RIGHT: TABLE + NOTE =================
+        \begin{column}{0.37\textwidth}
+            \vspace{0.25em}
 
-\begin{block}{So sánh nghiệm}
-\centering
-\tiny
-\setlength{\tabcolsep}{2.35pt}
-\renewcommand{\arraystretch}{1.08}
+            \centering
+            \scriptsize
+            \setlength{\tabcolsep}{2.35pt}
+            \renewcommand{\arraystretch}{1.08}
 
-\begin{tabular}{@{}lrrrr@{}}
-\toprule
-\textbf{PP} & \textbf{Vùng} & \textbf{K.hoạt} & \textbf{Cost} & \textbf{Solve} \\
-\midrule
-Manual & 12 & 7 & \textbf{47.35} & \textbf{17.38} \\
-ACD    & 15 & 9 & 51.55          & 34.23          \\
-VCC    & 33 & 7 & 76.26          & 26.36          \\
-\bottomrule
-\end{tabular}
-\vspace{-0.55em}
-\end{block}
+            \begin{tabular}{@{}lrrrr@{}}
+                \toprule
+                \textbf{PP} & \textbf{Vùng} & \textbf{K.hoạt} & \textbf{Cost}  & \textbf{Solve} \\
+                \midrule
+                Manual      & 12            & 7               & \textbf{47.35} & \textbf{17.38} \\
+                ACD         & 15            & 9               & 51.55          & 34.23          \\
+                VCC         & 33            & 7               & 76.26          & 26.36          \\
+                \bottomrule
+            \end{tabular}
 
-\vspace{0.15em}
+            \vspace{0.3em}
+            \footnotesize
+            \begin{itemize}
+                \setlength\itemsep{0.12em}
+                \item Defect $\sim 10^{-14}$ 
+                \item gap $\sim 10^{-9}$
+                \item vi phạm $\sim 10^{-8}$
+                \item \textbf{Số vùng kích hoạt} quyết định chất lượng nghiệm DMS hơn số vùng toàn cục
+            \end{itemize}
 
-\begin{exampleblock}{Thông điệp chính}
+        \end{column}
 
-\scriptsize
-\begin{itemize}
-    \setlength\itemsep{0.12em}
-    \item Defect $\sim 10^{-14}$; gap $\sim 10^{-9}$; vi phạm $\sim 10^{-8}$.
-    \item \textbf{Số vùng kích hoạt} quyết định chất lượng nghiệm DMS hơn số vùng toàn cục.
-\end{itemize}
-\vspace{-0.65em}
-\end{exampleblock}
-
-\end{column}
-
-\end{columns}
+    \end{columns}
 \end{frame}
 
 % =====================================================================
 % TN2 - Combined slide: Maze 25x25
 % =====================================================================
-\begin{frame}{TN2 — Mê cung $25\!\times\!25$: Linear vs Bézier GCS}
+\begin{frame}{TN2 - Mê cung $25\!\times\!25$: Linear vs Bézier GCS}
     \begin{columns}[T,onlytextwidth]
         \begin{column}{0.55\textwidth}
             \centering
@@ -1024,24 +1103,25 @@ VCC    & 33 & 7 & 76.26          & 26.36          \\
             {\scriptsize Cùng homotopy: Bézier \textit{ôm cua rộng} để duy trì $C^2$}\\[0.3em]
         \end{column}
         \begin{column}{0.45\textwidth}
-            \begin{block}{Thiết lập}
-                \footnotesize 10 mê cung DFS ngẫu nhiên $25\!\times\!25\!=\!625$ ô, loại bỏ 100 tường. Bézier bậc $d=6$, $C^2$, $\dot{q}\in[-1,1]$.
-            \end{block}
+            \footnotesize 10 mê cung DFS ngẫu nhiên $25\!\times\!25\!=\!625$ ô, loại bỏ 100 tường.
+            Bézier bậc $d=6$, $C^2$, $\dot{q}\in[-1,1]$.
+
+            \vspace{0.3em}
             \footnotesize
             \centering
             \begin{tabular}{lcc}
                 \toprule
                 \textbf{TB 10 mẫu} & \textbf{Linear} & \textbf{Bézier} \\
                 \midrule
-                Solve (s)   & \textbf{1.28}  & 85.22 \\
-                Median (s)  & 1.16           & 85.10 \\
-                Mean cost   & 71.88          & 88.03 \\
-                Cost ratio  & 0.82           & 1.00  \\
+                Solve (s)          & \textbf{1.28}   & 85.22           \\
+                Median (s)         & 1.16            & 85.10           \\
+                Mean cost          & 71.88           & 88.03           \\
+                Cost ratio         & 0.82            & 1.00            \\
                 \bottomrule
             \end{tabular}
-            \begin{exampleblock}{Tính tối ưu toàn cục}
-                \scriptsize Trên \textbf{cả 10 mê cung}: $y_e^*\!\in\!\{0,1\}$ tự động $\Rightarrow$ \textbf{optimality gap $\boldsymbol{=0\%}$}, không cần rounding.
-            \end{exampleblock}
+
+            \vspace{0.3em}
+            \textbf{Tối ưu toàn cục:} trên cả 10 mê cung $y_e^*\!\in\!\{0,1\}$ tự động $\Rightarrow$ optimality gap $=0\%$, không cần rounding.
         \end{column}
     \end{columns}
 \end{frame}
@@ -1049,32 +1129,27 @@ VCC    & 33 & 7 & 76.26          & 26.36          \\
 % =====================================================================
 % TN2 - Combinatorial scalability insight slide
 % =====================================================================
-\begin{frame}{TN2 — Vì sao GCS xử lý được 625 ô?}
+\begin{frame}{TN2 - Vì sao GCS xử lý được 625 ô?}
     \begin{columns}[T,onlytextwidth]
-        \begin{column}{0.55\textwidth}
-            \begin{alertblock}{MICP truyền thống}
-                \footnotesize
-                Mỗi đoạn quỹ đạo cần biến nhị phân gán vào 1 trong $|I|$ vùng $\Rightarrow$ \textbf{$|I|^2$ biến nhị phân}.
-                \vspace{0.3em}
-                \[
-                    625 \text{ ô} \;\Rightarrow\; |I|^2 = 390{,}625 \text{ biến}
-                \]
-                $\Rightarrow$ \textit{Không giải được trong thực tế.}
-            \end{alertblock}
-            \begin{exampleblock}{GCS (network flow)}
-                \footnotesize
-                Chỉ tạo biến nhị phân cho \textbf{cạnh giữa hai vùng kề}; bậc đồ thị 2D thấp $\Rightarrow$ \textbf{$|\mathcal{E}|\approx 2|I|$}.
-                \vspace{0.3em}
-                \[
-                    625 \text{ ô} \;\Rightarrow\; 2|I| \approx 1{,}250 \text{ biến}
-                \]
-                $\Rightarrow$ \textit{Giải được trong $\sim$85 s.}
-            \end{exampleblock}
-        \end{column}
         \begin{column}{0.45\textwidth}
+            \footnotesize
+            \textbf{MICP truyền thống:} mỗi đoạn gán vào 1 trong $|I|$ vùng $\Rightarrow$ $|I|^2$ biến nhị phân.
+            \[
+                625 \text{ ô} \;\Rightarrow\; |I|^2 = 390{,}625 \text{ biến}
+                \;\Rightarrow\; \textit{không giải được.}
+            \]
+
+            \vspace{0.2em}
+            \textbf{GCS (network flow):} chỉ tạo biến cho \textbf{cạnh giữa hai vùng kề}; bậc đồ thị 2D thấp $\Rightarrow$ $|\mathcal{E}|\approx 2|I|$.
+            \[
+                625 \text{ ô} \;\Rightarrow\; 2|I| \approx 1{,}250 \text{ biến}
+                \;\Rightarrow\; \textit{giải được trong $\sim$85 s.}
+            \]
+        \end{column}
+        \begin{column}{0.55\textwidth}
             \centering
-            \includegraphics[width=0.8\textwidth]{./imgs/maze-1.png}\\
-            {\footnotesize Khác homotopy: Bézier chọn đường \textit{dài hơn} nhưng ít cua gắt}
+            \includegraphics[width=0.7\textwidth]{./imgs/maze-1.png}\\
+            {\scriptsize Khác homotopy: Bézier chọn đường \textit{dài hơn} nhưng ít cua gắt}
         \end{column}
     \end{columns}
 \end{frame}
@@ -1082,12 +1157,12 @@ VCC    & 33 & 7 & 76.26          & 26.36          \\
 % =====================================================================
 % TN1 - Slide 1: Convergence on 2D environment
 % =====================================================================
-\begin{frame}{TN1 — GCS-DMS: hội tụ trên môi trường 2D}
+\begin{frame}{TN1 - GCS-DMS: hội tụ trên môi trường 2D}
     \begin{columns}[T,onlytextwidth]
         \begin{column}{0.45\textwidth}
             \centering
             \includegraphics[height=6cm]{./imgs/dms/conv_2d.png}\\
-            {\footnotesize Các khung hình: defect dynamics \& connection gap giảm dần qua các vòng IPOPT.}
+            {\scriptsize Các khung hình: defect dynamics \& connection gap giảm dần qua các vòng IPOPT.}
         \end{column}
         \begin{column}{0.55\textwidth}
             \footnotesize
@@ -1095,22 +1170,20 @@ VCC    & 33 & 7 & 76.26          & 26.36          \\
                 \centering\footnotesize
                 \begin{tabular}{lc}
                     \toprule
-                    \textbf{Chỉ số (môi trường 2D)} & \textbf{Giá trị}                \\
+                    \textbf{Chỉ số (môi trường 2D)} & \textbf{Giá trị}         \\
                     \midrule
-                    Số vùng kích hoạt               & 9                               \\
-                    Thời gian thực thi $T$ (s)      & 25.47                           \\
-                    Thời gian giải (s)              & 17.94                           \\
-                    Cost                            & 51.55                           \\
+                    Số vùng kích hoạt               & 9                        \\
+                    Thời gian thực thi $T$ (s)      & 25.47                    \\
+                    Thời gian giải (s)              & 17.94                    \\
+                    Cost                            & 51.55                    \\
                     \midrule
-                    Defect dynamics                 & $2.47\!\times\!10^{-11}$        \\
-                    Connection gap                  & $1.05\!\times\!10^{-10}$        \\
-                    Vi phạm an toàn                 & $7.13\!\times\!10^{-8}$         \\
+                    Defect dynamics                 & $2.47\!\times\!10^{-11}$ \\
+                    Connection gap                  & $1.05\!\times\!10^{-10}$ \\
+                    Vi phạm an toàn                 & $7.13\!\times\!10^{-8}$  \\
                     \bottomrule
                 \end{tabular}
             \end{table}
-            \begin{exampleblock}{Quan sát}
-                \scriptsize Nghiệm cuối hội tụ về quỹ đạo liên tục, thỏa mãn đồng thời \textbf{động lực phi tuyến + ràng buộc an toàn} ở mức \textbf{chính xác số học} ($10^{-8}\!-\!10^{-11}$).
-            \end{exampleblock}
+            \scriptsize \textbf{Nhận xét:} nghiệm hội tụ về quỹ đạo liên tục thỏa đồng thời \textbf{động lực phi tuyến + an toàn} ở mức chính xác số học ($10^{-8}\!-\!10^{-11}$).
         \end{column}
     \end{columns}
 \end{frame}
@@ -1118,48 +1191,45 @@ VCC    & 33 & 7 & 76.26          & 26.36          \\
 % =====================================================================
 % TN1 - Slide 2: Maze 15x15 with 4 seeds
 % =====================================================================
-\begin{frame}{TN1 — GCS-DMS: mê cung $15\!\times\!15$ (4 mẫu đại diện)}
+\begin{frame}{TN1 - GCS-DMS: mê cung $15\!\times\!15$ (4 mẫu đại diện)}
     \begin{columns}[T,onlytextwidth]
         \begin{column}{0.6\textwidth}
             \centering
             \begin{minipage}{0.47\linewidth}
                 \centering
                 \includegraphics[height=2.8cm]{./imgs/dms/maze_case_size15_kd15_seed4_animation_last_frame.png}\\
-                {\scriptsize Seed 4 — log-barrier, 24 vùng}
+                {\scriptsize Seed 4 - log-barrier, 24 vùng}
             \end{minipage}\hfill
             \begin{minipage}{0.47\linewidth}
                 \centering
                 \includegraphics[height=2.8cm]{./imgs/dms/maze_case_size15_kd15_seed20_animation_last_frame.png}\\
-                {\scriptsize Seed 20 — log-barrier, 44 vùng}
+                {\scriptsize Seed 20 - log-barrier, 44 vùng}
             \end{minipage}
-            
+
             \begin{minipage}{0.47\linewidth}
                 \centering
                 \includegraphics[height=2.8cm]{./imgs/dms/maze_case_size15_kd15_seed18_animation_last_frame.png}\\
-                {\scriptsize Seed 18 — lưới điểm, 33 vùng}
+                {\scriptsize Seed 18 - lưới điểm, 33 vùng}
             \end{minipage}\hfill
             \begin{minipage}{0.47\linewidth}
                 \centering
                 \includegraphics[height=2.8cm]{./imgs/dms/maze_case_size15_kd15_seed17_animation_last_frame.png}\\
-                {\scriptsize Seed 17 — lưới điểm, 27 vùng}
+                {\scriptsize Seed 17 - lưới điểm, 27 vùng}
             \end{minipage}\\[0.3em]
         \end{column}
         \begin{column}{0.4\textwidth}
-            \begin{block}{Mô hình động lực}
-                \footnotesize
-                \textbf{Unicycle:} $\dot p_x = v\cos\theta,\ \dot p_y = v\sin\theta,\ \dot\theta=\omega$;\\
-                $v\!\in\![-2,2],\ |\omega|\!\le\!\pi$.
-            \end{block}
-            \begin{exampleblock}{Tổng quát hóa}
-                \footnotesize
-                Tỉ lệ thành công \textbf{10/10 seed} cho cả hai cơ chế an toàn:
-                \begin{itemize}\itemsep0pt
-                    \item Defect $\sim 10^{-10}$
-                    \item Gap $\sim 10^{-9}$
-                    \item Vi phạm $\sim 10^{-8}$
-                \end{itemize}
-                $\Rightarrow$ \textbf{nghiệm khả thi động lực học} trên nhiều cấu trúc mê cung.
-            \end{exampleblock}
+            \footnotesize
+            \textbf{Unicycle:}
+            $\dot p_x = v\cos\theta,\ \dot p_y = v\sin\theta,\ \dot\theta=\omega$;
+            $v\!\in\![-2,2],\ |\omega|\!\le\!\pi$.
+
+            \vspace{0.4em}
+            \footnotesize \textbf{10/10 seed} thành công với cả hai cơ chế an toàn:
+            \begin{itemize}\itemsep0pt
+                \item Defect $\sim 10^{-10}$
+                \item Gap $\sim 10^{-9}$;\ Vi phạm $\sim 10^{-8}$
+            \end{itemize}
+            $\Rightarrow$ \textbf{nghiệm khả thi động lực học} trên nhiều cấu trúc mê cung.
         \end{column}
     \end{columns}
 \end{frame}
@@ -1167,36 +1237,34 @@ VCC    & 33 & 7 & 76.26          & 26.36          \\
 % =====================================================================
 % TN1 - Slide 3: Velocity profile insight
 % =====================================================================
-\begin{frame}{TN1 — Hồ sơ vận tốc \& dấu vết động lực phi tuyến}
+\begin{frame}{TN1 - Hồ sơ vận tốc \& dấu vết động lực phi tuyến}
     \begin{columns}[T,onlytextwidth]
         \begin{column}{0.6\textwidth}
             \centering
             \begin{minipage}{0.48\linewidth}
                 \centering
                 \includegraphics[width=0.9\linewidth]{./imgs/dms/seed4_vel.png}\\
-                {\scriptsize $|v(t)|$ — Seed 4}
+                {\scriptsize $|v(t)|$ - Seed 4}
             \end{minipage}\hfill
             \begin{minipage}{0.48\linewidth}
                 \centering
                 \includegraphics[width=0.9\linewidth]{./imgs/dms/seed17_vel.png}\\
-                {\scriptsize $|v(t)|$ — Seed 17}
+                {\scriptsize $|v(t)|$ - Seed 17}
             \end{minipage}\\[0.3em]
             {\footnotesize Hồ sơ vận tốc dao động $0.6$-$0.75$ m/s, giảm sâu tại nút giao/hành lang hẹp.}
         \end{column}
         \begin{column}{0.35\textwidth}
-            \begin{exampleblock}{Đặc trưng động lực Unicycle}
-                \footnotesize
-                Xe \textbf{tự động giảm tốc} tại:
-                \begin{itemize}\itemsep0pt
-                    \item Nút giao (cần đổi hướng)
-                    \item Hành lang hẹp
-                    \item Đoạn chuyển nhiều vùng
-                \end{itemize}
-                Lý do: giới hạn $|\omega|\!\le\!\omega_{\max}$ buộc giảm $v$ để có bán kính cua $\ge v/\omega_{\max}$.
-            \end{exampleblock}
-            \begin{alertblock}{Điểm GCS-Bézier không có}
-                \scriptsize Tối ưu hình học thuần \textit{không} phản ánh được hành vi này.
-            \end{alertblock}
+            \footnotesize
+            Unicycle \textbf{tự động giảm tốc} tại:
+            \begin{itemize}\itemsep0pt
+                \item Nút giao (cần đổi hướng)
+                \item Hành lang hẹp
+                \item Đoạn chuyển nhiều vùng
+            \end{itemize}
+            \textbf{Lý do:} $|\omega|\!\le\!\omega_{\max}$ buộc giảm $v$ để bán kính cua $\ge v/\omega_{\max}$.
+
+            \vspace{0.4em}
+            \scriptsize \textit{GCS-Bézier tối ưu hình học thuần không phản ánh được hành vi này.}
         \end{column}
     \end{columns}
 \end{frame}
@@ -1204,41 +1272,39 @@ VCC    & 33 & 7 & 76.26          & 26.36          \\
 % =====================================================================
 % TN1 - Slide 4: Log-barrier vs finite-grid comparison
 % =====================================================================
-\begin{frame}{TN1 — Hai cơ chế an toàn: log-barrier vs lưới điểm}
+\begin{frame}{TN1 - Hai cơ chế an toàn: log-barrier vs lưới điểm}
     \footnotesize
     \begin{table}
         \centering\footnotesize
         \caption{So sánh trên cùng 10 seed mê cung $15\!\times\!15$ (giữ nguyên mọi tham số khác).}
         \begin{tabular}{lcccc}
             \toprule
-            \textbf{Chế độ}     & \textbf{Tỉ lệ thành công} & \textbf{Solve TB (s)} & \textbf{Cost TB} & \textbf{Int. gap TB} \\
+            \textbf{Chế độ}   & \textbf{Tỉ lệ thành công} & \textbf{Solve TB (s)} & \textbf{Cost TB} & \textbf{Int. gap TB}            \\
             \midrule
-            Log-barrier         & 10/10                     & 245.51                & 118.63           & $1.4\!\times\!10^{-1}$ \\
-            Lưới hữu hạn điểm   & 10/10                     & \textbf{81.60}        & \textbf{115.55}  & \textbf{$6.4\!\times\!10^{-2}$} \\
+            Log-barrier       & 10/10                     & 245.51                & 118.63           & $1.4\!\times\!10^{-1}$          \\
+            Lưới hữu hạn điểm & 10/10                     & \textbf{81.60}        & \textbf{115.55}  & \textbf{$6.4\!\times\!10^{-2}$} \\
             \bottomrule
         \end{tabular}
     \end{table}
 
     \begin{columns}[T,onlytextwidth]
         \begin{column}{0.5\textwidth}
-            \begin{block}{Log-barrier $\;-\mu\sum\log(-a_i^\top x + b_i)$}
-                \footnotesize
-                \begin{itemize}\itemsep0pt
-                    \item[$+$] Quỹ đạo nằm \textbf{sâu} trong vùng an toàn.
-                    \item[$+$] Mô hình hóa rõ về mặt lý thuyết.
-                    \item[$-$] Chậm $\sim$3$\times$ do hàm log phi tuyến.
-                \end{itemize}
-            \end{block}
+            \textbf{Log-barrier} $\;{-\mu\sum\log(-a_i^\top x + b_i)}$:
+            \footnotesize
+            \begin{itemize}\itemsep0pt
+                \item[$+$] Quỹ đạo nằm \textbf{sâu} trong vùng an toàn
+                \item[$+$] Mô hình hóa rõ về mặt lý thuyết
+                \item[$-$] Chậm $\sim$3$\times$ do hàm log phi tuyến
+            \end{itemize}
         \end{column}
         \begin{column}{0.5\textwidth}
-            \begin{exampleblock}{Lưới hữu hạn điểm}
-                \footnotesize
-                \begin{itemize}\itemsep0pt
-                    \item[$+$] Transcription trực tiếp, dễ kiểm soát.
-                    \item[$+$] Nhanh \& integrality gap nhỏ hơn.
-                    \item[$-$] Đảm bảo phụ thuộc số/vị trí điểm.
-                \end{itemize}
-            \end{exampleblock}
+            \textbf{Lưới hữu hạn điểm:}
+            \footnotesize
+            \begin{itemize}\itemsep0pt
+                \item[$+$] Transcription trực tiếp, dễ kiểm soát
+                \item[$+$] Nhanh \& integrality gap nhỏ hơn
+                \item[$-$] Đảm bảo phụ thuộc số/vị trí điểm lấy mẫu
+            \end{itemize}
         \end{column}
     \end{columns}
 
@@ -1249,64 +1315,64 @@ VCC    & 33 & 7 & 76.26          & 26.36          \\
 % =====================================================================
 % Summary slide
 % =====================================================================
-\begin{frame}{Tổng hợp đánh giá ba thực nghiệm}
+\begin{frame}{GCS-Bézier và GCS-DMS bổ trợ nhau: tối ưu toàn cục hình học vs khả thi động lực học}
     \begin{columns}[T,onlytextwidth]
         \begin{column}{0.33\textwidth}
-            \begin{block}{TN3 — Phân hoạch}
-                \footnotesize
-                \begin{itemize}\itemsep0pt
-                    \item ACD: \textbf{cân bằng nhất} cho 2D.
-                    \item VCC: dày đặc $\Rightarrow$ giải chậm trong 2D, hữu ích cho không gian cao chiều.
-                    \item Chất lượng phân hoạch \textit{quyết định trực tiếp} chi phí giải.
-                \end{itemize}
-            \end{block}
+            \textbf{TN3 - Phân hoạch:}
+            \footnotesize
+            \begin{itemize}\itemsep0pt
+                \item ACD: \textbf{cân bằng nhất} cho 2D
+                \item VCC: dày đặc $\Rightarrow$ giải chậm 2D, hữu ích chiều cao
+                \item Chất lượng phân hoạch \textit{quyết định trực tiếp} chi phí giải
+            \end{itemize}
         \end{column}
         \begin{column}{0.33\textwidth}
-            \begin{exampleblock}{TN2 — Mở rộng tổ hợp}
-                \footnotesize
-                \begin{itemize}\itemsep0pt
-                    \item GCS-Bézier xử lý 625 ô \textbf{ổn định}.
-                    \item Relaxation \textbf{chặt} $\Rightarrow$ optimality gap $=0\%$.
-                    \item Bézier giúp quỹ đạo $C^2$ với chi phí $\uparrow$ $\sim$22\% so với Linear.
-                \end{itemize}
-            \end{exampleblock}
+            \textbf{TN2 - Mở rộng tổ hợp:}
+            \footnotesize
+            \begin{itemize}\itemsep0pt
+                \item GCS-Bézier xử lý 625 ô \textbf{ổn định}
+                \item Relaxation \textbf{chặt} $\Rightarrow$ gap $=0\%$
+                \item Bézier $C^2$, chi phí $\uparrow$ $\sim$22\% vs Linear
+            \end{itemize}
         \end{column}
         \begin{column}{0.33\textwidth}
-            \begin{alertblock}{TN1 — Động lực phi tuyến}
-                \footnotesize
-                \begin{itemize}\itemsep0pt
-                    \item GCS-DMS \textbf{khả thi} cho Unicycle.
-                    \item Defect $\sim 10^{-10}$ — chính xác số học.
-                    \item Đánh đổi: NLP phi lồi, \textit{không} bảo đảm toàn cục.
-                \end{itemize}
-            \end{alertblock}
+            \textbf{TN1 - Động lực phi tuyến:}
+            \footnotesize
+            \begin{itemize}\itemsep0pt
+                \item GCS-DMS \textbf{khả thi} cho Unicycle
+                \item Defect $\sim 10^{-10}$, chính xác số học
+                \item NLP phi lồi $\Rightarrow$ không bảo đảm toàn cục
+            \end{itemize}
         \end{column}
     \end{columns}
 
-    \vspace{0.3em}
-    \begin{block}{Vai trò bổ trợ giữa hai hướng tiếp cận}
-        \footnotesize
-        GCS-Bézier và GCS-DMS giải hai bài toán khác nhau (hình học lồi vs điều khiển phi tuyến). Chúng \textbf{bổ trợ} nhau: Bézier cho \textit{mở rộng tổ hợp + tối ưu toàn cục} về hình học; DMS cho \textit{tính khả thi động lực học} trên rô-bốt thực.
-    \end{block}
+    \vspace{0.4em}
+    \footnotesize
+    \textbf{Kết luận:} Bézier $\rightarrow$ mở rộng tổ hợp + tối ưu toàn cục hình học;\quad
+    DMS $\rightarrow$ khả thi động lực học phi tuyến trên rô-bốt thực.
+    Hai hướng \textbf{bổ trợ} nhau, không cạnh tranh.
 \end{frame}
 
-\begin{frame}{Giới hạn của GCS}
-    \textbf{1. Phụ thuộc vào chất lượng phân hoạch lồi (Convex Decomposition):}
+\begin{frame}{GCS phụ thuộc vào phân hoạch và chưa xử lý được môi trường động}
+    \textbf{1. Phụ thuộc phân hoạch:}
     \begin{itemize}
-        \item Số lượng vùng lồi ảnh hưởng trực tiếp đến kích thước bài toán
-        \item Chất lượng phân hoạch quyết định khả năng tìm được quỹ đạo tối ưu
-        \item Có thể bỏ sót vùng tự do nhỏ
+        \item Số vùng $\uparrow$ $\Rightarrow$ kích thước bài toán $\uparrow$, chi phí tính
+              cao
+        \item Phân hoạch thô $\Rightarrow$ bỏ sót vùng tự do nhỏ, giảm chất lượng nghiệm
     \end{itemize}
 
-    \textbf{2. Kích thước bài toán:}
+    \vspace{0.3em}
+    \textbf{2. Tổ hợp tính toán:}
     \begin{itemize}
-        \item Số miền lồi lớn $\Rightarrow$ nhiều biến, chi phí tính cao
+        \item Số biến nhị phân $\propto |\mathcal{E}|$ $\Rightarrow$ NP-hard về mặt lý thuyết
+        \item Relaxation chặt giúp thực tế, nhưng không bảo đảm trong mọi trường hợp
     \end{itemize}
 
-    \textbf{3. Thách thức với môi trường động (Dynamic Environments):}
+    \vspace{0.3em}
+    \textbf{3. Môi trường động:}
     \begin{itemize}
-        \item Môi trường động: cần tái tính
-        \item Thời gian tính toán hiện tại chưa phù hợp cho ứng dụng thời gian thực
+        \item Vật cản di chuyển $\Rightarrow$ phải tái phân hoạch và giải lại
+        \item Thời gian giải hiện tại ($>$80 s) chưa phù hợp cho real-time
     \end{itemize}
 \end{frame}
 
@@ -1574,6 +1640,12 @@ VCC    & 33 & 7 & 76.26          & 26.36          \\
 
 \end{frame}
 
+\begin{frame}{Appendix}
+    \begin{center}
+        \Huge Phân hoạch cấu hình bằng phủ clique của đồ thị khả kiến
+    \end{center}
+\end{frame}
+
 \begin{frame}{VCC - Bước 1: Lấy mẫu \& Xây dựng Đồ thị Khả kiến}
     \begin{columns}[c]
         \column{0.45\textwidth}
@@ -1723,6 +1795,223 @@ VCC    & 33 & 7 & 76.26          & 26.36          \\
             \item Số vùng lồi đã đủ cho ứng dụng
         \end{itemize}
     \end{columns}
+\end{frame}
+
+\begin{frame}{Appendix}
+    \begin{center}
+        \Huge Bài toán tìm đường đi ngắn nhất (Shortest Path Problem - SPP) trong GCS
+    \end{center}
+\end{frame}
+
+\begin{frame}{Bài toán tìm đường đi ngắn nhất (SPP) trong GCS}
+
+    \textbf{Mục tiêu:} Tìm đường đi chi phí tối thiểu $\sigma \to \tau$ trên GCS
+    % \vspace{0.5em}
+
+    \begin{columns}[T,onlytextwidth]
+        \begin{column}{0.5\textwidth}
+            \[
+                \min \sum_{e=(u,v)\in \mathcal{E}} \ell_e(x_u,x_v)\, y_e
+            \]
+            \begin{itemize}
+                \item \textbf{Bảo toàn luồng:}
+                      \[
+                          \sum_{e\in\mathcal{I}^{out}_v} y_e - \sum_{e\in\mathcal{I}^{in}_v} y_e
+                          =
+                          \begin{cases}
+                              1  & v=\sigma       \\
+                              -1 & v=\tau         \\
+                              0  & \text{còn lại}
+                          \end{cases}
+                      \]
+                \item \textbf{Loại vòng lặp:} $\sum_{e\in\mathcal{I}^{out}_v} y_e \le 1$
+                \item \textbf{Biên:} $x_{\sigma} = x_{\text{start}},\; x_{\tau} = x_{\text{goal}}$
+                      % \item \textbf{An toàn:} $y_e>0 \implies x_v \in \mathcal{X}_v$
+                      % \item \textbf{Liên kết:} $y_e=1 \implies (x_u,x_v) \in \mathcal{X}_e$
+            \end{itemize}
+        \end{column}
+        \begin{column}{0.5\textwidth}
+            \centering
+            \includegraphics[width=0.8\linewidth]{./imgs/gcs-frame-2.png}
+            \captionof{figure}{SPP trong GCS\footnotemark}
+        \end{column}
+    \end{columns}
+
+    % \captionof{figure}{SPP in GCS\footnotemark}
+
+    % \footnotetext{Nguồn: Shao Yuan et al., ``GCS*: Forward Heuristic Search on Implicit Graphs of Convex Sets''}
+    \footnotetext{Nguồn: Marcucci et al., ``Motion Planning around Obstacles with Convex Optimization''}
+
+\end{frame}
+
+\begin{frame}{Hoạch định chuyển động}
+    \textbf{Mô hình hóa bài toán:}
+    % \vspace{0.1cm}
+    \begin{equation*}
+        \min_{q, T} \underbrace{aT}_{\text{Thời gian}} + \underbrace{b \int_{0}^{T} \|\dot{q}(t)\|_2 dt}_{\text{Độ dài}} + \underbrace{c \int_{0}^{T} \|\dot{q}(t)\|_2^2 dt}_{\text{Năng lượng}}
+    \end{equation*}
+    % \vspace{-0.2cm}
+    \begin{itemize}
+        \item \textbf{An toàn:} $q(t) \in \bigcup_{i \in \mathcal{I}} \mathcal{Q}_i$ (phân hoạch lồi)
+        \item \textbf{Vật lý:} $\dot{q}(t) \in \mathcal{D}$ (tập vận tốc lồi), $q \in \mathcal{C}^\eta$ (trơn)
+        \item \textbf{Ràng buộc biên:} $q(0) = q_{init}, \dot{q}(0) = v_{init}$; $q(T) = q_{final}, \dot{q}(T) = v_{final}$
+              % \item \textbf{Lồi hóa:} hàm phối cảnh xử lý $T$ như biến quyết định
+    \end{itemize}
+
+    % \vspace{1em}
+    % Cấu trúc lại qua tọa độ đường $s \in [0, 1]$: $q(t) = r(s)$ với $t = h(s)$
+    % \begin{equation*}
+    %     r(s) = \sum_{k=0}^{d} \beta_{k,d}(s)r_k, \quad h(s) = \sum_{k=0}^{d} \beta_{k,d}(s)h_k
+    % \end{equation*}
+\end{frame}
+
+\begin{frame}{Đặc tính NP-hard và Nới lỏng Lồi}
+    \textbf{Bài toán:}
+    \begin{align}
+        \text{minimize} \quad   & \sum_{e=(u,v) \in
+        \mathcal{E}} y_e \ell_e(x_u, x_v) \label{eq:gcs_obj_milp}                                                                                                                \\
+        \text{subject to} \quad & \sum_{e \in \mathcal{E}^+(u)} y_e - \sum_{e \in \mathcal{E}^-(u)} y_e = \delta_u, \quad \forall u \in \mathcal{V} \label{eq:flow_conservation} \\
+                                & (x_u, x_v) \in X_e, \quad \forall e=(u,v) \in \mathcal{E} \label{eq:edge_constraint}                                                           \\
+                                & x_v \in X_v, \quad \forall v \in \mathcal{V} \label{eq:vertex_constraint}                                                                      \\
+                                & y_e \in \{0, 1\}, \quad \forall e \in \mathcal{E} \label{eq:binary_variable}
+    \end{align}
+
+    \begin{itemize}
+        \item Lập trình hỗn hợp nguyên lồi (Mixed-Integer Convex Program - MICP),
+              NP-hard~\cite{marcucci2023motion}
+        \item \textbf{Giải pháp:} Nới lỏng $\rightarrow$ bài toán lồi chặt~\cite{marcucci2023motion,marcucci2024shortest}
+    \end{itemize}
+
+\end{frame}
+
+% \section{Phương pháp Rounding}
+\begin{frame}{Nới lỏng lồi (Convex Relaxation) và Giải thuật Làm tròn}
+    \textbf{Chiến lược nới lỏng bài toán MICP:}
+    \begin{itemize}
+        \item Hàm chi phí phi lồi và ràng buộc rời rạc $\rightarrow$ lồi: kỹ thuật hàm phối
+              cảnh~\cite{marcucci2023motion,marcucci2024shortest}.
+        \item Ràng buộc phi lồi $\rightarrow$ hệ ràng buộc lồi chặt $\Rightarrow$ tối ưu
+              lồi~\cite{marcucci2023motion,marcucci2024shortest}.
+    \end{itemize}
+    \textbf{Kết quả nới lỏng:}
+    \begin{itemize}
+        \item Kết quả cho ra thường chặt: $C_{relax} \approx C_{opt}$
+        \item Nếu không chặt (Loose Relaxation): làm tròn ngẫu nhiên
+        \item \textbf{Đánh giá:}
+              \begin{itemize}
+                  \item Khoảng cách tối ưu: $\delta_{opt} = \frac{C_{round} - C_{opt}}{C_{opt}}$
+                  \item Ước lượng qua nới lỏng: $\delta_{relax} = \frac{C_{round} - C_{relax}}{C_{relax}}$
+              \end{itemize}
+    \end{itemize}
+
+    \textbf{Làm tròn ngẫu nhiên:}
+    \begin{enumerate}
+        \item Khởi tạo từ nguồn $\sigma$
+        \item Tại nút $v$: chọn cạnh $e=(v \to w)$ theo xác suất $\propto y_e^*$
+        \item Quay lui nếu ngõ cụt, đến đích $\tau$~\cite{marcucci2023motion}
+    \end{enumerate}
+\end{frame}
+
+\begin{frame}{Appendix}
+    \begin{center}
+        \Huge Bài toán tối ưu điều khiển DMS-GCS
+    \end{center}
+\end{frame}
+
+\begin{frame}{Local multiple shooting block trên mỗi vùng GCS}
+    \small
+
+    Với mỗi vùng $v\in V_r$, biến continuous cục bộ là
+
+    \[
+        s_v^- \in \mathbb{R}^{n_x},
+        \qquad
+        s_v^+ \in \mathbb{R}^{n_x},
+        \qquad
+        w_v\in\mathbb{R}^{m_v},
+        \qquad
+        \Delta_v\ge 0.
+    \]
+
+    Trên miền thời gian chuẩn hoá $\tau\in[0,1]$:
+
+    \[
+        \frac{dx_v}{d\tau}(\tau) =
+        \Delta_v f(x_v(\tau),u_v(\tau)),
+        \qquad
+        x_v(0)=s_v^-,
+        \qquad
+        u_v(\tau)=U_v(\tau;w_v).
+    \]
+
+    Endpoint map:
+
+    \[
+        F_v(s_v^-,w_v,\Delta_v):=x_v(1).
+    \]
+
+    Defect constraint của multiple shooting:
+
+    \[
+        s_v^+ - F_v(s_v^-,w_v,\Delta_v)=0,
+        \qquad
+        \forall v\in V_r.
+    \]
+
+    \vspace{0.5em}
+
+    Ý nghĩa: $s_v^-$ và $s_v^+$ là biến tối ưu độc lập, còn defect constraint buộc
+    chúng khớp với nghiệm động lực học sinh ra bởi local IVP.
+
+\end{frame}
+
+\begin{frame}{Formulation GCS - Multiple Shooting}
+    \footnotesize
+    \[
+        \begin{aligned}
+            \min_{\substack{y,p,z,\{s_v^-,s_v^+,w_v,\Delta_v\}_{v\in V_r}}}
+            \quad
+             &
+            \sum_{v\in V_r} p_v J_v(s_v^-,w_v,\Delta_v)
+            \\
+            \text{s.t.}\quad
+             &
+            \sum_{(\sigma,v)\in E} y_{\sigma v}=1,\quad
+            \sum_{(v,\tau)\in E} y_{v\tau}=1,
+            \\
+             &
+            \sum_{(u,v)\in E}y_{uv}
+            =
+            \sum_{(v,w)\in E}y_{vw}
+            =
+            p_v,\quad \forall v\in V_r,
+            \\
+             &
+            s_v^+=F_v(s_v^-,w_v,\Delta_v),\quad
+            x_v(\tau_{v,k})\in Q_v,\quad
+            u_v(\tau_{v,k})\in\mathcal U,
+            \quad \forall v,\ k,
+            \\
+             &
+            y_{uv}=1\Rightarrow
+            z_{uv}\in Q_u\cap Q_v,\quad
+            s_u^+=z_{uv},\quad s_v^-=z_{uv},
+            \quad \forall (u,v)\in E,
+            \\
+             &
+            y_{\sigma v}=1\Rightarrow s_v^-=x_s,\quad
+            y_{v\tau}=1\Rightarrow s_v^+=x_g,
+            \\
+             &
+            y_{uv},p_v\in\{0,1\},\quad \Delta_v\ge0.
+        \end{aligned}
+    \]
+
+    \vspace{0.3em}
+
+    GCS chọn skeleton rời rạc $\sigma\to v_1\to\cdots\to v_M\to\tau$; multiple
+    shooting biến mỗi vùng active thành một đoạn động lực học hữu hạn chiều.
+
 \end{frame}
 
 \end{document}
