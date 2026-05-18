@@ -13,6 +13,7 @@
 \usepackage{animate}
 \usepackage{multimedia}  % Thêm package để nhúng video
 \usepackage{tikz} % Để vẽ minh họa hoặc chèn hình
+\usepackage{mathrsfs} % Khai báo gói mathrsfs để sử dụng \mathscr
 
 \usepackage[vietnamese]{babel}
 \usepackage{caption}
@@ -288,21 +289,21 @@
     \footnotetext{Nguồn: Aditya Tandon et al, ``Autonomous navigation of quadruped robots for monitoring and inspection of civil infrastructure ''}
 \end{frame}
 
-\section{Graph of Convex Sets (GCS)}
+\section{Đồ thị của các tập lồi (Graph of convex sets - GCS)}
 
-\begin{frame}{Ý tưởng chính (GCS)}
+\begin{frame}{Ý tưởng chính}
     \begin{itemize}
         \item \textbf{Phân hoạch không gian:} $\rightarrow$ \textbf{vùng an toàn lồi} $\{Q_v\}$
-        \item \textbf{Mô hình hóa:} Hoạch định chuyển động $\rightarrow$ \textbf{SPP} trên \textbf{Graph of Convex Sets}
+        \item \textbf{Mô hình hóa:} Hoạch định chuyển động $\rightarrow$ \textbf{đường đi ngắn nhất} trên \textbf{Đồ thị các tập lồi}
         \item \textbf{Quyết định:}
               \begin{itemize}
                   \item \textbf{Rời rạc:} chọn cạnh / đường đi
                   \item \textbf{Liên tục:} trạng thái / quỹ đạo trong $Q_v$
               \end{itemize}
-        \item \textbf{Giải:} \textbf{relaxation} $\rightarrow$ convex optimization $\rightarrow$ đường khả thi tối ưu toàn cục
+        \item \textbf{Giải:} \textbf{xử lý toán học} $\rightarrow$ giải bài toán tối ưu $\rightarrow$ đường khả thi tối ưu toàn cục
     \end{itemize}
 
-    \begin{block}{Convex safe region}
+    \begin{block}{Định nghĩa tập lồi $Q_v$}
         $Q_v \subset \mathbb{R}^n$: lồi, đóng, an toàn~\cite{marcucci2023motion}.
     \end{block}
     \centering
@@ -397,7 +398,7 @@
     \includegraphics[width=\linewidth]{./imgs/VCC.png}
 \end{frame}
 
-\begin{frame}{Cấu trúc GCS (Graph of Convex Sets)}
+\begin{frame}{Cấu trúc đồ thị của các tập lồi (Graph of Convex Sets - GCS)}
 
     \begin{columns}[T,onlytextwidth]
         \begin{column}{0.5\textwidth}
@@ -408,11 +409,11 @@
                 \item \textbf{Biến liên tục:} $x_v$ $\in X_v$
                 \item \textbf{Tập lồi:} $X_v \subset R^{n_v}$ với $n_v$ chiều
             \end{itemize}
-            \textbf{Cạnh $e=(u,v)\in\mathcal{E}$:}
+            \textbf{Cạnh $e=(w,v)\in\mathcal{E}$:}
             \begin{itemize}
-                % \item \textbf{Chuyển tiếp} giữa $Q_u \leftrightarrow Q_v$
-                \item \textbf{Hàm chi phí:} $\ell_e(x_u,x_v)$
-                \item \textbf{Ràng buộc kết nối:} $(x_u,x_v)\in\mathcal{X}_e$
+                % \item \textbf{Chwyển tiếp} giữa $Q_w \leftrightarrow Q_v$
+                \item \textbf{Hàm chi phí:} $\ell_e(x_w,x_v)$
+                \item \textbf{Ràng buộc kết nối:} $(x_w,x_v)\in\mathcal{X}_e$
             \end{itemize}
         \end{column}
         \begin{column}{0.5\textwidth}
@@ -481,7 +482,7 @@
 
 \end{frame}
 
-\begin{frame}{Hoạch định chuyển động sử dụng mô hình SPP trong GCS}
+\begin{frame}{Hoạch định chuyển động trong GCS}
     \begin{columns}[T,onlytextwidth]
         \begin{column}{0.55\textwidth}
             \textbf{Mục tiêu:} tìm quỹ đạo tối ưu $\sigma \to \tau$ trên GCS
@@ -510,7 +511,7 @@
 \end{frame}
 
 % \section{Kỹ thuật Convex Relaxation}
-\begin{frame}{Hoạch định chuyển động sử dụng mô hình SPP trong GCS}
+\begin{frame}{Hoạch định chuyển động trong GCS}
 
     \begin{columns}[T,onlytextwidth]
         \begin{column}{0.55\textwidth}
@@ -627,7 +628,7 @@
 % \end{frame}
 
 % ===================== Slide DMS-1: GCS-DMS = MINLP (overview) =====================
-\begin{frame}{GCS-DMS gộp graph problem và OCP cục bộ thành một bài toán MINLP}
+\begin{frame}{Tiếp cận 2: Kết hợp GCS với Direct Multiple Shooting (DMS) - MIOCP/MINLP}
     \small
 
     \begin{columns}[T, onlytextwidth]
@@ -637,19 +638,19 @@
             \begin{itemize}
                 \item $y_{uv}\in\{0,1\}$: cạnh $(u,v)$ được chọn
                 \item $p_v\in\{0,1\}$: vùng $v$ được kích hoạt
-                \item Bảo toàn luồng: ${\displaystyle\sum_{\mathrm{in}}} y =
-                              {\displaystyle\sum_{\mathrm{out}}} y = p_v$
-                \item Interface $z_{uv}\!\in\!Q_u\!\cap\! Q_v$,\; $s_u^+ = s_v^- = z_{uv}$
+                      % \item Bảo toàn luồng: ${\displaystyle\sum_{\mathrm{in}}} y =
+                      %               {\displaystyle\sum_{\mathrm{out}}} y = p_v$
+                \item $z_{uv}\!\in\!Q_u\!\cap\! Q_v$,\; $s_u^+ = s_v^- = z_{uv}$
             \end{itemize}
 
             % \vspace{0.2cm}
             \[
-                J_{\mathrm{total}} = \sum_{v\in V_r} p_v\, J_v(s_v^-,w_v,\Delta_v)
+                J_{\mathrm{total}} = \sum_{v\in V_r} p_v\, J_v
             \]
         \end{column}
 
         \begin{column}{0.02\textwidth}
-            \centering \rule{0.4pt}{0.55\textheight}
+            \centering \rule{0.4pt}{0.5\textheight}
         \end{column}
 
         \begin{column}{0.55\textwidth}
@@ -658,23 +659,21 @@
             \vspace{0.2cm}
             \[
                 J_v =
-                \underbrace{a\Delta_v}_{\text{thời lượng}}
+                \int_0^{T_v}
+                \!\Bigl(
+                \underbrace{a}_{\text{thời lượng}}
                 +
-                \underbrace{
-                w_L\!\int_0^1 \tfrac{1}{\Delta_v}
-                \!\left|\tfrac{dq_v}{d\tau}\right|^{\!2}\!d\tau
-                }_{\text{vận tốc hình học}}
+                \underbrace{b\,|\dot{q}_v(t)|^2}_{\text{vận tốc hình học}}
                 +
-                \underbrace{
-                    w_E\!\int_0^1 \Delta_v|u_v|^2d\tau
-                }_{\text{năng lượng điều khiển}}
+                \underbrace{c\,|u_v(t)|^2}_{\text{năng lượng điều khiển}}
+                \Bigr)\,dt
             \]
 
             \vspace{0.1cm}
             \footnotesize
-            $q_v(\tau):=\pi(x_v(\tau))$;\quad
-            $\tfrac{1}{\Delta_v}\tfrac{dq_v}{d\tau}=\dot q_v$;\quad
-            $\Delta_v d\tau=dt$
+            $q_v(t):=\pi(x_v(t))$;\quad
+            $\dot{q}_v = dq_v/dt$;\quad
+            $T_v$ — thời lượng đoạn $v$
         \end{column}
     \end{columns}
 
@@ -687,35 +686,56 @@
 
 \end{frame}
 
-% ===================== Slide DMS-2: DMS - IVP & Defect =====================
+% ===================== Slide DMS-2: Multiple Shooting — biến, IVP, defect =====================
 \begin{frame}{DMS tham số hóa đoạn quỹ đạo, buộc tính liên tục qua defect constraint}
     \small
 
+    \centering
+    \[
+        s_v^-
+        \;\xrightarrow{\;\mathrm{IVP}_v\;}
+        x_v(1)
+        \;\overset{\mathrm{defect}\,=\,0}{=}\;
+        s_v^+
+        \;=\;
+        s_{v+1}^-
+        \;\xrightarrow{\;\mathrm{IVP}_{v+1}\;}
+        \cdots
+    \]
+
+    \vspace{0.1cm}
     \begin{columns}[T, onlytextwidth]
         \begin{column}{0.50\textwidth}
-            \textbf{Biến quyết định trên mỗi vùng $v \in V_r$:}
+            \textbf{Biến quyết định — vùng $v$:}
             \begin{itemize}
-                \item $s_v^- \in \mathbb{R}^{n_x}$ - trạng thái vào (điểm bắn)
-                \item $s_v^+ \in \mathbb{R}^{n_x}$ - trạng thái ra (độc lập)
-                \item $\Delta_v \ge 0$ - thời lượng đoạn
-                \item $w_v$ - tham số hóa điều khiển $u_v(\tau) = \mathcal{U}_v(\tau;w_v)$
+                \item $s_v^- \in \mathbb{R}^{n_x}$ — điểm bắn
+                \item $s_v^+ \in \mathbb{R}^{n_x}$ — trạng thái ra (tự do)
+                \item $\Delta_v \ge 0$ — thời lượng
+                \item $u_v(\cdot)\in\mathscr{U}_v$, với
             \end{itemize}
 
-            \vspace{0.3cm}
-            \textbf{IVP cục bộ} (thời gian chuẩn hóa $\tau\in[0,1]$):
+            \[
+                \mathscr{U}_v := \left\{
+                    \tau \mapsto \mathcal{U}_v(\tau; w_v)
+                    \mid
+                    w_v \in \mathbb{R}^{n_w}
+                \right\}
+            \]
+
+            % \vspace{0.2cm}
+
+        \end{column}
+
+        \begin{column}{0.46\textwidth}
+            \begin{alertblock}{Defect constraint}
+                \[
+                    s_v^+ \;-\; \underbrace{F_v(s_v^-,\,w_v,\,\Delta_v)}_{\displaystyle x_v(1)} \;=\; 0
+                \]
+            \end{alertblock}
             \[
                 \frac{dx_v}{d\tau} = \Delta_v f\!\bigl(x_v(\tau),\,u_v(\tau)\bigr),
                 \quad x_v(0) = s_v^-
             \]
-        \end{column}
-
-        \begin{column}{0.46\textwidth}
-            \begin{alertblock}{Ràng buộc defect - then chốt DMS}
-                \[
-                    s_v^+ \;-\; \underbrace{F_v(s_v^-,\,w_v,\,\Delta_v)}_{\displaystyle x_v(1)} \;=\; 0
-                \]
-                Tính liên tục áp đặt \emph{sau} tích phân, không cần tích phân tuần tự.
-            \end{alertblock}
         \end{column}
     \end{columns}
 
