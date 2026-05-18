@@ -1,5 +1,5 @@
 % filepath: /home/dang-khoa/university/Capstone Project/Report Source/experiments/results.tex
-Trong chương này, chúng tôi trình bày các kết quả định lượng thu được từ các thực nghiệm đã thiết lập ở phần trước. Nội dung lần lượt đánh giá tính khả thi động lực của GCS-DMS, khả năng mở rộng của GCS-Bézier trên môi trường mê cung, và ảnh hưởng của phân hoạch lồi trong môi trường 2D đơn giản. Toàn bộ các thực nghiệm được thực hiện trên máy tính cá nhân với cấu hình: CPU AMD Ryzen 7 4800H 2.9 GHz, RAM 16GB, hệ điều hành Ubuntu 24.04.
+Trong chương này, chúng tôi trình bày các kết quả định lượng thu được từ các thực nghiệm đã thiết lập ở phần trước. Nội dung lần lượt đánh giá tính khả thi động lực của GCS-DMS, khả năng mở rộng của GCS-Bézier trên môi trường mê cung, so sánh đối chứng giữa GCS và các planner sampling-based RRT/RRT*, và ảnh hưởng của phân hoạch lồi trong môi trường 2D đơn giản. Toàn bộ các thực nghiệm được thực hiện trên máy tính cá nhân với cấu hình: CPU AMD Ryzen 7 4800H 2.9 GHz, RAM 16GB, hệ điều hành Ubuntu 24.04.
 \subsection{Phân tích Thực nghiệm 1: GCS-DMS với ràng buộc động lực học phi tuyến}
 
 Trong thực nghiệm này, chúng tôi đánh giá hướng tiếp cận GCS-DMS trên bài toán hoạch định quỹ đạo có động lực học phi tuyến. Khác với formulation GCS-Bézier được dùng trong các thực nghiệm sau, mục tiêu của phần này không phải là so sánh trực tiếp giá trị hàm mục tiêu giữa hai formulation, mà là kiểm chứng khả năng của GCS-DMS trong việc đồng thời lựa chọn chuỗi vùng lồi, tối ưu trạng thái liên tục và sinh tín hiệu điều khiển thỏa mãn động lực học của hệ. Do bài toán sau rời rạc hóa thuộc lớp NLP/MINLP phi lồi, các kết quả dưới đây được diễn giải theo hướng đánh giá tính khả thi, độ hội tụ và chất lượng động học của nghiệm, thay vì khẳng định tối ưu toàn cục.
@@ -380,7 +380,145 @@ Quan sát các quỹ đạo tại Hình~\ref{fig:maze_results} (tương ứng v�
 Kết luận, việc thực hiện trên 10 mê cung khác nhau đã khẳng định tính ổn định của framework GCS. Mặc dù chi phí tính toán cho quỹ đạo \textit{kinodynamic} cao hơn, GCS cung cấp một giải pháp nhất quán để tìm ra lộ trình trơn tru, an toàn tuyệt đối và tối ưu toàn cục trong các môi trường có độ phức tạp tổ hợp cực cao.
 
 
-\subsection{Phân tích Thực nghiệm 3: Môi trường 2D đơn giản và tác động của phân hoạch lồi}
+\subsection{Phân tích Thực nghiệm 3: So sánh GCS, RRT và RRT* trên mê cung \texorpdfstring{$25\times 25$}{25x25}}
+\label{subsec:rrt_gcs_comparison_results}
+
+Sau khi đánh giá GCS-Bézier trên nhiều mê cung ngẫu nhiên, chúng tôi thực hiện
+thêm một thí nghiệm đối chứng trên một mê cung cố định để đặt GCS cạnh các
+phương pháp sampling-based quen thuộc.
+Mục tiêu của thí nghiệm này không phải là khẳng định một phương pháp luôn vượt
+trội trong mọi tiêu chí, mà là làm rõ đánh đổi giữa hai nhóm tiếp cận. GCS khai
+thác trực tiếp cấu trúc đồ thị của các vùng lồi để tối ưu đường đi hoặc
+quỹ đạo, trong khi RRT/RRT* tìm nghiệm bằng cách mở rộng cây ngẫu nhiên trong
+không gian tự do. Vì vậy, các chỉ số như độ dài đường đi, runtime, tỉ lệ thành
+công, smoothness được dùng để mô tả các khía cạnh khác nhau của
+nghiệm.
+
+\begin{figure}[!htp]
+    \centering
+    \includegraphics[width=0.7\textwidth]{experiments/image/RRT-GCS/path.png}
+    \caption{Các quỹ đạo trên mê cung seed 4 khi so sánh GCS, RRT và RRT* trên cùng một môi trường $25\times 25$.}
+    \label{fig:rrt_gcs_paths}
+\end{figure}
+
+\begin{figure}[!htp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{experiments/image/RRT-GCS/cot.png}
+    \caption{So sánh các chỉ số tổng hợp giữa GCS, RRT và RRT* trên mê cung seed 4.}
+    \label{fig:rrt_gcs_metrics}
+\end{figure}
+
+\begin{table}[!htp]
+\centering
+\caption{Kết quả định lượng khi so sánh GCS, RRT và RRT* trên mê cung $25\times 25$ seed 4}
+\label{tab:rrt_gcs_comparison}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lcccccc}
+\toprule
+\textbf{Thuật toán}
+& \textbf{Độ dài TB}
+& \textbf{Độ dài std}
+& \textbf{Runtime TB (ms)}
+& \textbf{Runtime std (ms)}
+& \textbf{Tỉ lệ TC}
+& \textbf{Smoothness} \\
+\midrule
+GCS-Linear
+& 54.7117
+& 0.0000
+& 2847.13
+& 0.00
+& 1.00
+
+& 22.6444 \\
+GCS-Bezier
+& 65.8388
+& 0.0000
+& 95179.93
+& 0.00
+& 1.00
+& 33.6341 \\
+RRT
+& 82.4245
+& 4.0946
+& 1715.12
+& 432.91
+& 1.00
+& 61.8902 \\
+RRT*
+& 80.7592
+& 3.8656
+& 8790.82
+& 9079.57
+& 1.00
+& 59.9205 \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\begin{figure}[!htp]
+    \centering
+    \includegraphics[width=0.78\textwidth]{experiments/image/RRT-GCS/rrt-linear.png}
+    \caption{So sánh độ dài đường đi giữa GCS-Linear và các nghiệm sampling-based trên mê cung $25\times 25$ seed 4.}
+    \label{fig:rrt_gcs_length_compare}
+\end{figure}
+
+\subsubsection{Độ dài đường đi và thời gian chạy}
+
+Bảng~\ref{tab:rrt_gcs_comparison} và Hình~\ref{fig:rrt_gcs_length_compare} cho
+thấy GCS-Linear cho đường đi ngắn nhất,
+với độ dài trung bình $54.7117$. Kết quả này phù hợp với bản chất của
+formulation, vì GCS-Linear tối ưu trực tiếp độ dài hình học trên đồ thị các vùng
+lồi. Lấy GCS-Linear làm mốc tham chiếu, GCS-Bezier tạo quỹ đạo dài hơn khoảng
+$20.3\%$, RRT dài hơn khoảng $50.7\%$, còn RRT* dài hơn khoảng $47.6\%$. Như
+vậy, RRT* có cải thiện so với RRT nhờ cơ chế rewiring, nhưng mức cải thiện trung
+bình chỉ khoảng $2.0\%$. Điều này cho thấy với time budget 30 giây và môi trường
+nhiều hành lang hẹp, RRT* chưa tiến gần tới chất lượng nghiệm của GCS-Linear.
+
+Xét về runtime, RRT là phương pháp nhanh nhất với thời gian chạy trung bình
+khoảng $1.72$ giây. GCS-Linear cần khoảng $2.85$ giây, chậm hơn RRT nhưng vẫn
+cùng bậc thời gian và đổi lại cho nghiệm ngắn hơn đáng kể. RRT* đạt nghiệm tốt
+nhất được ghi nhận sau trung bình $8.79$ giây, đồng thời có độ lệch chuẩn lớn
+($9.08$ giây), phản ánh rõ tính anytime và sự phụ thuộc vào seed lấy mẫu.
+GCS-Bezier có runtime lớn nhất, khoảng $95.18$ giây, do bài toán phải xử lý đồng
+thời ràng buộc liên tục $C^2$, giới hạn vận tốc, biến co giãn thời gian và các
+thành phần điều chuẩn đạo hàm.
+
+\subsubsection{Tỉ lệ thành công, smoothness}
+
+Cả bốn thuật toán đều tìm được nghiệm trong thí nghiệm này. Với GCS-Linear và
+GCS-Bezier, nghiệm là deterministic nên các độ lệch chuẩn bằng 0. Với RRT và
+RRT*, tỉ lệ thành công được tính trên 50 seed ngẫu nhiên và đều đạt $100\%$,
+cho thấy thiết lập sampling và collision checker đủ ổn định đối với mê cung seed
+4 trong giới hạn tham số đã chọn.
+
+Chỉ số smoothness trong bảng được tính bằng tổng góc đổi hướng, do đó giá trị
+nhỏ hơn tương ứng với đường đi ít gấp khúc hơn theo metric này. GCS-Linear đạt
+$22.6444$, GCS-Bezier đạt $33.6341$, RRT* đạt $59.9205$ và RRT đạt $61.8902$.
+Hai nghiệm sampling-based vì vậy vẫn kém mượt hơn rõ rệt sau bước shortcut
+smoothing. RRT* cải thiện nhẹ so với RRT, nhưng chênh lệch không lớn, phù hợp
+với quan sát ở chỉ số độ dài đường đi. Riêng GCS-Bezier cần được diễn giải cẩn
+thận: quỹ đạo Bézier có tính trơn theo tham số thời gian và thỏa các ràng
+buộc liên tục, nhưng do quỹ đạo có thể dài hơn và được sample dày hơn, tổng góc
+đổi hướng tích lũy không nhất thiết nhỏ nhất. Vì vậy, smoothness ở đây hữu ích
+để nhận diện độ gấp khúc của RRT/RRT*, nhưng chưa phản ánh đầy đủ chất lượng
+động học của quỹ đạo Bézier.
+
+\subsubsection{Nhận xét tổng hợp}
+
+Kết quả trên cho thấy mỗi nhóm phương pháp phù hợp với một mục tiêu sử dụng
+khác nhau. Nếu ưu tiên chính là đường đi ngắn, ổn định và có tính deterministic,
+GCS-Linear là lựa chọn tốt nhất trong thí nghiệm này. Nếu cần một nghiệm khả thi
+nhanh với chi phí tính toán thấp, RRT là baseline hiệu quả, nhưng đổi lại đường
+đi dài và gấp khúc hơn đáng kể. RRT* cải thiện chất lượng so với RRT nhờ
+rewiring, tuy nhiên mức cải thiện trong mê cung này còn khiêm tốn so với phần
+runtime tăng thêm. GCS-Bezier có chi phí tính toán lớn nhất, nhưng cần được xem
+như một bài toán khác giàu ràng buộc hơn: phương pháp này tìm quỹ đạo
+min-time dưới giới hạn vận tốc và ràng buộc continuity, thay vì chỉ tối thiểu
+hóa độ dài hình học.
+
+
+\subsection{Phân tích Thực nghiệm 4: Môi trường 2D đơn giản và tác động của phân hoạch lồi}
 
 % grid 4 images
 \begin{figure}[!htp]

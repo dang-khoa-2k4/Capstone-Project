@@ -15,7 +15,9 @@ Các câu hỏi thực nghiệm chính gồm: (i) GCS-DMS thể hiện lợi th�
 buộc động lực phi tuyến trở thành yếu tố quyết định tính khả thi của quỹ đạo;
 (ii) GCS-Bezier mở rộng ra sao trong các bài toán hình học có số vùng lớn; và
 (iii) chất lượng phân hoạch không gian tự do ảnh hưởng như thế nào đến bài toán
-hoạch định trên đồ thị vùng lồi. Các chỉ số chung như thời gian giải, độ dài
+hoạch định trên đồ thị vùng lồi. Ngoài ra, chúng tôi bổ sung một thí nghiệm
+so sánh trên cùng một mê cung cố định để đặt GCS cạnh các baseline
+sampling-based RRT/RRT*. Các chỉ số chung như thời gian giải, độ dài
 quỹ đạo hoặc mức vi phạm an toàn chỉ được dùng như thông tin mô tả; chúng không
 hàm ý một so sánh công bằng tuyệt đối giữa hai mô hình.
 
@@ -28,7 +30,7 @@ cho từng pha của bài toán được liệt kê trong Bảng~\ref{tab:softwa
 
 \begin{table}[!htp]
     \centering
-    \caption{Stack phần mềm cho hai mô hình thực nghiệm.}
+    \caption{Stack phần mềm cho các mô hình thực nghiệm.}
     \label{tab:software_stack}
     \begin{tabular}{lll}
         \toprule
@@ -36,6 +38,7 @@ cho từng pha của bài toán được liệt kê trong Bảng~\ref{tab:softwa
         \midrule
         Phân hoạch không gian & \multicolumn{2}{l}{ACD, IRIS, VCC (Drake / cài đặt riêng)}                        \\
         Solver                & Mosek (SOCP relaxation)                                    & CasADi + IPOPT (NLP) \\
+        Baseline sampling     & \multicolumn{2}{l}{RRT/RRT* tự cài đặt trong Python}                              \\
         Ngôn ngữ              & Python (Drake)                                             & Python               \\
         \bottomrule
     \end{tabular}
@@ -80,15 +83,27 @@ trong khi một số chỉ số chỉ có ý nghĩa với một mô hình cụ t
           mục~\ref{subsec:safety_constraints}.
 \end{itemize}
 
+\paragraph*{(D) So sánh với planner sampling-based.}
+Trong thí nghiệm so sánh giữa GCS, RRT và RRT*, chúng tôi dùng thêm các chỉ số
+hậu kiểm sau: độ dài trung bình của polyline hoặc trajectory sample
+($\text{length}_{\text{mean}}$), thời gian chạy trung bình
+($\text{runtime}_{\text{mean}}$), tỉ lệ thành công trên nhiều seed ngẫu nhiên,
+smoothness đo bằng tổng góc đổi hướng sau shortcut smoothing đối với RRT/RRT*
+hoặc trên trajectory sample đối với GCS, và clearance nhỏ nhất trên sampled path.
+Riêng clearance được diễn giải cẩn thận vì start/goal nằm trên biên mê cung,
+khiến giá trị minimum có thể bằng không dù đường đi không va chạm vật cản.
+
 \subsection{Các thực nghiệm}
 \label{subsec:exp_scenarios}
 
-Chúng tôi thiết kế ba thực nghiệm với mục tiêu bổ trợ nhau. Mỗi thực nghiệm
-được dùng để kiểm tra một khía cạnh riêng của khung GCS và của hai formulation:
+Chúng tôi thiết kế ba thực nghiệm chính với mục tiêu bổ trợ nhau, cùng một thí
+nghiệm so sánh với RRT/RRT*. Mỗi thực nghiệm được dùng để kiểm tra một khía
+cạnh riêng của khung GCS, của hai formulation, hoặc của baseline sampling-based:
 \begin{itemize}
     \item \textbf{Thực nghiệm 1 — GCS-DMS cho xe nonholonomic kiểu Unicycle} (mục~\ref{subsubsec:scenario_C}): khả năng sinh quỹ đạo khả thi động lực học trong môi trường 2D đơn giản và trong các mê cung kích thước $15\times 15$;
     \item \textbf{Thực nghiệm 2 — Mê cung} (mục~\ref{subsubsec:scenario_B}): khả năng mở rộng tổ hợp của GCS-Bezier khi số vùng lồi lên đến hàng trăm;
-    \item \textbf{Thực nghiệm 3 — Môi trường 2D đơn giản} (mục~\ref{subsubsec:scenario_A}): tác động của thuật toán phân hoạch lên từng formulation.
+    \item \textbf{Thực nghiệm 3 — GCS, RRT và RRT*} (mục~\ref{subsubsec:scenario_rrt_compare}): so sánh GCS với planner sampling-based trên cùng một mê cung $25\times 25$ cố định;
+    \item \textbf{Thực nghiệm 4 — Môi trường 2D đơn giản và phân hoạch lồi} (mục~\ref{subsubsec:scenario_A}): tác động của thuật toán phân hoạch lên từng formulation.
 \end{itemize}
 
 \subsubsection{Thực nghiệm 1 — GCS-DMS cho xe nonholonomic kiểu Unicycle}
@@ -150,7 +165,76 @@ Demo trực quan và mã nguồn của thực nghiệm này được công bố 
 Repository hiện ở chế độ riêng tư (private); người quan tâm vui lòng liên hệ
 nhóm tác giả để được cấp quyền truy cập.
 
-\subsubsection{Thực nghiệm 3 — Môi trường 2D đơn giản}
+\subsubsection{Thực nghiệm 3 — So sánh GCS, RRT và RRT* trên mê cung cố định}
+\label{subsubsec:scenario_rrt_compare}
+
+\textbf{Mục tiêu.}
+Thực nghiệm này được thiết kế nhằm so sánh bốn bộ lập kế hoạch trên cùng một
+mê cung cố định: GCS-Linear, GCS-Bezier, RRT và RRT*. Khác với thí nghiệm thống
+kê trên nhiều mê cung ở mục trước, mục tiêu của phần này là tạo một phép đối
+chiếu trực tiếp trong cùng điều kiện hình học, cùng cấu hình bắt đầu/kết thúc.
+Nhờ đó, sự khác biệt giữa hướng tiếp cận tối ưu hóa trên đồ thị các vùng lồi và
+hướng tiếp cận sampling-based có thể được diễn giải rõ hơn qua các chỉ số độ dài
+đường đi, thời gian chạy, tỉ lệ thành công và độ trơn của nghiệm.
+
+\textbf{Môi trường.}
+Mê cung được sinh cố định bằng seed và số tường loại bỏ như trong
+Bảng~\ref{tab:rrt_compare_maze_setup}. Trong mô hình GCS, mỗi ô của mê cung
+được biểu diễn như một vùng lồi và các cạnh có hướng thể hiện quan hệ kề nhau
+giữa các vùng. Đối với RRT/RRT*, môi trường được mô tả bởi tập các đoạn tường,
+đóng vai trò biên vật cản trong bộ kiểm tra va chạm. Cách thiết lập này bảo đảm
+bốn thuật toán cùng giải một bài toán hình học, nhưng sử dụng hai cơ chế tìm
+kiếm khác nhau: tối ưu hóa trên graph có cấu trúc và lấy mẫu ngẫu nhiên trong
+không gian tự do.
+
+\begin{table}[!htp]
+    \centering
+    \caption{Thiết lập mê cung cho thí nghiệm so sánh GCS, RRT và RRT*.}
+    \label{tab:rrt_compare_maze_setup}
+    \begin{tabular}{lc}
+        \toprule
+        \textbf{Thành phần} & \textbf{Giá trị} \\
+        \midrule
+        Maze size & $25\times 25$ \\
+        Maze seed & 4 \\
+        Knock-down walls & 25 \\
+        Start & $(0.5,\;0.0)$ \\
+        Goal & $(24.5,\;25.0)$ \\
+        Convex regions & 625 \\
+        Directed GCS edges & 1298 \\
+        Wall segments collision checker & 651 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+Các tham số dùng cho hai baseline sampling-based được giữ giống nhau ở các thành
+phần cốt lõi, nhằm bảo đảm khác biệt quan sát được chủ yếu đến từ cơ chế
+rewiring của RRT* thay vì từ cấu hình lấy mẫu. Cụ thể, cả RRT và RRT* dùng bước
+steer tối đa bằng một chiều rộng ô mê cung, cùng xác suất bias về goal và cùng
+ngưỡng nối tới goal như trong Bảng~\ref{tab:rrt_compare_planner_setup}.
+
+\begin{table}[!htp]
+    \centering
+    \caption{Thiết lập tham số cho RRT và RRT* trong thí nghiệm so sánh.}
+    \label{tab:rrt_compare_planner_setup}
+    \begin{tabularx}{\textwidth}{lcc>{\raggedright\arraybackslash}X}
+        \toprule
+        \textbf{Tham số} & \textbf{RRT} & \textbf{RRT*} & \textbf{Ý nghĩa} \\
+        \midrule
+        \texttt{max\_iter} & 20000 & 20000 & Số vòng lặp tối đa \\
+        \texttt{step\_size} & 1.0 & 1.0 & Bước steer tối đa, tương ứng một cell width \\
+        \texttt{goal\_bias} & 0.05 & 0.05 & Xác suất sample trực tiếp goal \\
+        \texttt{goal\_tol} & 0.5 & 0.5 & Khoảng cách để coi là nối được tới goal \\
+        \bottomrule
+    \end{tabularx}
+\end{table}
+
+Do GCS-Linear và GCS-Bezier là các phương pháp deterministic trong thiết lập
+này, mỗi phương pháp chỉ được chạy một lần. Ngược lại, RRT và RRT* phụ thuộc vào
+quá trình lấy mẫu ngẫu nhiên, nên mỗi thuật toán được chạy trên 50 seed khác
+nhau để ước lượng độ ổn định, độ biến thiên và chất lượng nghiệm trung bình.
+
+\subsubsection{Thực nghiệm 4 — Môi trường 2D đơn giản}
 
 \label{subsubsec:scenario_A}
 
@@ -209,7 +293,9 @@ tham số riêng như đã mô tả ở các mục trước.
 \subsection{Tham số bài toán}
 \label{subsec:exp_parameters}
 
-Bảng~\ref{tab:exp_params} tóm tắt các tham số chính của các thực nghiệm. Do hai
+Bảng~\ref{tab:exp_params} tóm tắt các tham số chính của ba thực nghiệm chính.
+Thiết lập riêng của thí nghiệm so sánh GCS--RRT/RRT* đã được trình bày tại
+Bảng~\ref{tab:rrt_compare_maze_setup} và phần mô tả ngay sau bảng. Do hai
 formulation có biến quyết định và hàm mục tiêu khác nhau, các tham số được chọn
 theo ý nghĩa riêng của từng mô hình; các tham số trùng tên chỉ được hiểu là có
 cùng đơn vị hoặc cùng vai trò vật lý, không phải điều kiện để so sánh tối ưu
