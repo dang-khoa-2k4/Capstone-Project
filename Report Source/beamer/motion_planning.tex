@@ -1009,7 +1009,7 @@
                 \begin{itemize}
                     \item \textbf{ACD cân bằng nhất:} tự động, $C_{\text{path}}$ gần VCC, nhanh hơn $\sim$64$\times$
                     \item \textbf{VCC:} $t_{\text{solve}}$ rất cao - số biến nhị phân $\propto|\mathcal{E}|$ tăng phi tuyến
-                    \item \textbf{Manual:} nhanh nhưng không tự động $\Rightarrow$ không khả thi cho rô-bốt tự hành
+                    \item \textbf{Manual:} nhanh nhưng không tự động $\Rightarrow$ không khả thi trong thực tế
                 \end{itemize}
             }
         \end{column}
@@ -1082,10 +1082,10 @@
             \footnotesize
             \begin{itemize}
                 \setlength\itemsep{0.12em}
-                \item Defect $\sim 10^{-14}$ 
-                \item gap $\sim 10^{-9}$
-                \item vi phạm $\sim 10^{-8}$
-                \item \textbf{Số vùng kích hoạt} quyết định chất lượng nghiệm DMS hơn số vùng toàn cục
+                \item \textbf{Defect} $\sim 10^{-14}$: sai số động lực học trong mỗi đoạn shooting
+                \item \textbf{Gap nối} $\sim 10^{-9}$: sai lệch trạng thái giữa hai vùng liên tiếp
+                \item \textbf{Vi phạm an toàn} $\sim 10^{-8}$: mức vượt ràng buộc tránh vật cản
+                \item \textbf{Chuỗi vùng kích hoạt} ảnh hưởng trực tiếp đến nghiệm DMS hơn tổng số vùng phân hoạch
             \end{itemize}
 
         \end{column}
@@ -1122,7 +1122,10 @@
             \end{tabular}
 
             \vspace{0.3em}
-            \textbf{Tối ưu toàn cục:} trên cả 10 mê cung $y_e^*\!\in\!\{0,1\}$ tự động $\Rightarrow$ optimality gap $=0\%$, không cần rounding.
+            \[
+                \delta_{\mathrm{opt}} := \frac{C_{\mathrm{round}} - C_{\mathrm{opt}}}{C_{\mathrm{opt}}}
+            \]
+            \textbf{Tối ưu toàn cục:} $y_e^*\!\in\!\{0,1\}$ tự động; $\delta_{\mathrm{opt}}=0\%$ nghĩa là cost trùng cận dưới, không cần rounding.
         \end{column}
     \end{columns}
 \end{frame}
@@ -1227,8 +1230,9 @@
             \vspace{0.4em}
             \footnotesize \textbf{10/10 seed} thành công với cả hai cơ chế an toàn:
             \begin{itemize}\itemsep0pt
-                \item Defect $\sim 10^{-10}$
-                \item Gap $\sim 10^{-9}$;\ Vi phạm $\sim 10^{-8}$
+                \item Defect $\sim 10^{-10}$: sai số động lực học nội đoạn
+                \item Gap nối $\sim 10^{-9}$: sai lệch giữa hai đoạn liên tiếp
+                \item Vi phạm an toàn $\sim 10^{-8}$: mức vượt ràng buộc tránh vật cản
             \end{itemize}
             $\Rightarrow$ \textbf{nghiệm khả thi động lực học} trên nhiều cấu trúc mê cung.
         \end{column}
