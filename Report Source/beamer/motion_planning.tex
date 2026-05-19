@@ -250,7 +250,7 @@
 
 % \end{frame}
 
-\begin{frame}{Một số hướng tiếp cận}
+\begin{frame}{Một số hướng Phương pháp}
     \begin{columns}[T,onlytextwidth]
         \begin{column}{0.33\textwidth}
             \centering
@@ -282,7 +282,7 @@
         \end{column}
         \begin{column}{0.33\textwidth}
             \centering
-            \textbf{SPP in GCS Framework}~\cite{marcucci2023motion, marcucci2024shortest}
+            \textbf{Graph of convex sets - GCS}~\cite{marcucci2023motion, marcucci2024shortest}
             \includegraphics[width=\linewidth]{./imgs/gcs-example.png}
         \end{column}
     \end{columns}
@@ -291,7 +291,7 @@
 
 \section{Đồ thị của các tập lồi (Graph of convex sets - GCS)}
 
-\begin{frame}{Ý tưởng chính}
+\begin{frame}{Ý tưởng chính của GCS}
     \begin{itemize}
         \item \textbf{Phân hoạch không gian:} $\rightarrow$ \textbf{vùng an toàn lồi} $\{Q_v\}$
         \item \textbf{Mô hình hóa:} Hoạch định chuyển động $\rightarrow$ \textbf{đường đi ngắn nhất} trên \textbf{Đồ thị các tập lồi}
@@ -429,7 +429,7 @@
 
 \section{Xây dựng bài toán tối ưu hóa}
 
-\begin{frame}{Tiếp cận 1: Bài toán tối ưu hóa trong GCS}
+\begin{frame}{Phương pháp 1: Bài toán tối ưu hóa trong GCS kết hợp đường cong Bezier (GCS-Bézier)}
 
     \begin{columns}[T,onlytextwidth]
         \begin{column}{0.48\textwidth}
@@ -482,7 +482,7 @@
 
 \end{frame}
 
-\begin{frame}{Hoạch định chuyển động trong GCS}
+\begin{frame}{Hoạch định chuyển động trong GCS-Bézier}
     \begin{columns}[T,onlytextwidth]
         \begin{column}{0.55\textwidth}
             \textbf{Mục tiêu:} tìm quỹ đạo tối ưu $\sigma \to \tau$ trên GCS
@@ -511,7 +511,7 @@
 \end{frame}
 
 % \section{Kỹ thuật Convex Relaxation}
-\begin{frame}{Hoạch định chuyển động trong GCS}
+\begin{frame}{Hoạch định chuyển động trong GCS-Bézier}
 
     \begin{columns}[T,onlytextwidth]
         \begin{column}{0.55\textwidth}
@@ -628,7 +628,7 @@
 % \end{frame}
 
 % ===================== Slide DMS-1: GCS-DMS = MINLP (overview) =====================
-\begin{frame}{Tiếp cận 2: Kết hợp GCS với Direct Multiple Shooting (DMS) - MIOCP/MINLP}
+\begin{frame}{Phương pháp 2: Kết hợp GCS với Direct Multiple Shooting (GCS-DMS)}
     \small
 
     \begin{columns}[T, onlytextwidth]
@@ -1189,9 +1189,9 @@
 
 
 % =====================================================================
-% TN3 - Slide 1: GCS vs RRT/RRT* setup + results table
+% TN3 - Slide 1: GCS-Bezier vs RRT/RRT* setup + results table
 % =====================================================================
-\begin{frame}{TN3 - GCS vs RRT/RRT* trên mê cung $25\!\times\!25$ (seed 4)}
+\begin{frame}{TN3 - GCS-Bezier vs RRT/RRT* trên mê cung $25\!\times\!25$ (seed 4)}
     \vspace{-0.6em}
     \begin{columns}[T,onlytextwidth]
         \begin{column}{0.46\textwidth}
@@ -1638,7 +1638,7 @@
 
     \hrulefill
 
-    \textbf{2. GCS: Tiếp cận dựa trên luồng đồ thị (Flow-based)}
+    \textbf{2. GCS: Phương pháp dựa trên luồng đồ thị (Flow-based)}
     \begin{itemize}
         \item \textbf{Cơ chế:} Chỉ tạo biến nhị phân cho các \textbf{cạnh (edges)} nối giữa các vùng tiếp giáp nhau. Quỹ đạo được xem như một luồng chạy từ nguồn đến đích trên đồ thị.
         \item \textbf{Ưu điểm hình học:} Trong không gian 2D, mỗi vùng chỉ tiếp giáp với một số ít vùng lân cận (hệ số bậc đồ thị thấp).
