@@ -188,7 +188,7 @@
         \end{column}
     \end{columns}
 
-    \footnotetext{Nguồn: Johannes Ihle et al., ``Graph of Convex Sets for Trajectory Optimization on Spot''}
+    \footnotetext{\tiny Nguồn: Johannes Ihle et al., ``Graph of Convex Sets for Trajectory Optimization on Spot''}
 \end{frame}
 
 \begin{frame}{Bài toán hoạch định chuyển động}
@@ -286,7 +286,7 @@
             \includegraphics[width=\linewidth]{./imgs/gcs-example.png}
         \end{column}
     \end{columns}
-    \footnotetext{Nguồn: Aditya Tandon et al, ``Autonomous navigation of quadruped robots for monitoring and inspection of civil infrastructure ''}
+    \footnotetext{\tiny Nguồn: Aditya Tandon et al, ``Autonomous navigation of quadruped robots for monitoring and inspection of civil infrastructure ''}
 \end{frame}
 
 \section{Đồ thị của các tập lồi (Graph of convex sets - GCS)}
@@ -424,7 +424,7 @@
     \end{columns}
     % Lưu ý: $\ell_e$ đại diện cho chi phí tổng quát, lồi đóng, không bắt buộc là một metric
 
-    \footnotetext{Nguồn: Marcucci et al., ``Motion Planning around Obstacles with Convex Optimization''}
+    \footnotetext{\tiny Nguồn: Marcucci et al., ``Motion Planning around Obstacles with Convex Optimization''}
 \end{frame}
 
 \section{Xây dựng bài toán tối ưu hóa}
@@ -507,7 +507,7 @@
         \end{column}
     \end{columns}
 
-    \footnotetext{Nguồn: Marcucci et al., ``Motion Planning around Obstacles with Convex Optimization''}
+    \footnotetext{\tiny Nguồn: Marcucci et al., ``Motion Planning around Obstacles with Convex Optimization''}
 \end{frame}
 
 % \section{Kỹ thuật Convex Relaxation}
@@ -542,7 +542,34 @@
 
     \end{columns}
 
-    \footnotetext{Nguồn: Marcucci et al., ``Motion Planning around Obstacles with Convex Optimization''}
+    \footnotetext{\tiny Nguồn: Marcucci et al., ``Motion Planning around Obstacles with Convex Optimization''}
+\end{frame}
+
+\begin{frame}{Nới lỏng lồi (Convex Relaxation) và Giải thuật Làm tròn}
+    \textbf{Chiến lược nới lỏng bài toán MICP:}
+    \begin{itemize}
+        \item Hàm chi phí phi lồi và ràng buộc rời rạc $\rightarrow$ lồi: kỹ thuật hàm phối
+              cảnh~\cite{marcucci2023motion,marcucci2024shortest}.
+        \item Ràng buộc phi lồi $\rightarrow$ hệ ràng buộc lồi chặt $\Rightarrow$ tối ưu
+              lồi~\cite{marcucci2023motion,marcucci2024shortest}.
+    \end{itemize}
+    \textbf{Kết quả nới lỏng:}
+    \begin{itemize}
+        \item Kết quả cho ra thường chặt: $C_{relax} \approx C_{opt}$
+        \item Nếu không chặt (Loose Relaxation): làm tròn ngẫu nhiên
+        \item \textbf{Đánh giá:}
+              \begin{itemize}
+                  \item Khoảng cách tối ưu: $\delta_{opt} = \frac{C_{round} - C_{opt}}{C_{opt}}$
+                  \item Ước lượng qua nới lỏng: $\delta_{relax} = \frac{C_{round} - C_{relax}}{C_{relax}}$
+              \end{itemize}
+    \end{itemize}
+
+    \textbf{Làm tròn ngẫu nhiên:}
+    \begin{enumerate}
+        \item Khởi tạo từ nguồn $\sigma$
+        \item Tại nút $v$: chọn cạnh $e=(v \to w)$ theo xác suất $\propto y_e^*$
+        \item Quay lui nếu ngõ cụt, đến đích $\tau$~\cite{marcucci2023motion}
+    \end{enumerate}
 \end{frame}
 
 % \begin{frame}{Sinh quỹ đạo liên tục}
@@ -588,7 +615,7 @@
 % \end{multicols}
 % \end{frame}
 
-% Nguồn nội dung: report_v4 mô tả mục tiêu ghép GCS + direct multiple shooting và endpoint map/defect constraint; beamer mms_beamer trình bày local shooting block, flow formulation và continuity/interface constraints.    
+% Nguồn nội dung: report_v4 mô tả mục tiêu ghép GCS + direct multiple shooting và endpoint map/defect constraint; beamer mms_beamer trình bày cục bộ shooting block, flow formulation và continuity/interface constraints.    
 
 % \begin{frame}{Hàm mục tiêu cục bộ trên một vùng active}
 %     \small
@@ -612,7 +639,7 @@
 %         w_L|\dot q(t)|^2 + w_E|u(t)|^2, \qquad w_L,w_E>0.
 %     \]
 
-%     Chi phí local trên vùng $v$:
+%     Chi phí cục bộ trên vùng $v$:
 %     \[
 %         J_v(s_v^-,w_v,\Delta_v) =
 %         a\Delta_v + \int_0^1 \Delta_v \left( w_L \left| \frac{1}{\Delta_v}
@@ -631,164 +658,537 @@
 \begin{frame}{Phương pháp 2: Kết hợp GCS với Direct Multiple Shooting (GCS-DMS)}
     \small
 
+    Hệ động lực học:\quad $\dot{x}(t)=f\bigl(x(t),u(t)\bigr)$,\quad $t\in[0,T]$
+
+    \vspace{0.4em}
+
     \begin{columns}[T, onlytextwidth]
-        \begin{column}{0.43\textwidth}
-            \centering \textbf{graph problem - network flow}
-
-            \begin{itemize}
-                \item $y_{uv}\in\{0,1\}$: cạnh $(u,v)$ được chọn
-                \item $p_v\in\{0,1\}$: vùng $v$ được kích hoạt
-                      % \item Bảo toàn luồng: ${\displaystyle\sum_{\mathrm{in}}} y =
-                      %               {\displaystyle\sum_{\mathrm{out}}} y = p_v$
-                \item $z_{uv}\!\in\!Q_u\!\cap\! Q_v$,\; $s_u^+ = s_v^- = z_{uv}$
-            \end{itemize}
-
-            % \vspace{0.2cm}
+        \begin{column}{0.5\textwidth}
+            \textbf{Bài toán điều khiển tối ưu - OCP:}
             \[
-                J_{\mathrm{total}} = \sum_{v\in V_r} p_v\, J_v
+                \min_{T,\,x(\cdot),\,u(\cdot)}\;
+                \underbrace{\Phi\bigl(x(T),T\bigr)}_{\text{chi phí cuối}}
+                +
+                \int_0^T \underbrace{\ell\bigl(x(t),u(t)\bigr)}_{\text{chi phí tức thời}}\,dt
             \]
+            \vspace{-0.5em}
+            \begin{align*}
+                \text{s.t.}\quad
+                 & \dot{x}(t)=f(x(t),u(t))                            \\
+                 & x(0)=x^{\mathrm{s}},\quad x(T)=x^{\mathrm{g}}      \\
+                 & x(t)\in Q,\quad u(t)\in\mathcal{U},\quad \forall t
+            \end{align*}
         \end{column}
 
-        \begin{column}{0.02\textwidth}
-            \centering \rule{0.4pt}{0.5\textheight}
-        \end{column}
-
-        \begin{column}{0.55\textwidth}
-            \centering \textbf{OCP trên vùng $v$ (khi $p_v=1$)}
-
-            \vspace{0.2cm}
-            \[
-                J_v =
-                \int_0^{T_v}
-                \!\Bigl(
-                \underbrace{a}_{\text{thời lượng}}
-                +
-                \underbrace{b\,|\dot{q}_v(t)|^2}_{\text{vận tốc hình học}}
-                +
-                \underbrace{c\,|u_v(t)|^2}_{\text{năng lượng điều khiển}}
-                \Bigr)\,dt
-            \]
-
-            \vspace{0.1cm}
-            \footnotesize
-            $q_v(t):=\pi(x_v(t))$;\quad
-            $\dot{q}_v = dq_v/dt$;\quad
-            $T_v$ — thời lượng đoạn $v$
+        \begin{column}{0.5\textwidth}
+            % \textbf{Giải thích:}
+            % \begin{itemize}
+            %     \item $\Phi$: chất lượng trạng thái cuối
+            %     \item $\ell$: chi phí tích lũy dọc quỹ đạo
+            %     \item $f$: phương trình động lực học hệ thống
+            %     \item $Q\subset\mathbb{R}^{n_x}$: không gian an toàn
+            %     \item $\mathcal{U}$: tập điều khiển chấp nhận được
+            % \end{itemize}
+            \includegraphics[width=\textwidth]{imgs/simple-ocp.jpg}
+            \captionof{figure}{\footnotesize Bài toán điều khiển tối ưu (OCP) đơn giản \footnotemark}
         \end{column}
     \end{columns}
 
-    \vspace{0.15cm}
-    \begin{alertblock}{Phân loại bài toán}
-        Biến nhị phân $p_v,y_{uv}$ + OCP phi tuyến $\;\Rightarrow\;$
-        \textbf{MIOCP} (liên tục theo thời gian) \;/\;
-        \textbf{MINLP} (sau khi DMS rời rạc hóa điều khiển)
-    \end{alertblock}
+    \vspace{0.7em}
+    \textbf{Thách thức:} $Q$ phi lồi do vật cản và ràng buộc động học phi tuyến
+    $\;\Rightarrow\;$ phân hoạch $Q\to\{Q_v\}$ lồi + mã hóa đường đi qua đồ thị GCS
 
+    \footnotetext{\tiny Nguồn: Moritz Diehl et al, ``Fast Direct Multiple Shooting Algorithms for Optimal Robot Control''}
 \end{frame}
 
-% ===================== Slide DMS-2: Multiple Shooting — biến, IVP, defect =====================
-\begin{frame}{DMS tham số hóa đoạn quỹ đạo, buộc tính liên tục qua defect constraint}
+% % ===================== Slide NEW-2: DMS idea + Apply vào GCS (gộp) =====================
+% \begin{frame}{Direct Multiple Shooting (DMS) — rời rạc hóa OCP theo vùng lồi}
+%     \small
+
+%     \textbf{Ý tưởng:} chia thành $N$ đoạn, mỗi đoạn có điều kiện đầu \emph{độc lập} $s_k$,
+%     tính liên tục áp đặt qua \emph{defect constraint}
+%     $\;\to\;$ NLP hữu hạn chiều.
+
+%     \[
+%         s_v^-
+%         \;\xrightarrow{\;\Delta_v,\,w_v\;}
+%         F_v(s_v^-,w_v,\Delta_v)
+%         \;\overset{\text{defect}=0}{=}\;
+%         s_v^+
+%         \;=\;
+%         s_{v+1}^-
+%         \;\xrightarrow{\;\Delta_{v+1},\,w_{v+1}\;}
+%         \cdots
+%     \]
+
+%     \vspace{0.2em}
+
+%     \begin{columns}[T, onlytextwidth]
+%         \begin{column}{0.50\textwidth}
+%             \textbf{Trong GCS-DMS: đoạn = vùng $Q_v$}
+
+%             \vspace{0.3em}
+%             Biến quyết định trên vùng $v$:
+%             \begin{itemize}
+%                 \item $s_v^-\in\mathbb{R}^{n_x}$ - điểm bắn (shooting point)
+%                 \item $s_v^+\in\mathbb{R}^{n_x}$ - trạng thái ra (tự do)
+%                 \item $\Delta_v\ge 0$ - thời lượng đoạn
+%                 \item $w_v\in\mathbb{R}^{n_w}$ - tham số tín hiệu điều khiển
+%             \end{itemize}
+%         \end{column}
+
+%         \begin{column}{0.48\textwidth}
+%             \textbf{IVP chuẩn hóa trên $\tau\in[0,1]$:}
+%             \[
+%                 \frac{dx_v}{d\tau}
+%                 = \Delta_v\,f\!\bigl(x_v(\tau),\,\mathcal{U}_v(\tau;w_v)\bigr),
+%                 \quad x_v(0)=s_v^-
+%             \]
+%             \textbf{Endpoint map:}
+%             $F_v(s_v^-,w_v,\Delta_v):=x_v(1)$
+
+%             \vspace{0.4em}
+%             \textbf{Defect constraint:}
+%             \[
+%                 s_v^+ - F_v(s_v^-,w_v,\Delta_v) = 0
+%             \]
+%         \end{column}
+%     \end{columns}
+
+% \end{frame}
+
+% % ===================== Slide NEW-3: Interface, coupling, network flow =====================
+% \begin{frame}{Ghép nối quỹ đạo qua biến ghép nối và network flow}
+%     \small
+
+%     \begin{columns}[T, onlytextwidth]
+%         \begin{column}{0.50\textwidth}
+%             \textbf{Biến} $z_{uv}\in Q_u\cap Q_v$:
+%             điểm chuyển tiếp giữa hai vùng kề nhau.
+
+%             \vspace{0.4em}
+%             Khi cạnh $(u,v)$ được chọn ($y_{uv}=1$):
+%             \[
+%                 s_u^+ = z_{uv} = s_v^-,
+%                 \quad
+%                 z_{uv}\in Q_u\cap Q_v
+%             \]
+
+%             Điều kiện biên:
+%             \[
+%                 s_v^- = x^{\mathrm{s}}\;\text{(nguồn)},\quad
+%                 s_v^+ = x^{\mathrm{g}}\;\text{(đích)}
+%             \]
+
+%             \vspace{0.3em}
+%             \textbf{Network flow} — đúng 1 đường đi đơn giản:
+%             \begin{align*}
+%                 \sum_{(\sigma,v)} y_{\sigma v} &= 1,\quad \sum_{(v,\tau)} y_{v\tau} = 1 \\
+%                 \sum_{\mathrm{in}} y_{uv} &= \sum_{\mathrm{out}} y_{vw} = p_v
+%             \end{align*}
+%         \end{column}
+
+%         \begin{column}{0.48\textwidth}
+%             \textbf{Phân loại bài toán:}
+
+%             \vspace{0.3em}
+%             Biến nhị phân $y_{uv},p_v$ chọn đường đi\\
+%             $+$ IVP phi tuyến theo từng vùng active
+
+%             \vspace{0.3em}
+%             $\Rightarrow$
+%             \textbf{MIOCP} (dạng liên tục theo thời gian)
+
+%             $\Rightarrow$
+%             \textbf{MINLP} (sau khi DMS rời rạc hóa)
+
+%             \vspace{0.5em}
+%             \textbf{Hàm mục tiêu tổng:}
+%             \[
+%                 \min\;\sum_{v\in V_r} p_v\, J_v(s_v^-,w_v,\Delta_v)
+%             \]
+%             với $J_v = a\Delta_v
+%             + \int_0^{\Delta_v}\!\left(w_L|\dot{q}_v(t)|^2
+%             +w_E|u_v(t)|^2\right)\!dt$
+%         \end{column}
+%     \end{columns}
+
+% \end{frame}
+
+% % ===================== Slide NEW-4: Safety + log-barrier =====================
+% \begin{frame}{Ràng buộc an toàn hình học: hard constraint và log-barrier}
+%     \small
+
+%     \textbf{Thách thức:} $x_v(t)\in Q_v$ $\forall t\in[0,\Delta_v]$ là ràng buộc \emph{continuous-time}
+%     — vô hạn chiều, không thể đưa trực tiếp vào bộ giải số.
+
+%     \vspace{0.5em}
+
+%     \begin{columns}[T, onlytextwidth]
+%         \begin{column}{0.48\textwidth}
+%             \textbf{Cách 1 — Hard constraint (sampling):}
+%             \[
+%                 A_v\,x_v(t_k)\le b_v-\varepsilon_v,
+%                 \quad k=0,\ldots,M_v
+%             \]
+%             Đơn giản, không đổi hàm mục tiêu.\\
+%             Nhược: blind spot giữa các node lưới.
+%         \end{column}
+
+%         \begin{column}{0.48\textwidth}
+%             \textbf{Cách 2 — Log-barrier:}
+%             \[
+%                 \phi_v(x)
+%                 =-\sum_{j=1}^{m_v}\log\!\bigl((b_v)_j-(A_v x)_j\bigr)
+%             \]
+%             $\phi_v\to+\infty$ khi $x$ tiếp cận biên $Q_v$\\
+%             $\Rightarrow$ tự nhiên ép quỹ đạo nằm sâu trong vùng.
+%         \end{column}
+%     \end{columns}
+
+%     \vspace{0.5em}
+
+%     \textbf{Tích hợp log-barrier vào hàm mục tiêu} (với trọng số $\mu_v>0$):
+%     \[
+%         \min\;\sum_{v}\!p_v\!\left[
+%             J_v
+%             +\int_0^{\Delta_v}\!\mu_v\,\phi_v\!\bigl(x_v(t)\bigr)\,dt
+%         \right]
+%     \]
+
+%     Không cần ràng buộc tường minh cho $Q_v$.
+%     \textbf{Chiến lược kiểm thử:} $\mu_v$ giảm dần $10^{-2}\!\to\!10^{-5}$
+%     $\;\Rightarrow\;$ tiệm cận nghiệm bài toán gốc.
+
+% \end{frame}
+% ===================== Slide NEW-2: DMS idea + Apply vào GCS, không chuẩn hóa thời gian =====================
+\begin{frame}{Direct Multiple Shooting (DMS) rời rạc hóa OCP theo vùng lồi}
     \small
 
-    \centering
+    \textbf{Ý tưởng:} mỗi vùng lồi $Q_v$ được gán một đoạn chuyển động có thời lượng riêng
+    $\Delta_v \ge 0$ $\;\Rightarrow\;$ giải một IVP cục bộ theo thời gian
+    $t_v \in [0,\Delta_v]$ $\;\Rightarrow\;$ nối các đoạn bằng ràng buộc defect.
+
     \[
         s_v^-
-        \;\xrightarrow{\;\mathrm{IVP}_v\;}
-        x_v(1)
-        \;\overset{\mathrm{defect}\,=\,0}{=}\;
+        \;\xrightarrow{\;u_v(\cdot),\,\Delta_v\;}
+        F_v(s_v^-,w_v,\Delta_v)
+        \;\overset{\text{defect}=0}{=}\;
         s_v^+
         \;=\;
         s_{v+1}^-
-        \;\xrightarrow{\;\mathrm{IVP}_{v+1}\;}
+        \;\xrightarrow{\;u_{v+1}(\cdot),\,\Delta_{v+1}\;}
         \cdots
     \]
 
-    \vspace{0.1cm}
+    \vspace{0.2em}
+
     \begin{columns}[T, onlytextwidth]
-        \begin{column}{0.50\textwidth}
-            \textbf{Biến quyết định — vùng $v$:}
+        \begin{column}{0.45\textwidth}
+            \textbf{Trong GCS-DMS: đoạn = vùng $Q_v$}
+
+            \vspace{0.3em}
+            Biến quyết định trên vùng $v$:
             \begin{itemize}
-                \item $s_v^- \in \mathbb{R}^{n_x}$ — điểm bắn
-                \item $s_v^+ \in \mathbb{R}^{n_x}$ — trạng thái ra (tự do)
-                \item $\Delta_v \ge 0$ — thời lượng
-                \item $u_v(\cdot)\in\mathscr{U}_v$, với
+                \item $s_v^- \in \mathbb{R}^{n_x}$ - trạng thái vào vùng
+                \item $s_v^+ \in \mathbb{R}^{n_x}$ - trạng thái ra khỏi vùng
+                \item $\Delta_v \ge 0$ - thời lượng đi qua vùng $Q_v$
+                \item $w_v \in \mathbb{R}^{n_w}$ - tham số điều khiển cục bộ
             \end{itemize}
 
+            % \vspace{0.3em}
+            Tổng thời gian quỹ đạo:
             \[
-                \mathscr{U}_v := \left\{
-                    \tau \mapsto \mathcal{U}_v(\tau; w_v)
-                    \mid
-                    w_v \in \mathbb{R}^{n_w}
-                \right\}
+                T = \sum_{v\in V_r} p_v\,\Delta_v .
             \]
-
-            % \vspace{0.2cm}
-
         \end{column}
 
-        \begin{column}{0.46\textwidth}
-            \begin{alertblock}{Defect constraint}
-                \[
-                    s_v^+ \;-\; \underbrace{F_v(s_v^-,\,w_v,\,\Delta_v)}_{\displaystyle x_v(1)} \;=\; 0
-                \]
-            \end{alertblock}
+        \begin{column}{0.55\textwidth}
+            \textbf{IVP cục bộ theo thời gian:}
             \[
-                \frac{dx_v}{d\tau} = \Delta_v f\!\bigl(x_v(\tau),\,u_v(\tau)\bigr),
-                \quad x_v(0) = s_v^-
+                \dot{x}_v(t_v)
+                =
+                f\!\bigl(x_v(t_v),u_v(t_v)\bigr),
+                \quad
+                t_v\in[0,\Delta_v],
+            \]
+            \[
+                x_v(0)=s_v^-, 
+                \quad
+                u_v(t_v)=\mathcal{U}_v(t_v;w_v,\Delta_v).
+            \]
+
+            \textbf{Endpoint map:}
+            \[
+                F_v(s_v^-,w_v,\Delta_v)
+                :=
+                x_v(\Delta_v).
+            \]
+
+            \textbf{Defect constraint:}
+            \[
+                s_v^+
+                -
+                F_v(s_v^-,w_v,\Delta_v)
+                =0 .
             \]
         \end{column}
     \end{columns}
 
 \end{frame}
 
-% ===================== Slide DMS-3: Solver (2 pha) + Safety + Output =====================
-\begin{frame}{Giải MINLP; ràng buộc an toàn qua lấy mẫu hoặc log-barrier}
-    \footnotesize
+% ===================== Slide NEW-3: Interface, coupling, network flow, theo thời lượng vùng =====================
+\begin{frame}{Ghép nối vùng lồi bằng thời điểm chuyển vùng và network flow}
+    \small
 
     \begin{columns}[T, onlytextwidth]
-        \begin{column}{0.52\textwidth}
-            \textbf{Pha 1 - Chọn đường đi:}
-            \begin{itemize}
-                \item Relax $y_{uv}\in\{0,1\}$ sang $[0,1]$
-                \item Giải convex problem trên toàn GCS
-                \item Làm tròn để cố định chuỗi vùng $Q_{v_1}\to\cdots\to Q_{v_K}$
-            \end{itemize}
+        \begin{column}{0.50\textwidth}
+            \textbf{Biến ghép nối} $z_{uv}\in Q_u\cap Q_v$:
+            trạng thái chuyển tiếp khi đi từ vùng $Q_u$ sang vùng $Q_v$.
 
-            \vspace{0.15cm}
-            \textbf{Pha 2 - Tối ưu quỹ đạo:}
-            \begin{itemize}
-                \item Warm-start từ pha 1
-                \item Tối ưu đồng thời $(s_v^\pm,\,w_v,\,\Delta_v)$ trên các vùng active
-            \end{itemize}
+            \vspace{0.4em}
+            Khi cạnh $(u,v)$ được chọn:
+            \[
+                y_{uv}=1
+                \quad\Rightarrow\quad
+                s_u^+ = z_{uv} = s_v^-,
+                \qquad
+                z_{uv}\in Q_u\cap Q_v .
+            \]
 
-            \vspace{0.15cm}
-            \textbf{Cơ chế an toàn continuous-time:}
-            \begin{itemize}
-                \item \textbf{Lấy mẫu:} $A_v x_v(\tau_k)\!\le\! b_v\!-\!\varepsilon_v$ -
-                      đơn giản, có blind spot giữa node
-                \item \textbf{Log-barrier:} $-\mu_v\!\int\!\textstyle\sum_j\!\log(b_j\!-\!a_j^\top x_v)\,d\tau$ -
-                      liên tục, nhạy với $\mu_v$
-            \end{itemize}
+            \vspace{0.3em}
+            Điều kiện biên:
+            \[
+                s_v^- = x^{\mathrm{s}}
+                \quad \text{nếu } (\sigma,v) \text{ được chọn},
+            \]
+            \[
+                s_v^+ = x^{\mathrm{g}}
+                \quad \text{nếu } (v,\tau_f) \text{ được chọn}.
+            \]
+
+            % \vspace{0.3em}
+            % \textbf{Network flow:}
+            % \begin{align*}
+            %     \sum_{(\sigma,v)\in E} y_{\sigma v} & = 1, \\
+            %     \sum_{(v,\tau_f)\in E} y_{v\tau_f}  & = 1, \\
+            %     \sum_{(u,v)\in E} y_{uv}
+            %                                         & =
+            %     \sum_{(v,w)\in E} y_{vw}
+            %     =
+            %     p_v .
+            % \end{align*}
         \end{column}
 
-        \begin{column}{0.44\textwidth}
-            \textbf{Đầu ra:}
-            \begin{itemize}
-                \item Chuỗi vùng $Q_{v_1},\ldots,Q_{v_K}$ được kích hoạt
-                \item $x^\star(\cdot)$: quỹ đạo \textbf{liên tục}, an toàn
-                \item $u^\star(\cdot)$: tín hiệu điều khiển hợp lệ
-                \item $T^\star = \textstyle\sum_v \Delta_v^\star$: thời gian tổng
-            \end{itemize}
+        \begin{column}{0.48\textwidth}
+            \centering\vspace{0.2em}
+            \begin{tikzpicture}[scale=0.83, font=\scriptsize, >=stealth,
+                every node/.style={inner sep=1pt}]
 
-            \vspace{0.3cm}
-            \textbf{Ba bảo đảm cùng lúc:}
-            \begin{itemize}
-                \item \textbf{Liên tục:} defect $= 0$ tại mọi giao điểm
-                \item \textbf{An toàn:} $x^\star(t)\in Q_{v(t)},\;\forall t$
-                \item \textbf{Động lực học:} IVP thỏa trên từng vùng
-            \end{itemize}
+                % ── Q_v1 (blue) ──────────────────────────────────────
+                \fill[blue!22]
+                    (0,0.4)--(0.3,0)--(2.1,0)--(2.5,0.8)
+                    --(2.3,2.1)--(0.7,2.3)--(0,1.7)--cycle;
+                \draw[blue!55, thick]
+                    (0,0.4)--(0.3,0)--(2.1,0)--(2.5,0.8)
+                    --(2.3,2.1)--(0.7,2.3)--(0,1.7)--cycle;
+
+                % ── Q_v2 (green) ─────────────────────────────────────
+                \fill[green!18, opacity=0.85]
+                    (1.8,0)--(4.2,0)--(4.6,1.0)--(4.2,2.2)
+                    --(1.6,2.2)--(1.6,0.7)--cycle;
+                \draw[green!60!black, thick]
+                    (1.8,0)--(4.2,0)--(4.6,1.0)--(4.2,2.2)
+                    --(1.6,2.2)--(1.6,0.7)--cycle;
+
+                % ── Q_v3 (orange) ────────────────────────────────────
+                \fill[orange!22, opacity=0.85]
+                    (3.8,0.1)--(6.1,0.1)--(6.2,1.4)--(5.7,2.3)
+                    --(3.6,2.3)--(3.6,0.9)--cycle;
+                \draw[orange!65!black, thick]
+                    (3.8,0.1)--(6.1,0.1)--(6.2,1.4)--(5.7,2.3)
+                    --(3.6,2.3)--(3.6,0.9)--cycle;
+
+                % ── Q_v1∩Q_v2 (purple) ───────────────────────────────
+                \fill[purple!25, opacity=0.75]
+                    (1.8,0)--(2.1,0)--(2.5,0.8)--(2.3,2.1)
+                    --(1.6,2.2)--(1.6,0.7)--cycle;
+
+                % ── Q_v2∩Q_v3 (purple) ───────────────────────────────
+                \fill[purple!25, opacity=0.75]
+                    (3.8,0.1)--(4.2,0)--(4.6,1.0)--(4.2,2.2)
+                    --(3.6,2.3)--(3.6,0.9)--cycle;
+
+                % ── region labels ─────────────────────────────────────
+                \node[blue!65, font=\bfseries\footnotesize]
+                    at (0.85,1.7) {$Q_{v_1}$};
+                \node[green!55!black, font=\bfseries\footnotesize]
+                    at (2.8,1.7) {$Q_{v_2}$};
+                \node[orange!60!black, font=\bfseries\footnotesize]
+                    at (4.95,1.7) {$Q_{v_3}$};
+
+                % ── trajectory ────────────────────────────────────────
+                \draw[red!70, very thick]
+                    (0.5,0.55)
+                    ..controls(0.7,1.5)and(1.4,0.6)..(2.1,1.1)
+                    ..controls(2.75,1.65)and(3.25,0.75)..(3.9,1.3)
+                    ..controls(4.55,1.9)and(5.2,0.75)..(5.7,1.1);
+
+                % ── start / end markers ───────────────────────────────
+                \filldraw[black] (0.5,0.55) circle(2pt);
+                \node[left=2pt] at (0.5,0.55) {$x^s$};
+                \filldraw[black] (5.7,1.1) circle(2pt);
+                \node[right=2pt] at (5.7,1.1) {$x^g$};
+
+                % ── coupling point z_{v1,v2} ──────────────────────────
+                \filldraw[purple!80!black] (2.1,1.1) circle(3pt);
+                \node[above=2pt, purple!75, font=\bfseries\scriptsize]
+                    at (2.1,1.22) {$z_{v_1 v_2}$};
+                \node[below=1pt, font=\tiny, align=center]
+                    at (2.1,0.87) {$s_{v_1}^+\!=\!z\!=\!s_{v_2}^-$};
+
+                % ── coupling point z_{v2,v3} ──────────────────────────
+                \filldraw[purple!80!black] (3.9,1.3) circle(3pt);
+                \node[above=2pt, purple!75, font=\bfseries\scriptsize]
+                    at (3.9,1.42) {$z_{v_2 v_3}$};
+                \node[below=1pt, font=\tiny, align=center]
+                    at (3.9,1.07) {$s_{v_2}^+\!=\!z\!=\!s_{v_3}^-$};
+
+                % ── local segment labels ──────────────────────────────
+                \node[red!60, font=\tiny, rotate=15]
+                    at (0.9,1.2) {$x_{v_1}(\cdot)$};
+                \node[red!60, font=\tiny]
+                    at (2.9,1.05) {$x_{v_2}(\cdot)$};
+                \node[red!60, font=\tiny, rotate=-15]
+                    at (4.7,1.1) {$x_{v_3}(\cdot)$};
+
+                % ── time axis ─────────────────────────────────────────
+                \draw[->, gray!65] (-0.05,-0.38) -- (6.45,-0.38);
+                \node[right, gray!65] at (6.45,-0.38) {$t$};
+
+                \foreach \x/\lbl in {
+                        0.5/{$t_0{=}0$},
+                        2.1/{$t_1$},
+                        3.9/{$t_2$},
+                        5.7/{$T$}}{
+                    \draw[gray!65] (\x,-0.33)--(\x,-0.43);
+                    \node[below, gray!60, font=\tiny]
+                        at (\x,-0.46) {\lbl};
+                }
+
+                % ── duration braces ───────────────────────────────────
+                \draw[<->, gray!55, thin]
+                    (0.5,-0.77)--(2.1,-0.77)
+                    node[midway, below, font=\tiny, gray!70] {$\Delta_{v_1}$};
+                \draw[<->, gray!55, thin]
+                    (2.1,-0.77)--(3.9,-0.77)
+                    node[midway, below, font=\tiny, gray!70] {$\Delta_{v_2}$};
+                \draw[<->, gray!55, thin]
+                    (3.9,-0.77)--(5.7,-0.77)
+                    node[midway, below, font=\tiny, gray!70] {$\Delta_{v_3}$};
+
+            \end{tikzpicture}
+
+            \includegraphics[width=\textwidth]{imgs/dms_v2.png}
+            % \caption{\footnotesize Minh họa ràng buộc ghép nối qua biến $z_{uv}$ và thời điểm chuyển vùng $t_v$}
         \end{column}
     \end{columns}
+
+\end{frame}
+
+% ===================== Slide NEW-4: Safety + log-barrier theo thời lượng thật =====================
+\begin{frame}{Ràng buộc an toàn theo thời lượng trong từng vùng lồi}
+    \small
+
+    \textbf{Yêu cầu an toàn cục bộ:}
+    với mỗi vùng active $Q_v=\{x:A_vx\le b_v\}$,
+    nghiệm của IVP phải thỏa
+    \[
+        x_v(t_v)\in Q_v,
+        \qquad
+        \forall t_v\in[0,\Delta_v].
+    \]
+
+    Đây là ràng buộc continuous-time trên cả đoạn thời gian đi qua vùng,
+    không chỉ tại trạng thái vào/ra.
+
+    \vspace{0.5em}
+
+    \begin{columns}[T, onlytextwidth]
+        \begin{column}{0.48\textwidth}
+            \textbf{Cách 1 - hard constraint bằng sampling:}
+
+            Chọn các mốc kiểm tra trực tiếp trên khoảng $[0,\Delta_v]$:
+            \[
+                0=t_{v,0}<t_{v,1}<\cdots<t_{v,M_v}=\Delta_v .
+            \]
+
+            Áp ràng buộc:
+            \[
+                A_v x_v(t_{v,k})
+                \le
+                b_v-\varepsilon_v,
+                \quad
+                k=0,\ldots,M_v .
+            \]
+
+            \vspace{0.3em}
+            Ưu điểm: đơn giản, dễ hiện thực với RK4.\\
+            Nhược điểm: có thể bỏ sót vi phạm giữa hai mốc kiểm tra.
+        \end{column}
+
+        \begin{column}{0.48\textwidth}
+            \textbf{Cách 2 - log-barrier theo thời gian thật:}
+
+            Với $Q_v=\{x:A_vx<b_v\}$, đặt
+            \[
+                \phi_v(x)
+                =
+                -
+                \sum_{j=1}^{m_v}
+                \log\!\bigl((b_v)_j-(A_vx)_j\bigr).
+            \]
+
+            Khi $x$ tiến sát biên $Q_v$:
+            \[
+                \phi_v(x)\to +\infty .
+            \]
+
+            \vspace{0.3em}
+            Do đó barrier khuyến khích nghiệm cục bộ nằm sâu trong vùng lồi,
+            thay vì chỉ vừa chạm biên.
+        \end{column}
+    \end{columns}
+
+    \vspace{0.6em}
+
+    \textbf{Hàm mục tiêu cục bộ trên vùng $v$:}
+    \[
+        J_v(s_v^-,w_v,\Delta_v)
+        =
+        a\Delta_v
+        +
+        \int_{0}^{\Delta_v}
+        \left(
+        w_L\|\dot q_v(t_v)\|^2
+        +
+        w_E\|u_v(t_v)\|^2
+        \right)dt_v .
+    \]
+
+    \textbf{Thêm log-barrier:}
+    \[
+        \min
+        \sum_{v\in V_r}
+        p_v
+        \left[
+            J_v(s_v^-,w_v,\Delta_v)
+            +
+            \mu_v
+            \int_{0}^{\Delta_v}
+            \phi_v\!\bigl(x_v(t_v)\bigr)dt_v
+            \right].
+    \]
 
 \end{frame}
 
@@ -851,7 +1251,7 @@
     \vspace{0.25em}
 
     \begin{columns}[T,onlytextwidth]
-        
+
         % ================= COL 1 =================
         \begin{column}{0.24\textwidth}
             \raggedright
@@ -883,7 +1283,6 @@
             {\footnotesize 2D + maze $15\!\times\!15$}\\[-0.15em]
             {\footnotesize GCS-DMS với động lực học phi tuyến.}
         \end{column}
-
 
     \end{columns}
 
@@ -1190,7 +1589,6 @@
 %     \end{columns}
 % \end{frame}
 
-
 % =====================================================================
 % TN3 - Slide 1: GCS-Bezier vs RRT/RRT* setup + results table
 % =====================================================================
@@ -1204,7 +1602,7 @@
         \end{column}
         \begin{column}{0.54\textwidth}
             \scriptsize
-            \textbf{Thiết lập.} 
+            \textbf{Thiết lập.}
             RRT/RRT*: \texttt{step}=1, \texttt{bias}=0.05, \texttt{max\_iter}=20{,}000;
             trung bình \textbf{50 seed}. GCS deterministic.
 
@@ -1245,17 +1643,16 @@
         \renewcommand{\arraystretch}{1.05}
         \begin{tabular}{@{}lcccc@{}}
             \toprule
-                            & \textbf{Length}      & \textbf{Runtime (ms)} & \textbf{Smooth}      & \textbf{Std runtime} \\
+                       & \textbf{Length} & \textbf{Runtime (ms)} & \textbf{Smooth} & \textbf{Std runtime} \\
             \midrule
-            GCS-Linear      & \textbf{54.71}       & 2{,}847               & \textbf{22.64}       & $0$                  \\
-            GCS-Bézier      & 65.84                & 95{,}180              & 33.63                & $0$                  \\
-            RRT             & 82.42                & \textbf{1{,}715}      & 61.89                & ---                  \\
-            RRT*            & 80.76                & 8{,}791               & 59.92                & $\approx 9{,}080$    \\
+            GCS-Linear & \textbf{54.71}  & 2{,}847               & \textbf{22.64}  & $0$                  \\
+            GCS-Bézier & 65.84           & 95{,}180              & 33.63           & $0$                  \\
+            RRT        & 82.42           & \textbf{1{,}715}      & 61.89           & ---                  \\
+            RRT*       & 80.76           & 8{,}791               & 59.92           & $\approx 9{,}080$    \\
             \bottomrule
         \end{tabular}
     \end{center}
 \end{frame}
-
 
 % =====================================================================
 % TN4 - Slide 1: Convergence on 2D environment
@@ -1286,7 +1683,7 @@
                     \bottomrule
                 \end{tabular}
             \end{table}
-            \scriptsize \textbf{Nhận xét:} nghiệm hội tụ về quỹ đạo liên tục thỏa đồng thời \textbf{động lực phi tuyến + an toàn} ở mức chính xác số học ($10^{-8}\!-\!10^{-11}$).
+            \scriptsize \textbf{Nhận xét:} nghiệm hội tụ thỏa đồng thời \textbf{động lực phi tuyến + an toàn} ở mức chính xác số học ($10^{-11}$ đến $10^{-8}$).
         \end{column}
     \end{columns}
 \end{frame}
@@ -1294,7 +1691,7 @@
 % =====================================================================
 % TN4 - Slide 2: Maze 15x15 with 4 seeds
 % =====================================================================
-\begin{frame}{TN4 - GCS-DMS: mê cung $15\!\times\!15$ (4 mẫu đại diện)}
+\begin{frame}{TN4 - GCS-DMS: mê cung $15\!\times\!15$}
     \begin{columns}[T,onlytextwidth]
         \begin{column}{0.6\textwidth}
             \centering
@@ -1322,16 +1719,16 @@
         \end{column}
         \begin{column}{0.4\textwidth}
             \footnotesize
-            \textbf{Unicycle:}
-            $\dot p_x = v\cos\theta,\ \dot p_y = v\sin\theta,\ \dot\theta=\omega$;
-            $v\!\in\![-2,2],\ |\omega|\!\le\!\pi$.
+            \textbf{Mô hình:} unicycle, 
+            % $(\dot p_x, \dot p_y, \dot\theta) = (v\cos\theta, v\sin\theta, \omega)$,
+            $v\in[-2,2]$, $|\omega|\le\pi$
 
             \vspace{0.4em}
-            \footnotesize \textbf{10/10 seed} thành công với cả hai cơ chế an toàn:
+            \footnotesize \textbf{10/10 seed} thành công với:
             \begin{itemize}\itemsep0pt
-                \item Defect $\sim 10^{-10}$: sai số động lực học nội đoạn
-                \item Gap nối $\sim 10^{-9}$: sai lệch giữa hai đoạn liên tiếp
-                \item Vi phạm an toàn $\sim 10^{-8}$: mức vượt ràng buộc tránh vật cản
+                \item Sai số động lực học nội đoạn (Defect) $\sim 10^{-10}$
+                \item Sai lệch giữa hai đoạn liên tiếp (Gap nối) $\sim 10^{-9}$
+                \item Vi phạm an toàn (mức vượt ràng buộc tránh vật cản) $\sim 10^{-8}$
             \end{itemize}
             $\Rightarrow$ \textbf{nghiệm khả thi động lực học} trên nhiều cấu trúc mê cung.
         \end{column}
@@ -1341,34 +1738,35 @@
 % =====================================================================
 % TN4 - Slide 3: Velocity profile insight
 % =====================================================================
-\begin{frame}{TN4 - Hồ sơ vận tốc \& dấu vết động lực phi tuyến}
+\begin{frame}{TN4 - Biểu đồ vận tốc: tự động giảm tốc tại nút giao và hành lang hẹp}
     \begin{columns}[T,onlytextwidth]
         \begin{column}{0.6\textwidth}
             \centering
             \begin{minipage}{0.48\linewidth}
                 \centering
                 \includegraphics[width=0.9\linewidth]{./imgs/dms/seed4_vel.png}\\
-                {\scriptsize $|v(t)|$ - Seed 4}
+                {\scriptsize $|v(t)|$ - Seed 4 - log-barrier}
             \end{minipage}\hfill
             \begin{minipage}{0.48\linewidth}
                 \centering
                 \includegraphics[width=0.9\linewidth]{./imgs/dms/seed17_vel.png}\\
-                {\scriptsize $|v(t)|$ - Seed 17}
+                {\scriptsize $|v(t)|$ - Seed 17 - lưới điểm}
             \end{minipage}\\[0.3em]
-            {\footnotesize Hồ sơ vận tốc dao động $0.6$-$0.75$ m/s, giảm sâu tại nút giao/hành lang hẹp.}
+            {\footnotesize Vận tốc giảm rõ tại điểm chuyển hướng}
         \end{column}
         \begin{column}{0.35\textwidth}
             \footnotesize
-            Unicycle \textbf{tự động giảm tốc} tại:
+            Mô hình động học có thông số tốc độ dao động $0.6$-$0.75$ m/s, \textbf{tự động giảm tốc} tại:
             \begin{itemize}\itemsep0pt
                 \item Nút giao (cần đổi hướng)
                 \item Hành lang hẹp
                 \item Đoạn chuyển nhiều vùng
             \end{itemize}
+            \vspace{0.3em}
             \textbf{Lý do:} $|\omega|\!\le\!\omega_{\max}$ buộc giảm $v$ để bán kính cua $\ge v/\omega_{\max}$.
 
             \vspace{0.4em}
-            \scriptsize \textit{GCS-Bézier tối ưu hình học thuần không phản ánh được hành vi này.}
+            \footnotesize \textit{GCS-Bézier tối ưu hình học thuần không phản ánh được hành vi này.}
         \end{column}
     \end{columns}
 \end{frame}
@@ -1407,7 +1805,7 @@
             \begin{itemize}\itemsep0pt
                 \item[$+$] Transcription trực tiếp, dễ kiểm soát
                 \item[$+$] Nhanh \& integrality gap nhỏ hơn
-                \item[$-$] Đảm bảo phụ thuộc số/vị trí điểm lấy mẫu
+                \item[$-$] Phụ thuộc số/vị trí điểm lấy mẫu
             \end{itemize}
         \end{column}
     \end{columns}
@@ -1476,7 +1874,7 @@
     \textbf{3. Môi trường động:}
     \begin{itemize}
         \item Vật cản di chuyển $\Rightarrow$ phải tái phân hoạch và giải lại
-        \item Thời gian giải hiện tại ($>$80 s) chưa phù hợp cho real-time
+        \item Thời gian giải hiện tại chưa phù hợp cho real-time
     \end{itemize}
 \end{frame}
 
@@ -1528,9 +1926,7 @@
             \begin{itemize}
                 \item Hoàn thiện mô hình hoàn chỉnh cho hoạch định chuyển động cho không gian cao
                       chiều bằng GCS.
-                \item Tích hợp trên robot thực tế.
-                \item 
-                \item 
+                \item Tích hợp trên robot thực tế. \item \item
             \end{itemize}
         \end{column}
     \end{columns}
@@ -1946,7 +2342,7 @@
     % \captionof{figure}{SPP in GCS\footnotemark}
 
     % \footnotetext{Nguồn: Shao Yuan et al., ``GCS*: Forward Heuristic Search on Implicit Graphs of Convex Sets''}
-    \footnotetext{Nguồn: Marcucci et al., ``Motion Planning around Obstacles with Convex Optimization''}
+    \footnotetext{\tiny Nguồn: Marcucci et al., ``Motion Planning around Obstacles with Convex Optimization''}
 
 \end{frame}
 
@@ -1991,37 +2387,87 @@
 \end{frame}
 
 % \section{Phương pháp Rounding}
-\begin{frame}{Nới lỏng lồi (Convex Relaxation) và Giải thuật Làm tròn}
-    \textbf{Chiến lược nới lỏng bài toán MICP:}
-    \begin{itemize}
-        \item Hàm chi phí phi lồi và ràng buộc rời rạc $\rightarrow$ lồi: kỹ thuật hàm phối
-              cảnh~\cite{marcucci2023motion,marcucci2024shortest}.
-        \item Ràng buộc phi lồi $\rightarrow$ hệ ràng buộc lồi chặt $\Rightarrow$ tối ưu
-              lồi~\cite{marcucci2023motion,marcucci2024shortest}.
-    \end{itemize}
-    \textbf{Kết quả nới lỏng:}
-    \begin{itemize}
-        \item Kết quả cho ra thường chặt: $C_{relax} \approx C_{opt}$
-        \item Nếu không chặt (Loose Relaxation): làm tròn ngẫu nhiên
-        \item \textbf{Đánh giá:}
-              \begin{itemize}
-                  \item Khoảng cách tối ưu: $\delta_{opt} = \frac{C_{round} - C_{opt}}{C_{opt}}$
-                  \item Ước lượng qua nới lỏng: $\delta_{relax} = \frac{C_{round} - C_{relax}}{C_{relax}}$
-              \end{itemize}
-    \end{itemize}
+% \begin{frame}{Nới lỏng lồi (Convex Relaxation) và Giải thuật Làm tròn}
+%     \textbf{Chiến lược nới lỏng bài toán MICP:}
+%     \begin{itemize}
+%         \item Hàm chi phí phi lồi và ràng buộc rời rạc $\rightarrow$ lồi: kỹ thuật hàm phối
+%               cảnh~\cite{marcucci2023motion,marcucci2024shortest}.
+%         \item Ràng buộc phi lồi $\rightarrow$ hệ ràng buộc lồi chặt $\Rightarrow$ tối ưu
+%               lồi~\cite{marcucci2023motion,marcucci2024shortest}.
+%     \end{itemize}
+%     \textbf{Kết quả nới lỏng:}
+%     \begin{itemize}
+%         \item Kết quả cho ra thường chặt: $C_{relax} \approx C_{opt}$
+%         \item Nếu không chặt (Loose Relaxation): làm tròn ngẫu nhiên
+%         \item \textbf{Đánh giá:}
+%               \begin{itemize}
+%                   \item Khoảng cách tối ưu: $\delta_{opt} = \frac{C_{round} - C_{opt}}{C_{opt}}$
+%                   \item Ước lượng qua nới lỏng: $\delta_{relax} = \frac{C_{round} - C_{relax}}{C_{relax}}$
+%               \end{itemize}
+%     \end{itemize}
 
-    \textbf{Làm tròn ngẫu nhiên:}
-    \begin{enumerate}
-        \item Khởi tạo từ nguồn $\sigma$
-        \item Tại nút $v$: chọn cạnh $e=(v \to w)$ theo xác suất $\propto y_e^*$
-        \item Quay lui nếu ngõ cụt, đến đích $\tau$~\cite{marcucci2023motion}
-    \end{enumerate}
-\end{frame}
+%     \textbf{Làm tròn ngẫu nhiên:}
+%     \begin{enumerate}
+%         \item Khởi tạo từ nguồn $\sigma$
+%         \item Tại nút $v$: chọn cạnh $e=(v \to w)$ theo xác suất $\propto y_e^*$
+%         \item Quay lui nếu ngõ cụt, đến đích $\tau$~\cite{marcucci2023motion}
+%     \end{enumerate}
+% \end{frame}
 
 \begin{frame}{Appendix}
     \begin{center}
         \Huge Bài toán tối ưu điều khiển DMS-GCS
     \end{center}
+\end{frame}
+
+% ===================== Slide APP-1: Mô hình tổng hợp đầy đủ =====================
+\begin{frame}{Mô hình tổng hợp MIOCP/MINLP}
+    \footnotesize
+
+    \textbf{Hàm mục tiêu:}
+    \[
+        \min\;\sum_{v\in V_r} p_v\!\left[
+            J_v(s_v^-,w_v,\Delta_v)
+            +\int_0^{\Delta_v}\!\mu_v\,\phi_v\!\bigl(x_v(t)\bigr)\,dt
+            \right]
+    \]
+
+    \vspace{0.1em}
+
+    \begin{columns}[T, onlytextwidth]
+        \begin{column}{0.50\textwidth}
+            \textbf{5 nhóm ràng buộc:}
+            \begin{enumerate}
+                \item \textbf{Network flow:} chọn đúng 1 đường đi đơn giản $\sigma\to\tau$
+                \item \textbf{IVP + defect:} tính liên tục nội bộ trong vùng
+                \item \textbf{An toàn:} sampling hoặc log-barrier trên $Q_v$
+                \item \textbf{Coupling + biên:} tính liên tục toàn cục qua $z_{uv}$
+                \item \textbf{Nhị phân:} $y_{uv},p_v\in\{0,1\}$
+            \end{enumerate}
+        \end{column}
+
+        \begin{column}{0.48\textwidth}
+            \textbf{Phân loại và chiến lược giải:}
+
+            \vspace{0.2em}
+            MIOCP $\to$ MINLP (sau DMS)\\
+            Không về được MISOCP: $F_v$ là hàm ẩn phi tuyến từ IVP
+
+            \vspace{0.4em}
+            \textbf{Pha 1 — Chọn đường đi:}
+            relax $y_{uv}\to[0,1]$, giải convex, làm tròn
+            $\to$ chuỗi vùng $Q_{v_1}\!\to\!\cdots\!\to\! Q_{v_K}$
+
+            \vspace{0.2em}
+            \textbf{Pha 2 — Tối ưu quỹ đạo:}
+            warm-start từ pha 1,
+            tối ưu NLP đồng thời $(s_v^\pm,w_v,\Delta_v)$
+
+            \vspace{0.3em}
+            \textbf{3 bảo đảm:} defect $=0$ \;|\; $x^\star\!\in Q_v$ \;|\; IVP hợp lệ
+        \end{column}
+    \end{columns}
+
 \end{frame}
 
 \begin{frame}{Local multiple shooting block trên mỗi vùng GCS}
@@ -2067,7 +2513,7 @@
     \vspace{0.5em}
 
     Ý nghĩa: $s_v^-$ và $s_v^+$ là biến tối ưu độc lập, còn defect constraint buộc
-    chúng khớp với nghiệm động lực học sinh ra bởi local IVP.
+    chúng khớp với nghiệm động lực học sinh ra bởi cục bộ IVP.
 
 \end{frame}
 
@@ -2117,6 +2563,68 @@
 
     GCS chọn skeleton rời rạc $\sigma\to v_1\to\cdots\to v_M\to\tau$; multiple
     shooting biến mỗi vùng active thành một đoạn động lực học hữu hạn chiều.
+
+\end{frame}
+
+% ===================== Slide APP-NORM: Mô hình chuẩn hóa τ∈[0,1] (tham chiếu) =====================
+\begin{frame}{GCS-DMS: Mô hình chuẩn hóa miền thời gian $\tau\in[0,1]$}
+    \small
+
+    \textbf{Lý do chuẩn hóa:} $\Delta_v$ là biến quyết định — tích phân luôn trên $[0,1]$
+    cố định, $\Delta_v$ đưa vào như hệ số tỉ lệ.
+
+    \vspace{0.4em}
+
+    \begin{columns}[T, onlytextwidth]
+        \begin{column}{0.50\textwidth}
+            \textbf{IVP chuẩn hóa trên $\tau\in[0,1]$:}
+            \[
+                \frac{dx_v}{d\tau}(\tau)
+                = \Delta_v\,f\!\bigl(x_v(\tau),\,\mathcal{U}_v(\tau;w_v)\bigr),
+                \quad x_v(0)=s_v^-
+            \]
+
+            \textbf{Endpoint map:}
+            $\;F_v(s_v^-,w_v,\Delta_v):=x_v(1)$
+
+            \vspace{0.3em}
+            \textbf{Defect:}
+            $\;s_v^+ - F_v(s_v^-,w_v,\Delta_v)=0$
+
+            \vspace{0.3em}
+            \textbf{Chi phí cục bộ:}
+            \[
+                J_v = a\Delta_v
+                +\int_0^1\!\Delta_v\!\left(
+                w_L\!\left|\tfrac{1}{\Delta_v}\tfrac{dq_v}{d\tau}\right|^2
+                +w_E|u_v|^2
+                \right)\!d\tau
+            \]
+        \end{column}
+
+        \begin{column}{0.48\textwidth}
+            \textbf{Hàm mục tiêu với log-barrier:}
+            \[
+                \min\;\sum_{v\in V_r} p_v\!\left[
+                    J_v
+                    +\int_0^1\!\Delta_v\,\mu_v\,\phi_v\!\bigl(x_v(\tau)\bigr)\,d\tau
+                    \right]
+            \]
+
+            \textbf{Quan hệ với miền liên tục:}\\
+            $\dfrac{dq_v}{d\tau}=\Delta_v\dot{q}_v$
+            $\;\Rightarrow\;$
+            $\tfrac{1}{\Delta_v}\tfrac{dq_v}{d\tau}=\dot{q}_v$
+
+            $\Delta_v\,d\tau = dt$
+            $\;\Rightarrow\;$
+            $\int_0^1\Delta_v(\cdot)\,d\tau = \int_0^{\Delta_v}(\cdot)\,dt$
+
+            \vspace{0.3em}
+            Hai công thức tương đương nhau;\\
+            dạng chuẩn hóa thuận tiện khi $\Delta_v$ là biến tối ưu.
+        \end{column}
+    \end{columns}
 
 \end{frame}
 
