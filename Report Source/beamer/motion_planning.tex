@@ -1127,17 +1127,20 @@
 % =====================================================================
 \begin{frame}{TN2 - Mê cung $25\!\times\!25$: Linear vs Bézier GCS}
     \begin{columns}[T,onlytextwidth]
-        \begin{column}{0.55\textwidth}
+        \begin{column}{0.45\textwidth}
             \centering
-            \includegraphics[width=0.7\textwidth]{./imgs/maze-1.png}\\[-0.2em]
+            \includegraphics[width=0.8\textwidth]{./imgs/maze-1.png}\\[-0.2em]
             {\scriptsize Cùng homotopy: Bézier \textit{ôm cua rộng} để duy trì $C^2$}\\[0.3em]
         \end{column}
-        \begin{column}{0.45\textwidth}
-            \footnotesize 10 mê cung DFS ngẫu nhiên $25\!\times\!25\!=\!625$ ô, loại bỏ 100 tường.
-            Bézier bậc $d=6$, $C^2$, $\dot{q}\in[-1,1]$.
+        \begin{column}{0.55\textwidth}
+            \footnotesize Setup: Mê cung $25\!\times\!25\!=\!625$ ô (vùng lồi).\\
+            \begin{itemize}
+                \item \textbf{Linear GCS:} Bézier bậc $d=1$, $\dot{q}\in[-1,1]$.
+                \item \textbf{Bézier GCS:} Bézier bậc $d=6$, $C^2$, $\dot{q}\in[-1,1]$.
+            \end{itemize}
+            
 
             \vspace{0.3em}
-            \footnotesize
             \centering
             \begin{tabular}{lcc}
                 \toprule
@@ -1162,30 +1165,30 @@
 % =====================================================================
 % TN2 - Combinatorial scalability insight slide
 % =====================================================================
-\begin{frame}{TN2 - Vì sao GCS xử lý được 625 ô?}
-    \begin{columns}[T,onlytextwidth]
-        \begin{column}{0.45\textwidth}
-            \footnotesize
-            \textbf{MICP truyền thống:} mỗi đoạn gán vào 1 trong $|I|$ vùng $\Rightarrow$ $|I|^2$ biến nhị phân.
-            \[
-                625 \text{ ô} \;\Rightarrow\; |I|^2 = 390{,}625 \text{ biến}
-                \;\Rightarrow\; \textit{không giải được.}
-            \]
+% \begin{frame}{TN2 - Vì sao GCS xử lý được 625 ô?}
+%     \begin{columns}[T,onlytextwidth]
+%         \begin{column}{0.45\textwidth}
+%             \footnotesize
+%             \textbf{MICP truyền thống:} mỗi đoạn gán vào 1 trong $|I|$ vùng $\Rightarrow$ $|I|^2$ biến nhị phân.
+%             \[
+%                 625 \text{ ô} \;\Rightarrow\; |I|^2 = 390{,}625 \text{ biến}
+%                 \;\Rightarrow\; \textit{không giải được.}
+%             \]
 
-            \vspace{0.2em}
-            \textbf{GCS (network flow):} chỉ tạo biến cho \textbf{cạnh giữa hai vùng kề}; bậc đồ thị 2D thấp $\Rightarrow$ $|\mathcal{E}|\approx 2|I|$.
-            \[
-                625 \text{ ô} \;\Rightarrow\; 2|I| \approx 1{,}250 \text{ biến}
-                \;\Rightarrow\; \textit{giải được trong $\sim$85 s.}
-            \]
-        \end{column}
-        \begin{column}{0.55\textwidth}
-            \centering
-            \includegraphics[width=0.7\textwidth]{./imgs/maze-1.png}\\
-            {\scriptsize Khác homotopy: Bézier chọn đường \textit{dài hơn} nhưng ít cua gắt}
-        \end{column}
-    \end{columns}
-\end{frame}
+%             \vspace{0.2em}
+%             \textbf{GCS (network flow):} chỉ tạo biến cho \textbf{cạnh giữa hai vùng kề}; bậc đồ thị 2D thấp $\Rightarrow$ $|\mathcal{E}|\approx 2|I|$.
+%             \[
+%                 625 \text{ ô} \;\Rightarrow\; 2|I| \approx 1{,}250 \text{ biến}
+%                 \;\Rightarrow\; \textit{giải được trong $\sim$85 s.}
+%             \]
+%         \end{column}
+%         \begin{column}{0.55\textwidth}
+%             \centering
+%             \includegraphics[width=0.7\textwidth]{./imgs/maze-1.png}\\
+%             {\scriptsize Khác homotopy: Bézier chọn đường \textit{dài hơn} nhưng ít cua gắt}
+%         \end{column}
+%     \end{columns}
+% \end{frame}
 
 
 % =====================================================================
