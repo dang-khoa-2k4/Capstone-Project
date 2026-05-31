@@ -2,10 +2,10 @@
 
 Mục đích của các thực nghiệm là kiểm chứng hai hướng tiếp cận đã đề xuất ở
 Chương~\ref{ch:proposed_method}: hoạch định bằng \textbf{Graph of Convex Sets
-    (GCS-Bezier)} và hoạch định bằng \textbf{GCS kết hợp Direct Multiple Shooting
+    (GCS-Bézier)} và hoạch định bằng \textbf{GCS kết hợp Direct Multiple Shooting
     (GCS-DMS)}. Hai hướng này không được xem như hai bộ giải cạnh tranh trực tiếp
 cho cùng một bài toán tối ưu, vì chúng khác nhau về biến quyết định, hàm mục
-tiêu, lớp ràng buộc và ý nghĩa vật lý của nghiệm. GCS-Bezier tập trung vào tối
+tiêu, lớp ràng buộc và ý nghĩa vật lý của nghiệm. GCS-Bézier tập trung vào tối
 ưu quỹ đạo hình học/động học với cấu trúc lồi, trong khi GCS-DMS mô hình hóa
 trực tiếp động lực học và tín hiệu điều khiển của hệ. Vì vậy, phần thực nghiệm
 được thiết kế nhằm đánh giá từng mô hình trong miền áp dụng phù hợp, đồng thời
@@ -13,7 +13,7 @@ làm rõ vai trò bổ trợ giữa chúng.
 
 Các câu hỏi thực nghiệm chính gồm: (i) GCS-DMS thể hiện lợi thế gì khi ràng
 buộc động lực phi tuyến trở thành yếu tố quyết định tính khả thi của quỹ đạo;
-(ii) GCS-Bezier mở rộng ra sao trong các bài toán hình học có số vùng lớn; và
+(ii) GCS-Bézier mở rộng ra sao trong các bài toán hình học có số vùng lớn; và
 (iii) chất lượng phân hoạch không gian tự do ảnh hưởng như thế nào đến bài toán
 hoạch định trên đồ thị vùng lồi. Ngoài ra, chúng tôi bổ sung một thí nghiệm
 so sánh trên cùng một mê cung cố định để đặt GCS cạnh các baseline
@@ -34,7 +34,7 @@ cho từng pha của bài toán được liệt kê trong Bảng~\ref{tab:softwa
     \label{tab:software_stack}
     \begin{tabular}{lll}
         \toprule
-        \textbf{Pha}          & \textbf{GCS / GCS-Bezier}                                  & \textbf{GCS-DMS}     \\
+        \textbf{Pha}          & \textbf{GCS / GCS-Bézier}                                  & \textbf{GCS-DMS}     \\
         \midrule
         Phân hoạch không gian & \multicolumn{2}{l}{ACD, IRIS, VCC (Drake / cài đặt riêng)}                        \\
         Solver                & Mosek (SOCP relaxation)                                    & CasADi + IPOPT (NLP) \\
@@ -47,7 +47,7 @@ cho từng pha của bài toán được liệt kê trong Bảng~\ref{tab:softwa
 \subsection{Chỉ số đánh giá}
 \label{subsec:exp_metrics}
 
-Do GCS-Bezier và GCS-DMS giải hai bài toán tối ưu khác nhau, hệ chỉ số dưới đây
+Do GCS-Bézier và GCS-DMS giải hai bài toán tối ưu khác nhau, hệ chỉ số dưới đây
 được dùng để mô tả và kiểm chứng từng mô hình, thay vì xếp hạng trực tiếp hai
 phương pháp. Một số chỉ số có thể áp dụng cho cả hai mô hình ở mức hậu kiểm,
 trong khi một số chỉ số chỉ có ý nghĩa với một mô hình cụ thể.
@@ -56,14 +56,14 @@ trong khi một số chỉ số chỉ có ý nghĩa với một mô hình cụ t
 \begin{itemize}
     \item $t_{\text{decomp}}$: thời gian phân hoạch không gian tự do thành các vùng lồi.
     \item $N_{\text{region}}$: số vùng lồi thu được sau phân hoạch, hoặc số vùng được kích hoạt trên đường đi nghiệm. Chỉ số này phản ánh trực tiếp quy mô đồ thị và số lượng biến/ràng buộc mà bộ giải phải xử lý.
-    \item $t_{\text{solve}}$: thời gian giải bài toán tối ưu tương ứng của từng mô hình (SOCP cho GCS-Bezier, NLP cho GCS-DMS). Chỉ số này phản ánh chi phí tính toán nội bộ của từng formulation, không phải thước đo so sánh tuyệt đối vì hai bài toán có số biến, ràng buộc và mục tiêu khác nhau.
+    \item $t_{\text{solve}}$: thời gian giải bài toán tối ưu tương ứng của từng mô hình (SOCP cho GCS-Bézier, NLP cho GCS-DMS). Chỉ số này phản ánh chi phí tính toán nội bộ của từng formulation, không phải thước đo so sánh tuyệt đối vì hai bài toán có số biến, ràng buộc và mục tiêu khác nhau.
     \item $t_{\text{total}} = t_{\text{decomp}} + t_{\text{solve}}$.
 \end{itemize}
 
 \paragraph*{(B) Chất lượng quỹ đạo.}
 \begin{itemize}
     \item $T_{\text{exec}}$: thời gian thực thi quỹ đạo, được báo cáo theo cách định nghĩa riêng của từng mô hình.
-    \item $C_{\text{path}}$ hoặc $C_{\text{round}}$: giá trị hàm mục tiêu sau khi làm tròn/khôi phục đường đi đối với GCS-Bezier. Trong các thực nghiệm 2D, đại lượng này bao gồm thời gian thực thi và thành phần điều chuẩn gia tốc.
+    \item $C_{\text{path}}$ hoặc $C_{\text{round}}$: giá trị hàm mục tiêu sau khi làm tròn/khôi phục đường đi đối với GCS-Bézier. Trong các thực nghiệm 2D, đại lượng này bao gồm thời gian thực thi và thành phần điều chuẩn gia tốc.
     \item $C_{\text{DMS}}$: giá trị hàm mục tiêu của GCS-DMS sau bước relaxation hoặc polish, bao gồm thời gian di chuyển và các thành phần phạt tương ứng của formulation.
     \item Hồ sơ vận tốc $|v(t)|$: dùng trong Thực nghiệm 1 để đánh giá định tính hành vi
           động lực của xe Unicycle, đặc biệt là hiện tượng giảm tốc tại các đoạn cua hẹp
@@ -72,7 +72,7 @@ trong khi một số chỉ số chỉ có ý nghĩa với một mô hình cụ t
 
 \paragraph*{(C) Tính khả thi và tối ưu.}
 \begin{itemize}
-    \item Với GCS-Bezier: thời gian giải, giá trị cost, cost ratio giữa các biến thể mô
+    \item Với GCS-Bézier: thời gian giải, giá trị cost, cost ratio giữa các biến thể mô
           hình khi có báo cáo, và trạng thái nhị phân của biến luồng sau relaxation/làm
           tròn.
     \item Với GCS-DMS: trạng thái hội tụ của relaxation/NLP polish, residual của ràng
@@ -101,7 +101,7 @@ nghiệm so sánh với RRT/RRT*. Mỗi thực nghiệm được dùng để ki�
 cạnh riêng của khung GCS, của hai formulation, hoặc của baseline sampling-based:
 \begin{itemize}
     \item \textbf{Thực nghiệm 1 — GCS-DMS cho xe nonholonomic kiểu Unicycle} (mục~\ref{subsubsec:scenario_C}): khả năng sinh quỹ đạo khả thi động lực học trong môi trường 2D đơn giản và trong các mê cung kích thước $15\times 15$;
-    \item \textbf{Thực nghiệm 2 — Mê cung} (mục~\ref{subsubsec:scenario_B}): khả năng mở rộng tổ hợp của GCS-Bezier khi số vùng lồi lên đến hàng trăm;
+    \item \textbf{Thực nghiệm 2 — Mê cung} (mục~\ref{subsubsec:scenario_B}): khả năng mở rộng tổ hợp của GCS-Bézier khi số vùng lồi lên đến hàng trăm;
     \item \textbf{Thực nghiệm 3 — GCS, RRT và RRT*} (mục~\ref{subsubsec:scenario_rrt_compare}): so sánh GCS với planner sampling-based trên cùng một mê cung $25\times 25$ cố định;
     \item \textbf{Thực nghiệm 4 — Môi trường 2D đơn giản và phân hoạch lồi} (mục~\ref{subsubsec:scenario_A}): tác động của thuật toán phân hoạch lên từng formulation.
 \end{itemize}
@@ -111,7 +111,7 @@ cạnh riêng của khung GCS, của hai formulation, hoặc của baseline samp
 \label{subsubsec:scenario_C}
 
 \textbf{Mục tiêu.}
-Minh chứng khả năng của GCS-DMS trong việc kết hợp lựa chọn đường đi rời rạc trên đồ thị vùng lồi với tối ưu quỹ đạo liên tục có ràng buộc động lực học phi tuyến. Thực nghiệm này tập trung kiểm chứng tính khả thi của nghiệm GCS-DMS thông qua defect dynamics, connection gap, mức vi phạm ràng buộc và hồ sơ vận tốc. Do bài toán GCS-DMS là NLP/MINLP phi lồi sau rời rạc hóa, kết quả được diễn giải như nghiệm khả thi chất lượng tốt của formulation động lực, không nhằm so sánh trực tiếp giá trị mục tiêu với GCS-Bezier.
+Minh chứng khả năng của GCS-DMS trong việc kết hợp lựa chọn đường đi rời rạc trên đồ thị vùng lồi với tối ưu quỹ đạo liên tục có ràng buộc động lực học phi tuyến. Thực nghiệm này tập trung kiểm chứng tính khả thi của nghiệm GCS-DMS thông qua defect dynamics, connection gap, mức vi phạm ràng buộc và hồ sơ vận tốc. Do bài toán GCS-DMS là NLP/MINLP phi lồi sau rời rạc hóa, kết quả được diễn giải như nghiệm khả thi chất lượng tốt của formulation động lực, không nhằm so sánh trực tiếp giá trị mục tiêu với GCS-Bézier.
 
 \textbf{Mô hình động lực.}
 Xét một xe Unicycle di chuyển trong mặt phẳng, có trạng thái $x = (p_x, p_y, \theta)^\top \in \mathbb{R}^2 \times S^1$ và điều khiển $u = (v, \omega)^\top$, với phương trình:
@@ -170,7 +170,7 @@ nhóm tác giả để được cấp quyền truy cập.
 
 \textbf{Mục tiêu.}
 Thực nghiệm này được thiết kế nhằm so sánh bốn bộ lập kế hoạch trên cùng một
-mê cung cố định: GCS-Linear, GCS-Bezier, RRT và RRT*. Khác với thí nghiệm thống
+mê cung cố định: GCS-Linear, GCS-Bézier, RRT và RRT*. Khác với thí nghiệm thống
 kê trên nhiều mê cung ở mục trước, mục tiêu của phần này là tạo một phép đối
 chiếu trực tiếp trong cùng điều kiện hình học, cùng cấu hình bắt đầu/kết thúc.
 Nhờ đó, sự khác biệt giữa hướng tiếp cận tối ưu hóa trên đồ thị các vùng lồi và
@@ -229,7 +229,7 @@ ngưỡng nối tới goal như trong Bảng~\ref{tab:rrt_compare_planner_setup}
     \end{tabularx}
 \end{table}
 
-Do GCS-Linear và GCS-Bezier là các phương pháp deterministic trong thiết lập
+Do GCS-Linear và GCS-Bézier là các phương pháp deterministic trong thiết lập
 này, mỗi phương pháp chỉ được chạy một lần. Ngược lại, RRT và RRT* phụ thuộc vào
 quá trình lấy mẫu ngẫu nhiên, nên mỗi thuật toán được chạy trên 50 seed khác
 nhau để ước lượng độ ổn định, độ biến thiên và chất lượng nghiệm trung bình.
@@ -239,7 +239,7 @@ nhau để ước lượng độ ổn định, độ biến thiên và chất l�
 \label{subsubsec:scenario_A}
 
 \textbf{Mục tiêu.}
-Định lượng tác động của các thuật toán phân hoạch lồi (ACD, VCC) so với phân hoạch thủ công\footnote{Tức người dùng tự phân hoạch không gian tự do; ở đây chúng tôi coi kết quả thủ công làm chuẩn tham chiếu về số vùng tối thiểu.} (Manual) lên chất lượng đầu vào của bài toán GCS. Thực nghiệm này không nhằm kết luận GCS-Bezier hay GCS-DMS tốt hơn, mà nhằm quan sát cách mỗi formulation phản ứng với các phân hoạch khác nhau.
+Định lượng tác động của các thuật toán phân hoạch lồi (ACD, VCC) so với phân hoạch thủ công\footnote{Tức người dùng tự phân hoạch không gian tự do; ở đây chúng tôi coi kết quả thủ công làm chuẩn tham chiếu về số vùng tối thiểu.} (Manual) lên chất lượng đầu vào của bài toán GCS. Thực nghiệm này không nhằm kết luận GCS-Bézier hay GCS-DMS tốt hơn, mà nhằm quan sát cách mỗi formulation phản ứng với các phân hoạch khác nhau.
 
 \textbf{Mô tả thực nghiệm.}
 Một không gian làm việc 2D với các vật cản đa giác lồi được bố trí cố định, cấu hình bắt đầu $q_{0}$ và cấu hình kết thúc $q_{T}$ được xác định trước. Không gian tự do $\mathcal{X}_{\text{free}}$ được phân rã thành tập các vùng lồi an toàn $\{Q_{i}\}_{i\in I}$ thông qua ba phương pháp:
@@ -248,7 +248,7 @@ Một không gian làm việc 2D với các vật cản đa giác lồi được
     \item \textbf{Phân hoạch lồi xấp xỉ (ACD):} dung sai $\tau = 0$ (các vùng lồi hoàn toàn).
     \item \textbf{Lớp phủ clique khả kiến (VCC):} mức độ phủ $96\%$.
 \end{enumerate}
-Trên mỗi phân hoạch, GCS-Bezier và GCS-DMS được giải theo formulation và hàm mục tiêu riêng của chúng. Kết quả được trình bày theo từng mô hình, còn các chỉ số chung chỉ đóng vai trò tham chiếu định tính.
+Trên mỗi phân hoạch, GCS-Bézier và GCS-DMS được giải theo formulation và hàm mục tiêu riêng của chúng. Kết quả được trình bày theo từng mô hình, còn các chỉ số chung chỉ đóng vai trò tham chiếu định tính.
 
 Đối với phần GCS-DMS của thực nghiệm này, mô hình động lực được chọn là xe Unicycle với trạng thái
 $x=(p_x,p_y,\theta)^\top$ và điều khiển $u=(v,\omega)^\top$. Cấu hình số dùng cho ba phân hoạch
@@ -351,9 +351,9 @@ trực tiếp.
 
 % Các mô hình được sử dụng trong chương thực nghiệm gồm:
 % \begin{itemize}
-%     \item \textbf{Manual + GCS-Bezier} (chỉ Thực nghiệm 3): cấu hình tham chiếu để đánh giá ảnh hưởng của phân hoạch thủ công.
+%     \item \textbf{Manual + GCS-Bézier} (chỉ Thực nghiệm 3): cấu hình tham chiếu để đánh giá ảnh hưởng của phân hoạch thủ công.
 %     \item \textbf{Linear-GCS}: chỉ tối thiểu hóa độ dài hình học, dùng làm cận dưới về thời gian giải.
-%     \item \textbf{Bezier-GCS}: phương pháp đề xuất hướng 1 của báo cáo này (mục~\ref{sec:gcs_approach}).
+%     \item \textbf{Bézier-GCS}: phương pháp đề xuất hướng 1 của báo cáo này (mục~\ref{sec:gcs_approach}).
 %     \item \textbf{GCS-DMS}: phương pháp đề xuất hướng 2 của báo cáo này (mục~\ref{sec:ocp_DMS_approach}).
 % \end{itemize}
-% Trong Thực nghiệm 1, kết quả được trình bày cho GCS-DMS nhằm đánh giá riêng khả năng xử lý động lực học phi tuyến của formulation này. GCS-Bezier không được dùng làm baseline trực tiếp trong thực nghiệm này, vì hai mô hình khác nhau về biến quyết định, hàm mục tiêu và lớp ràng buộc động lực.
+% Trong Thực nghiệm 1, kết quả được trình bày cho GCS-DMS nhằm đánh giá riêng khả năng xử lý động lực học phi tuyến của formulation này. GCS-Bézier không được dùng làm baseline trực tiếp trong thực nghiệm này, vì hai mô hình khác nhau về biến quyết định, hàm mục tiêu và lớp ràng buộc động lực.

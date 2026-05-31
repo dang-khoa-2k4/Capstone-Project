@@ -15,17 +15,17 @@ tuyến tính trên các điểm điều khiển nền tảng then chốt để 
 toán về dạng MICP khả giải. Hình~\ref{fig:GCS-Bézier_pipeline} tóm tắt luồng xử
 lý tổng thể.
 
-\begin{figure}[!htp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{experiments/image/beziergcs_pipeline.jpg}
     \caption[Motion planning bằng GCS-Bézier trên đồ thị các tập lồi]{%
+    \footnotesize
     Bài toán lập kế hoạch chuyển động quanh vật cản được quy về bài toán
     đường đi ngắn nhất trong Graphs of Convex Sets.
     \textbf{(A)} Môi trường gốc gồm các vật cản, cấu hình đầu
     $\mathbf{x}_{\mathrm{start}}$ và cấu hình đích
     $\mathbf{x}_{\mathrm{goal}}$.
-    \textbf{(B)} Không gian tự do $\mathcal{C}_{\mathrm{free}}$ được phân hoạch
-    thành các vùng an toàn lồi $\{Q_i\}$, ví dụ bằng IRIS, ACD hoặc VCC.
+    \textbf{(B)} Không gian tự do $\mathcal{C}_{\mathrm{free}}$ được phân hoạch thành các vùng lồi an toàn $\{Q_i\}$.
     \textbf{(C)} Từ quan hệ giao nhau giữa các vùng lồi, xây dựng đồ thị
     $G=(V,E)$, trong đó mỗi đỉnh $i$ tương ứng với một vùng $Q_i$,
     còn hai đỉnh phụ $\sigma$ và $\tau$ biểu diễn cấu hình đầu và cấu hình đích.
@@ -41,6 +41,69 @@ lý tổng thể.
     }
     \label{fig:GCS-Bézier_pipeline}
 \end{figure}
+
+\subsubsection{Lựa chọn đường cong Bézier cho bài toán GCS}
+\label{subsubsec:bezier_motivation}
+
+Trong Graphs of Convex Sets, không gian tự do $\mathcal{C}_{\mathrm{free}}$ được biểu
+diễn xấp xỉ bằng một họ các vùng lồi $\{Q_v\}_{v \in V}$.
+Bài toán motion planning trở thành bài toán chọn một đường đi trên đồ thị $G=(V,E)$
+từ $\mathbf{x}_{\mathrm{start}}$ đến $\mathbf{x}_{\mathrm{goal}}$, đồng thời tối ưu
+các biến liên tục gắn với các vùng được chọn.
+Vì vậy, biểu diễn đường cong trong mỗi vùng $Q_v$ cần thỏa mãn các yêu cầu cấu trúc
+xuất phát trực tiếp từ bản chất của bài toán shortest path trên đồ thị vùng lồi.
+
+Thứ nhất, đường cong cần được tham số hóa bởi một số hữu hạn biến quyết định để bài
+toán có thể được giải bằng phương pháp số.
+Thứ hai, điều kiện để toàn bộ đường cong nằm trong vùng lồi $Q_v$ cần có thể được thay
+thế bởi một số hữu hạn ràng buộc lồi trên các biến quyết định đó; nếu không, ràng buộc
+an toàn liên tục sẽ không tích hợp được trực tiếp vào bài toán tối ưu.
+Thứ ba, điều kiện nối tiếp giữa hai đoạn quỹ đạo trên một cạnh $e=(u,v) \in E$ cần
+được biểu diễn bằng các ràng buộc có cấu trúc tuyến tính hoặc song tuyến tính để bảo
+toàn tính lồi của bài toán.
+Thứ tư, các hàm chi phí như độ dài xấp xỉ, độ mượt, vận tốc hoặc gia tốc cần có thể
+được viết dưới dạng lồi hoặc xấp xỉ lồi, để toàn bộ bài toán vẫn nằm trong lớp MICP
+giải được.
+
+Đường cong Bézier đáp ứng đồng thời cả bốn yêu cầu trên nhờ tính chất bao lồi.
+Trong mỗi vùng $Q_v \subset \mathbb{R}^{n_c}$, một đoạn quỹ đạo được tham số hóa bằng
+đường cong Bézier bậc $d$ với $d+1$ điểm điều khiển
+$\mathbf{r}_{v,0}, \ldots, \mathbf{r}_{v,d} \in \mathbb{R}^{n_c}$:
+\[
+    \mathbf{q}_v(s)
+    = \sum_{k=0}^{d} B_{k,d}(s)\,\mathbf{r}_{v,k},
+    \qquad s \in [0,1].
+\]
+Vì các hàm cơ sở Bernstein $B_{k,d}(s) = \binom{d}{k}s^k(1-s)^{d-k}$ không âm và
+có tổng bằng một trên $[0,1]$, đường cong $\mathbf{q}_v(s)$ là một tổ hợp lồi của
+các điểm điều khiển.
+Do đó, nếu $\mathbf{r}_{v,k} \in Q_v$ với mọi $k$, thì $\mathbf{q}_v(s) \in Q_v$
+với mọi $s \in [0,1]$.
+
+Khi $Q_v$ là đa diện $Q_v = \{x \mid A_v x \le b_v\}$, ràng buộc an toàn liên tục
+$\mathbf{q}_v(s) \in Q_v$ được thay thế bởi $d+1$ ràng buộc tuyến tính trên điểm
+điều khiển:
+\[
+    A_v \mathbf{r}_{v,k} \le b_v, \qquad k = 0, \ldots, d.
+\]
+Đây là lý do chính khiến Bézier phù hợp với GCS: một ràng buộc hình học liên tục
+trên toàn bộ đường cong được biến thành các ràng buộc tuyến tính trên điểm điều khiển,
+tương thích trực tiếp với cấu trúc MICP hoặc relaxation lồi của bài toán shortest path.
+
+Tại mỗi cạnh $e = (u,v)$, điều kiện liên tục vị trí $\mathbf{r}_{u,d} = \mathbf{r}_{v,0}$
+là một ràng buộc tuyến tính trực tiếp trên điểm điều khiển.
+Các mức liên tục cao hơn về vận tốc và gia tốc có thể được áp đặt thông qua sai phân
+của điểm điều khiển, cũng dưới dạng tuyến tính hoặc song tuyến tính sau khi áp dụng
+kỹ thuật phối cảnh.
+Nhờ đó, Bézier không chỉ bảo đảm an toàn hình học trong từng vùng lồi cục bộ, mà còn
+hỗ trợ ghép nối nhiều đoạn thành một quỹ đạo liên tục từ $\mathbf{x}_{\mathrm{start}}$
+đến $\mathbf{x}_{\mathrm{goal}}$.
+So với polyline, Bézier cho phép biểu diễn quỹ đạo mượt hơn và đưa ràng buộc động học
+vào bài toán; so với spline nội suy hoặc các đường cong đặc thù như Dubins và
+Reeds--Shepp, Bézier tương thích trực tiếp hơn với ràng buộc bao lồi và cấu trúc tối
+ưu lồi của bài toán shortest path trên graph of convex sets.
+Phần tiếp theo đặc tả đầy đủ các tham số và ràng buộc của đoạn quỹ đạo Bézier trong
+từng vùng $Q_v$.
 
 \subsubsection{Tham số hóa đường cong Bézier trong vùng lồi}
 \label{subsubsec:bezier_param}
@@ -451,8 +514,7 @@ vị trí đầu và cuối tại đỉnh nguồn $s$ và đỉnh đích $t$.
 
 Sau khi áp dụng nới lỏng phối cảnh toàn bộ, bài toán~\eqref{eq:GCS-Bézier_full}
 trở thành Quy hoạch Nón Bậc hai Nguyên Hỗn hợp (MI-SOCP), có thể giải bởi các
-bộ giải SOCP/MISOCP thương mại (Gurobi, Mosek) hoặc mã nguồn mở (CLARABEL,
-ECOS) với bảo đảm tính tối ưu toàn cục trong giới hạn dung sai nguyên.
+bộ giải SOCP/MISOCP thương mại (Gurobi, Mosek) hoặc mã nguồn mở với bảo đảm tính tối ưu toàn cục trong giới hạn dung sai nguyên.
 
 \subsubsection{Ví dụ minh họa: GCS-Bézier bậc hai trong không gian 2D}
 \label{subsubsec:GCS-Bézier_example2d}

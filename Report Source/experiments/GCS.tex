@@ -101,7 +101,7 @@ Mối quan hệ song tuyến tính giữa $y_e$ và $x_v$ trong hàm mục tiêu
 khiến bài toán không lồi; đây là khó khăn trung tâm mà kỹ thuật nới lỏng phối cảnh
 ở phần sau giải quyết.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
   \centering
   \includegraphics[width=0.5\textwidth]{experiments/image/gcs_set.png}
   \caption[Minh họa bài toán SPP trong GCS]{%
@@ -139,29 +139,29 @@ Chính sự ghép nối giữa quyết định rời rạc và quyết định l
 GCS-SPP không thể được xem như một SPP cổ điển chỉ bằng cách thay đổi trọng số
 cạnh.
 
-\begin{proof}[Lập luận độ phức tạp]
-  Giả sử tồn tại một phép biến đổi đa thức đưa mọi thể hiện của SPP trong GCS
-  về một thể hiện SPP cổ điển sao cho nghiệm tối ưu của hai bài toán tương ứng
-  với nhau. Khi đó, nếu thể hiện SPP cổ điển thu được thuộc lớp có thể giải trong
-  thời gian đa thức, chẳng hạn đồ thị không chu trình hoặc đồ thị có trọng số
-  không âm, thì ta sẽ thu được một thuật toán đa thức cho SPP trong GCS.
+% \begin{proof}[Lập luận độ phức tạp]
+%   Giả sử tồn tại một phép biến đổi đa thức đưa mọi thể hiện của SPP trong GCS
+%   về một thể hiện SPP cổ điển sao cho nghiệm tối ưu của hai bài toán tương ứng
+%   với nhau. Khi đó, nếu thể hiện SPP cổ điển thu được thuộc lớp có thể giải trong
+%   thời gian đa thức, chẳng hạn đồ thị không chu trình hoặc đồ thị có trọng số
+%   không âm, thì ta sẽ thu được một thuật toán đa thức cho SPP trong GCS.
 
-  Tuy nhiên, SPP trong GCS đã được chứng minh là NP-hard ngay cả trong các trường
-  hợp mà đồ thị cơ sở là không chu trình và các chi phí là không âm
-  \cite{MarcucciEtAl2023GCS,Marcucci2024Thesis}. Nói cách khác, hai điều kiện vốn
-  làm cho SPP cổ điển trở nên dễ giải không đủ để làm cho SPP trong GCS trở thành
-  bài toán đa thức. Vì vậy, nếu phép quy giảm nói trên tồn tại, ta sẽ suy ra rằng
-  một bài toán NP-hard có thể được giải trong thời gian đa thức. Điều này mâu
-  thuẫn với giả thiết chuẩn $\mathrm{P}\neq\mathrm{NP}$.
-\end{proof}
+%   Tuy nhiên, SPP trong GCS đã được chứng minh là NP-hard ngay cả trong các trường
+%   hợp mà đồ thị cơ sở là không chu trình và các chi phí là không âm
+%   \cite{MarcucciEtAl2023GCS,Marcucci2024Thesis}. Nói cách khác, hai điều kiện vốn
+%   làm cho SPP cổ điển trở nên dễ giải không đủ để làm cho SPP trong GCS trở thành
+%   bài toán đa thức. Vì vậy, nếu phép quy giảm nói trên tồn tại, ta sẽ suy ra rằng
+%   một bài toán NP-hard có thể được giải trong thời gian đa thức. Điều này mâu
+%   thuẫn với giả thiết chuẩn $\mathrm{P}\neq\mathrm{NP}$.
+% \end{proof}
 
-Trong bối cảnh của đồ án này, điểm cần nhấn mạnh không phải là tính song
-tuyến hiển nhiên của biểu thức $y_e \ell_e(\cdot)$ trong công thức
-mixed-integer, mà là việc không thể thay thế toàn bộ cấu trúc GCS bằng một đồ
-thị rời rạc có trọng số cố định. Lý do là trọng số hiệu dụng của một cạnh chỉ
-được xác định sau khi đã chọn các biến liên tục tại các vùng lồi liên quan. Vì
-vậy, nếu ta gán trước cho mỗi cạnh một trọng số duy nhất, ta sẽ làm mất thông
-tin về hình học của quỹ đạo bên trong các vùng lồi.
+Trong bối cảnh của đồ án này, điểm cần nhấn mạnh không phải là tính song tuyến
+hiển nhiên của biểu thức $y_e \ell_e(\cdot)$ trong công thức mixed-integer, mà
+là việc không thể thay thế toàn bộ cấu trúc GCS bằng một đồ thị rời rạc có
+trọng số cố định. Lý do là trọng số hiệu dụng của một cạnh chỉ được xác định
+sau khi đã chọn các biến liên tục tại các vùng lồi liên quan. Vì vậy, nếu ta
+gán trước cho mỗi cạnh một trọng số duy nhất, ta sẽ làm mất thông tin về hình
+học của quỹ đạo bên trong các vùng lồi.
 
 Mối liên hệ với bài toán Hamiltonian giúp minh họa trực quan nguồn gốc của độ
 khó này. Trong SPP cổ điển với trọng số cố định không âm, mục tiêu ``đường đi
@@ -189,16 +189,6 @@ qua tất cả các đỉnh, tức là có bản chất giống bài toán Hamil
 \cite{Marcucci2024Thesis}. Ví dụ này cho thấy GCS-SPP không chỉ là SPP cổ điển
 với trọng số được định nghĩa lại; nó là một bài toán tối ưu rời rạc--liên tục,
 trong đó hình học của các tập lồi ảnh hưởng trực tiếp đến lựa chọn tổ hợp.
-
-Đối với mô hình GCS--Bézier được xét trong đồ án, các tính chất của đường
-cong Bézier giúp chuyển các ràng buộc hình học, độ trơn và một số ràng buộc
-động học như vận tốc thành các ràng buộc lồi trên các điểm điều khiển
-\cite{Marcucci2024Thesis}. Tuy nhiên, việc có một mô hình hữu hạn
-chiều lồi theo từng thành phần không làm mất đi bản chất mixed-integer của bài
-toán, bởi vì ta vẫn phải chọn chuỗi vùng lồi mà quỹ đạo đi qua. Do đó, độ khó
-của bài toán đến từ tầng lựa chọn rời rạc kết hợp với tối ưu liên tục bên trong
-các vùng lồi, chứ không cần viện dẫn đến dynamics phi tuyến của một bài toán
-điều khiển tối ưu tổng quát.
 
 \subsubsection{Mô hình Đỉnh và Cạnh trong Hoạch định Quỹ đạo}
 \label{subsubsec:gcs_vertex_edge}

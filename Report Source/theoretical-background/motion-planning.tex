@@ -1,24 +1,111 @@
-\section{Sinh Quỹ đạo Kinodynamic}\label{sec:kinodynamic_theory}
+\section{Hoạch định chuyển động robot}
+\label{sec:motion_planning}
 
-Lập kế hoạch chuyển động hình học (geometric motion planning) tìm kiếm một đường đi
-không va chạm trong không gian cấu hình của robot mà không xét đến các đặc tính vật lý
-của hệ thống.
-Tuy nhiên, trong thực tế, robot là một hệ cơ học mà trạng thái của nó chỉ có thể tiến triển
-theo thời gian theo các phương trình vi phân xác định được dẫn dắt bởi các đầu vào cơ cấu
-chấp hành.
-Một đường đi không va chạm về mặt hình học vẫn có thể không khả thi về mặt vật lý nếu nó
-đòi hỏi, chẳng hạn, sự thay đổi tức thời của vận tốc hoặc các lực vượt quá giới hạn bão hòa
-của cơ cấu chấp hành.
-Lập kế hoạch chuyển động kinodynamic mở rộng bài toán hình học bằng cách yêu cầu quỹ đạo
-được lập kế hoạch phải đồng thời tránh vật cản, thỏa mãn các ràng buộc vi phân do động lực
-học hệ thống áp đặt, và tối ưu hóa một tiêu chí hiệu năng do người dùng chỉ định.
+Hoạch định chuyển động (motion planning) là bài toán tìm một chuỗi cấu hình hoặc
+quỹ đạo cho robot từ trạng thái khởi đầu đến trạng thái đích trong môi trường
+chứa vật cản, đồng thời thỏa mãn các ràng buộc về không gian và vật
+lý~\cite{LaValle2006}.
+Tùy theo mức độ trừu tượng, bài toán có thể được phân thành ba dạng bổ sung cho
+nhau: hoạch định hình học (geometric planning), sinh quỹ đạo theo thời gian
+(trajectory generation), và lập kế hoạch kinodynamic.
+Mục này xây dựng các khái niệm nền tảng theo trình tự đó: không gian cấu hình và
+bài toán hình học (Mục~\ref{subsec:configuration_space}), tham số hóa thời gian
+(Mục~\ref{subsec:trajectory_generation}), tổng quan các biểu diễn đường cong
+thông dụng (Mục~\ref{subsec:curve_representations}), đến bài toán kinodynamic đầy
+đủ kết hợp tham số hóa bằng đường cong Bézier
+(Mục~\ref{subsec:kinodynamic_problem}--\ref{subsec:continuity_constraints}).
 
-Mục này xây dựng bài toán lập kế hoạch kinodynamic dưới dạng toán học chặt chẽ
-(Mục~\ref{subsec:kinodynamic_problem}), giới thiệu tham số hóa quỹ đạo đa thức bằng
-đường cong Bézier như một kỹ thuật để đưa bài toán về dạng hữu hạn chiều
-(Mục~\ref{subsec:bezier_parameterization}), và trình bày các ràng buộc liên tục đảm bảo
-chuyển động trơn qua các điểm chuyển tiếp giữa các đoạn quỹ đạo
-(Mục~\ref{subsec:continuity_constraints}).
+\subsection{Không gian cấu hình và bài toán hoạch định hình học}
+\label{subsec:configuration_space}
+
+Khái niệm không gian cấu hình (configuration space -- C-space) là nền tảng để phát
+biểu bài toán hoạch định chuyển động một cách hình thức và chặt
+chẽ~\cite{LaValle2006}.
+Gọi $\mathcal{W} \subseteq \mathbb{R}^{n_w}$ là không gian làm việc (workspace)
+của robot, thường là $\mathbb{R}^2$ hoặc $\mathbb{R}^3$.
+Trong $\mathcal{W}$ tồn tại một vùng chướng ngại vật $\mathcal{O} \subset \mathcal{W}$;
+phần còn lại $\mathcal{W} \setminus \mathcal{O}$ là vùng không có vật cản.
+Cấu hình của robot là một vector $q \in \mathcal{C}$ mô tả đầy đủ tư thế và vị
+trí của robot, trong đó $\mathcal{C}$ là không gian cấu hình.
+Gọi $\mathcal{A}(q) \subset \mathcal{W}$ là tập hợp tất cả các điểm trong không
+gian làm việc bị robot chiếm giữ khi ở cấu hình $q$.
+Vùng chướng ngại vật trong C-space là tập tất cả các cấu hình mà tại đó robot va
+chạm với vật cản:
+\begin{equation}
+    \mathcal{C}_{\mathrm{obs}}
+    = \bigl\{q \in \mathcal{C} \mid \mathcal{A}(q) \cap \mathcal{O} \neq \emptyset\bigr\}.
+    \label{eq:cspace_obs}
+\end{equation}
+Không gian tự do (free space) là phần bổ của $\mathcal{C}_{\mathrm{obs}}$ trong
+$\mathcal{C}$:
+\begin{equation}
+    \mathcal{C}_{\mathrm{free}}
+    = \mathcal{C} \setminus \mathcal{C}_{\mathrm{obs}}.
+    \label{eq:cspace_free}
+\end{equation}
+
+Bài toán hoạch định chuyển động hình học (geometric motion planning) là bài toán
+tìm một đường đi liên tục $\tau \colon [0,1] \to \mathcal{C}_{\mathrm{free}}$ sao
+cho $\tau(0) = q_I$ và $\tau(1) = q_G$, trong đó $q_I$ là cấu hình khởi đầu và
+$q_G$ là cấu hình đích.
+Bài toán này chỉ quan tâm đến hình dạng hình học của đường đi; thời gian, vận tốc
+và lực không xuất hiện trong phát biểu bài toán ở tầng này.
+Thách thức trung tâm là $\mathcal{C}_{\mathrm{free}}$ nói chung là tập phi lồi và
+không liên thông do sự hiện diện của $\mathcal{C}_{\mathrm{obs}}$, khiến bài toán
+trở thành NP-hard trong trường hợp tổng quát~\cite{LaValle2006}.
+
+\subsection{Các biểu diễn đường cong trong hoạch định chuyển động}
+\label{subsec:curve_representations}
+
+Lựa chọn cách biểu diễn đường đi hoặc quỹ đạo ảnh hưởng trực tiếp đến cấu trúc
+bài toán tối ưu, khả năng áp đặt ràng buộc an toàn, và tính tương thích với các
+phương pháp giải.
+Các biểu diễn phổ biến trong hoạch định chuyển động và điều khiển tối ưu có thể
+được phân loại thành năm nhóm chính.
+
+\textbf{Đường gấp khúc (polyline)} là biểu diễn đơn giản nhất, trong đó đường đi
+được xác định bởi một chuỗi waypoint nối nhau bằng đoạn thẳng.
+Dạng này phù hợp với các thuật toán tìm kiếm trên đồ thị hoặc lưới như A*,
+Dijkstra, PRM và RRT~\cite{LaValle2006}.
+Tuy nhiên, đường gấp khúc chỉ liên tục về vị trí, có góc gãy tại waypoint, và
+thường cần thêm bước làm mượt trước khi đưa vào hệ thống thực.
+
+\textbf{Đường cong dựa trên điểm điều khiển và bao lồi} - bao gồm đường cong
+Bézier và B-spline - được định hình bởi một chuỗi điểm điều khiển không nhất
+thiết nằm trên đường cong.
+Đặc điểm quan trọng nhất là chúng có liên hệ mạnh với bao lồi của các điểm điều
+khiển: toàn bộ đường cong nằm trong bao lồi đó.
+Vì vậy, nhóm này đặc biệt phù hợp với các bài toán cần diễn đạt ràng buộc hình
+học, nhất là khi không gian tự do được xấp xỉ bằng các vùng lồi.
+
+\textbf{Đường cong spline nội suy} - gồm cubic spline, Hermite spline và
+Catmull--Rom spline - phù hợp khi cần đường đi đi qua chính xác các waypoint
+và mượt hơn so với polyline.
+Tuy nhiên, việc các waypoint nằm trong vùng an toàn không đảm bảo toàn bộ đoạn
+spline nằm trong vùng đó, vì dạng nội suy có thể bị kéo ra ngoài vùng lồi giữa
+hai waypoint liền kề.
+
+\textbf{Đường cong hình học và động học đặc thù} - gồm cung tròn, đường cong
+Dubins, Reeds--Shepp và clothoid (đường xoắn Euler) - phản ánh ràng buộc động
+học của các hệ như xe tự hành hoặc robot car-like với giới hạn bán kính quay.
+Dubins phù hợp với chuyển động chỉ tiến; Reeds--Shepp cho phép tiến và lùi; còn
+clothoid hỗ trợ biến thiên độ cong mượt.
+Nhược điểm là các biểu diễn này có thể kéo theo mode rời rạc, ràng buộc curvature
+phi tuyến, hoặc công thức hình học khó đưa trực tiếp vào một bài toán tối ưu lồi.
+
+\textbf{Quỹ đạo rời rạc trong điều khiển tối ưu} biểu diễn quỹ đạo bằng chuỗi
+trạng thái và điều khiển tại các nút thời gian rời rạc - cách tiếp cận cốt lõi
+của direct transcription, direct collocation và MPC.
+Dạng biểu diễn này linh hoạt vì cho phép đưa trực tiếp động lực học và ràng buộc
+điều khiển vào bài toán, nhưng cần xử lý cẩn thận tính an toàn giữa các nút rời
+rạc.
+
+Nhìn chung, các biểu diễn đường cong trong hoạch định chuyển động và điều khiển
+tối ưu có thể được phân loại theo ba trục: được xác định bởi waypoint hay điểm
+điều khiển; mô tả đường hình học hay quỹ đạo theo thời gian; và tương thích hay
+không tương thích với tối ưu lồi hoặc mixed-integer convex optimization.
+Sự khác biệt theo trục thứ ba có ý nghĩa thực tiễn đặc biệt quan trọng trong
+khung GCS được trình bày ở Chương~\ref{ch:proposed_method}.
 
 \subsection{Bài toán Lập kế hoạch Kinodynamic}\label{subsec:kinodynamic_problem}
 
@@ -55,8 +142,8 @@ thỏa mãn phương trình động lực học~\eqref{eq:kinodynamic_dynamics} 
               \label{eq:safety_constraint}
           \end{equation}
 
-    \item \textbf{Giới hạn cơ cấu chấp hành và động học.}
-          Đầu vào điều khiển phải nằm trong tập khả thi của cơ cấu chấp hành:
+    \item \textbf{Giới hạn điều khiển và động học.}
+          Đầu vào điều khiển phải nằm trong tập khả thi của giới hạn điều khiển:
           \begin{equation}
               u(t) \in \mathcal{U}, \quad \forall\, t \in [0, T].
               \label{eq:control_constraint}
@@ -155,8 +242,8 @@ với các điểm điều khiển được tạo thành từ các sai phân h�
 Áp dụng đệ quy~\eqref{eq:bezier_derivative} cho phép tính gia tốc và các đạo hàm bậc cao
 hơn dưới dạng đường cong Bézier có bậc giảm dần, với các điểm điều khiển được biểu diễn
 dưới dạng tổ hợp tuyến tính của các $\gamma_k$ ban đầu.
-Do đó, các ràng buộc lên vận tốc và gia tốc dọc theo quỹ đạo --- chẳng hạn các giới hạn
-động học trong~\eqref{eq:control_constraint} --- quy về các ràng buộc bất đẳng thức tuyến
+Do đó, các ràng buộc lên vận tốc và gia tốc dọc theo quỹ đạo - chẳng hạn các giới hạn
+động học trong~\eqref{eq:control_constraint} - quy về các ràng buộc bất đẳng thức tuyến
 tính trên các sai phân điểm điều khiển, và có thể được áp đặt đồng thời với tính chất bao lồi.
 
 \subsection{Ràng buộc Độ trơn tại Điểm chuyển tiếp}\label{subsec:continuity_constraints}
@@ -210,8 +297,3 @@ lồi~\eqref{eq:convex_hull}, các giới hạn động học được áp đặ
 hàm~\eqref{eq:bezier_derivative}, và các điều kiện tại điểm
 nối~\eqref{eq:c0_continuity}--\eqref{eq:c2_continuity}.
 
-Cấu trúc này --- hàm mục tiêu tích phân, ràng buộc vi phân trên quỹ đạo, điều kiện biên cố
-định, và các ràng buộc bất đẳng thức trên đường --- chính xác là cấu trúc của một Bài toán
-Điều khiển Tối ưu (Optimal Control Problem, OCP).
-Mục tiếp theo hệ thống hóa mối liên hệ này và phát triển khung OCP làm nền tảng cho phương
-pháp tối ưu hóa quỹ đạo được áp dụng trong đồ án này.

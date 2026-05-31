@@ -302,7 +302,7 @@ Hồ sơ vận tốc ở Hình~\ref{fig:dms_maze_velocity} cho thấy xe thườ
     \label{fig:dms_maze_velocity}
 \end{figure}
 
-Tổng hợp các kết quả trên, GCS-DMS cho thấy khả năng sinh quỹ đạo khả thi về mặt động lực học trong các môi trường có nhiều vùng lồi và cấu trúc đường đi phức tạp. Điểm mạnh chính của phương pháp là mô hình hóa trực tiếp trạng thái, điều khiển và defect dynamics, nhờ đó nghiệm cuối cùng có thể được kiểm chứng bằng các sai số định lượng cụ thể, như sai số defect của động lực học, độ lệch khớp nối giữa các đoạn shooting, và mức vi phạm ràng buộc an toàn. Đổi lại, phương pháp phải chấp nhận chi phí tính toán cao hơn và không có bảo đảm tối ưu toàn cục như các relaxation lồi của GCS-Bezier. Đây là đánh đổi phù hợp với mục tiêu của hướng tiếp cận thứ hai: ưu tiên tính đúng đắn động lực học và tính khả thi của quỹ đạo trên hệ robot thực, thay vì chỉ tối ưu hóa hình học trong không gian cấu hình.
+Tổng hợp các kết quả trên, GCS-DMS cho thấy khả năng sinh quỹ đạo khả thi về mặt động lực học trong các môi trường có nhiều vùng lồi và cấu trúc đường đi phức tạp. Điểm mạnh chính của phương pháp là mô hình hóa trực tiếp trạng thái, điều khiển và defect dynamics, nhờ đó nghiệm cuối cùng có thể được kiểm chứng bằng các sai số định lượng cụ thể, như sai số defect của động lực học, độ lệch khớp nối giữa các đoạn shooting, và mức vi phạm ràng buộc an toàn. Đổi lại, phương pháp phải chấp nhận chi phí tính toán cao hơn và không có bảo đảm tối ưu toàn cục như các relaxation lồi của GCS-Bézier. Đây là đánh đổi phù hợp với mục tiêu của hướng tiếp cận thứ hai: ưu tiên tính đúng đắn động lực học và tính khả thi của quỹ đạo trên hệ robot thực, thay vì chỉ tối ưu hóa hình học trong không gian cấu hình.
 
 \subsection{Phân tích Thực nghiệm 2: Môi trường Mê cung Phức tạp}
 
@@ -322,7 +322,7 @@ Các tham số tối ưu hóa được thiết lập đồng nhất cho tất c�
 Dựa trên dữ liệu thu thập từ 10 mẫu thử nghiệm tại bảng \ref{tab:maze_results}, chúng tôi tiến hành so sánh đối chiếu giữa hai phương pháp:
 \begin{itemize}
     \item \textbf{Linear GCS}: tối thiểu hóa độ dài hình học.
-    \item \textbf{Bezier GCS}: tối thiểu hóa thời gian với ràng buộc động lực học.
+    \item \textbf{Bézier GCS}: tối thiểu hóa thời gian với ràng buộc động lực học.
 \end{itemize}
 
 \begin{table}[!htp]
@@ -333,7 +333,7 @@ Dựa trên dữ liệu thu thập từ 10 mẫu thử nghiệm tại bảng \re
         \hline
         \textbf{Chỉ số (Metric)} 
         & \textbf{Linear GCS} 
-        & \textbf{Bezier GCS} 
+        & \textbf{Bézier GCS} 
         & \textbf{Đơn vị} \\
         \hline
         Thời gian giải trung bình (Mean) 
@@ -361,18 +361,18 @@ Dựa trên dữ liệu thu thập từ 10 mẫu thử nghiệm tại bảng \re
 
 Kết quả thống kê cho thấy sự khác biệt rõ rệt về hiệu suất:
 
-\textbf{Về thời gian tính toán}: Linear GCS cho thấy khả năng phản hồi cực nhanh với thời gian giải trung bình chỉ $1,28$ giây. Trong khi đó, Bezier GCS yêu cầu trung bình $85,22$ giây để hội tụ. Sự gia tăng này là do Bezier GCS phải giải quyết các ràng buộc vi phân bậc cao ($C^2$) và tối ưu hóa đồng thời biến thời gian $h$, khiến bài toán SOCP có quy mô lớn hơn đáng kể.
+\textbf{Về thời gian tính toán}: Linear GCS cho thấy khả năng phản hồi cực nhanh với thời gian giải trung bình chỉ $1,28$ giây. Trong khi đó, Bézier GCS yêu cầu trung bình $85,22$ giây để hội tụ. Sự gia tăng này là do Bézier GCS phải giải quyết các ràng buộc vi phân bậc cao ($C^2$) và tối ưu hóa đồng thời biến thời gian $h$, khiến bài toán SOCP có quy mô lớn hơn đáng kể.
     
-\textbf{Về chi phí tối ưu}: Chi phí trung bình của Bezier GCS cao hơn khoảng $22\%$ so với Linear GCS. Tuy nhiên, chi phí của Bezier GCS bao gồm cả thành phần điều chuẩn gia tốc (\textit{Regularization Cost}), phản ánh sự đánh đổi cần thiết để đạt được quỹ đạo mượt mà và khả thi về mặt vật lý.
+\textbf{Về chi phí tối ưu}: Chi phí trung bình của Bézier GCS cao hơn khoảng $22\%$ so với Linear GCS. Tuy nhiên, chi phí của Bézier GCS bao gồm cả thành phần điều chuẩn gia tốc (\textit{Regularization Cost}), phản ánh sự đánh đổi cần thiết để đạt được quỹ đạo mượt mà và khả thi về mặt vật lý.
 
 
 \subsubsection{Phân tích Đặc điểm Quỹ đạo và Tính Tối ưu Toàn cục}
 
 Quan sát các quỹ đạo tại Hình~\ref{fig:maze_results} (tương ứng với các \textit{Seeds} khác nhau), chúng tôi rút ra các nhận định quan trọng về hành vi của bộ lập kế hoạch:
 \begin{enumerate}
-    \item \textbf{Sự khác biệt về lộ trình (Homotopy class)}: Trong nhiều trường hợp (ví dụ \textit{Seed 4} và \textit{Seed 42}), quỹ đạo Bezier GCS (màu đỏ) lựa chọn một lộ trình hoàn toàn khác so với quỹ đạo Linear GCS (màu xanh). Trong khi quỹ đạo hình học ưu tiên đường ngắn nhất với nhiều khúc cua gắt, quỹ đạo Bezier chấp nhận đi quãng đường dài hơn nhưng ít góc rẽ gắt hơn nhằm duy trì vận tốc cao và giảm chi phí gia tốc.
+    \item \textbf{Sự khác biệt về lộ trình (Homotopy class)}: Trong nhiều trường hợp (ví dụ \textit{Seed 4} và \textit{Seed 42}), quỹ đạo Bézier GCS (màu đỏ) lựa chọn một lộ trình hoàn toàn khác so với quỹ đạo Linear GCS (màu xanh). Trong khi quỹ đạo hình học ưu tiên đường ngắn nhất với nhiều khúc cua gắt, quỹ đạo Bézier chấp nhận đi quãng đường dài hơn nhưng ít góc rẽ gắt hơn nhằm duy trì vận tốc cao và giảm chi phí gia tốc.
     
-    \item \textbf{Hành vi tại các góc cua}: Quỹ đạo Bezier thể hiện xu hướng ``ôm cua'' rộng tại các giao lộ để đảm bảo tính liên tục của gia tốc ($C^2$). Các thành phần vận tốc được duy trì trong giới hạn $[-1, 1]$ nhờ vào cấu trúc nón phối cảnh trong mô hình GCS.
+    \item \textbf{Hành vi tại các góc cua}: Quỹ đạo Bézier thể hiện xu hướng ``ôm cua'' rộng tại các giao lộ để đảm bảo tính liên tục của gia tốc ($C^2$). Các thành phần vận tốc được duy trì trong giới hạn $[-1, 1]$ nhờ vào cấu trúc nón phối cảnh trong mô hình GCS.
     
     \item \textbf{Tính tối ưu toàn cục}: Đối với cả 10 mẫu mê cung, kỹ thuật nới lỏng lồi đều trả về các xác suất nhị phân $\phi_e$ hội tụ về $\{0,1\}$, giúp nghiệm thu được tự động đạt tối ưu toàn cục mà không cần qua bước làm tròn (\textit{Rounding}). Điều này chứng minh GCS vượt trội hơn các phương pháp MICP truyền thống khi giảm số lượng biến nhị phân từ mức $|I|^2$ xuống chỉ còn $2|I|$, cho phép giải quyết các mê cung lớn mà các bộ giải cũ thường thất bại.
 \end{enumerate}
@@ -431,7 +431,7 @@ GCS-Linear
 & 1.00
 
 & 22.6444 \\
-GCS-Bezier
+GCS-Bézier
 & 65.8388
 & 0.0000
 & 95179.93
@@ -469,7 +469,7 @@ Bảng~\ref{tab:rrt_gcs_comparison} và Hình~\ref{fig:rrt_gcs_length_compare} c
 thấy GCS-Linear cho đường đi ngắn nhất,
 với độ dài trung bình $54.7117$. Kết quả này phù hợp với bản chất của
 formulation, vì GCS-Linear tối ưu trực tiếp độ dài hình học trên đồ thị các vùng
-lồi. Lấy GCS-Linear làm mốc tham chiếu, GCS-Bezier tạo quỹ đạo dài hơn khoảng
+lồi. Lấy GCS-Linear làm mốc tham chiếu, GCS-Bézier tạo quỹ đạo dài hơn khoảng
 $20.3\%$, RRT dài hơn khoảng $50.7\%$, còn RRT* dài hơn khoảng $47.6\%$. Như
 vậy, RRT* có cải thiện so với RRT nhờ cơ chế rewiring, nhưng mức cải thiện trung
 bình chỉ khoảng $2.0\%$. Điều này cho thấy với time budget 30 giây và môi trường
@@ -480,24 +480,24 @@ khoảng $1.72$ giây. GCS-Linear cần khoảng $2.85$ giây, chậm hơn RRT n
 cùng bậc thời gian và đổi lại cho nghiệm ngắn hơn đáng kể. RRT* đạt nghiệm tốt
 nhất được ghi nhận sau trung bình $8.79$ giây, đồng thời có độ lệch chuẩn lớn
 ($9.08$ giây), phản ánh rõ tính anytime và sự phụ thuộc vào seed lấy mẫu.
-GCS-Bezier có runtime lớn nhất, khoảng $95.18$ giây, do bài toán phải xử lý đồng
+GCS-Bézier có runtime lớn nhất, khoảng $95.18$ giây, do bài toán phải xử lý đồng
 thời ràng buộc liên tục $C^2$, giới hạn vận tốc, biến co giãn thời gian và các
 thành phần điều chuẩn đạo hàm.
 
 \subsubsection{Tỉ lệ thành công, smoothness}
 
 Cả bốn thuật toán đều tìm được nghiệm trong thí nghiệm này. Với GCS-Linear và
-GCS-Bezier, nghiệm là deterministic nên các độ lệch chuẩn bằng 0. Với RRT và
+GCS-Bézier, nghiệm là deterministic nên các độ lệch chuẩn bằng 0. Với RRT và
 RRT*, tỉ lệ thành công được tính trên 50 seed ngẫu nhiên và đều đạt $100\%$,
 cho thấy thiết lập sampling và collision checker đủ ổn định đối với mê cung seed
 4 trong giới hạn tham số đã chọn.
 
 Chỉ số smoothness trong bảng được tính bằng tổng góc đổi hướng, do đó giá trị
 nhỏ hơn tương ứng với đường đi ít gấp khúc hơn theo metric này. GCS-Linear đạt
-$22.6444$, GCS-Bezier đạt $33.6341$, RRT* đạt $59.9205$ và RRT đạt $61.8902$.
+$22.6444$, GCS-Bézier đạt $33.6341$, RRT* đạt $59.9205$ và RRT đạt $61.8902$.
 Hai nghiệm sampling-based vì vậy vẫn kém mượt hơn rõ rệt sau bước shortcut
 smoothing. RRT* cải thiện nhẹ so với RRT, nhưng chênh lệch không lớn, phù hợp
-với quan sát ở chỉ số độ dài đường đi. Riêng GCS-Bezier cần được diễn giải cẩn
+với quan sát ở chỉ số độ dài đường đi. Riêng GCS-Bézier cần được diễn giải cẩn
 thận: quỹ đạo Bézier có tính trơn theo tham số thời gian và thỏa các ràng
 buộc liên tục, nhưng do quỹ đạo có thể dài hơn và được sample dày hơn, tổng góc
 đổi hướng tích lũy không nhất thiết nhỏ nhất. Vì vậy, smoothness ở đây hữu ích
@@ -512,7 +512,7 @@ GCS-Linear là lựa chọn tốt nhất trong thí nghiệm này. Nếu cần m
 nhanh với chi phí tính toán thấp, RRT là baseline hiệu quả, nhưng đổi lại đường
 đi dài và gấp khúc hơn đáng kể. RRT* cải thiện chất lượng so với RRT nhờ
 rewiring, tuy nhiên mức cải thiện trong mê cung này còn khiêm tốn so với phần
-runtime tăng thêm. GCS-Bezier có chi phí tính toán lớn nhất, nhưng cần được xem
+runtime tăng thêm. GCS-Bézier có chi phí tính toán lớn nhất, nhưng cần được xem
 như một bài toán khác giàu ràng buộc hơn: phương pháp này tìm quỹ đạo
 min-time dưới giới hạn vận tốc và ràng buộc continuity, thay vì chỉ tối thiểu
 hóa độ dài hình học.
@@ -646,7 +646,7 @@ Phân hoạch thủ công
 
 
 
-Sau khi hoàn tất giai đoạn phân hoạch không gian tự do thành các tập hợp vùng lồi, chúng tôi tiến hành thực hiện bài toán hoạch định quỹ đạo dựa trên khung làm việc Đồ thị các Tập lồi (GCS-Bezier). Mục tiêu của giai đoạn này là tìm kiếm một lộ trình tối ưu không chỉ về mặt hình học mà còn phải đáp ứng các ràng buộc về động lực học và độ trơn của quỹ đạo. Để đạt được sự cân bằng giữa thời gian thực thi vật lý ($T_{duration}$) và nỗ lực điều khiển (Control effort), hàm mục tiêu tổng hợp (Rounded Cost) được thiết lập như sau:
+Sau khi hoàn tất giai đoạn phân hoạch không gian tự do thành các tập hợp vùng lồi, chúng tôi tiến hành thực hiện bài toán hoạch định quỹ đạo dựa trên khung làm việc Đồ thị các Tập lồi (GCS-Bézier). Mục tiêu của giai đoạn này là tìm kiếm một lộ trình tối ưu không chỉ về mặt hình học mà còn phải đáp ứng các ràng buộc về động lực học và độ trơn của quỹ đạo. Để đạt được sự cân bằng giữa thời gian thực thi vật lý ($T_{duration}$) và nỗ lực điều khiển (Control effort), hàm mục tiêu tổng hợp (Rounded Cost) được thiết lập như sau:
 $$Rounded Cost \approx (1 \times T_{duration}) + \sum \left( 0.1 \times \int_{0}^{T_e} \|\text{a}(t)\|^2 dt \right)$$
 
 Trong đó, trọng số cho thời gian thực thi được đặt là $w_{t}=1$ và hệ số điều chuẩn đạo hàm bậc hai (gia tốc) là $\epsilon = 0.1$ nhằm giảm thiểu hiện tượng rung động (jerk) khi robot di chuyển qua các ranh giới vùng lồi. Các kết quả định lượng về hiệu suất tính toán và chất lượng quỹ đạo được phân tích chi tiết dựa trên dữ liệu thu được từ bộ giải Mosek.

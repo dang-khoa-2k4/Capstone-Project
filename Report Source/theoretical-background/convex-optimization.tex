@@ -54,7 +54,7 @@ Một ý nghĩa thực tiễn quan trọng nằm ở bao đóng (closure) của 
 \item Khi $y > 0$, biến $x$ bị ràng buộc trong phiên bản tỉ lệ của tập $\mathcal{C}$.
 \item Khi $y = 0$, biến $x$ bị ép về gốc tọa độ ($x=0$).
 \end{itemize}
-Tính chất này được khai thác trực tiếp trong ứng dụng của chúng tôi đối với Bài toán Đường đi Ngắn nhất trên Đồ thị các Tập Lồi (GCS). Trong mô hình Quy hoạch Lồi Nguyên-Hỗn hợp (MICP), biến kích hoạt nhị phân cho một cạnh đóng vai trò là hệ số tỉ lệ $y$. Khi một cạnh không hoạt động ($y=0$), các đóng góp trạng thái liên quan bị ép về 0, và chi phí---được mô hình hóa qua hàm phối cảnh---sẽ tự nhiên triệt tiêu. Hàm phối cảnh $\tilde{\ell}_e$ được định nghĩa để trả về 0 khi cả $y=0$ và các biến trạng thái bằng 0, đảm bảo rằng các thành phần không hoạt động sẽ không phát sinh chi phí trong hàm mục tiêu tối ưu.
+Tính chất này được khai thác trực tiếp trong ứng dụng của chúng tôi đối với Bài toán Đường đi Ngắn nhất trên Đồ thị các Tập Lồi (GCS). Trong mô hình Quy hoạch Lồi Nguyên-Hỗn hợp (MICP), biến kích hoạt nhị phân cho một cạnh đóng vai trò là hệ số tỉ lệ $y$. Khi một cạnh không hoạt động ($y=0$), các đóng góp trạng thái liên quan bị ép về 0, và chi phí - được mô hình hóa qua hàm phối cảnh - sẽ tự nhiên triệt tiêu. Hàm phối cảnh $\tilde{\ell}_e$ được định nghĩa để trả về 0 khi cả $y=0$ và các biến trạng thái bằng 0, đảm bảo rằng các thành phần không hoạt động sẽ không phát sinh chi phí trong hàm mục tiêu tối ưu.
 
 % \subsubsection{Nón Đối ngẫu (Dual Cones)}
 % Khái niệm thiết yếu thứ hai là \textit{nón đối ngẫu}. Đối với một nón lồi $\mathcal{K} \subseteq \mathbb{R}^n$, nón đối ngẫu $\mathcal{K}^*$ bao gồm tất cả các vector tạo thành một tích vô hướng không âm với mọi vector trong $\mathcal{K}$:
