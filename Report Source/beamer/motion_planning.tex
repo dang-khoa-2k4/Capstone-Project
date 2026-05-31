@@ -1275,8 +1275,8 @@
         \begin{column}{0.24\textwidth}
             \raggedright
             {\scriptsize\textbf{TN2 -- Maze $25\!\times\!25$}}\\[-0.15em]
-            {\footnotesize 10 mẫu ngẫu nhiên}\\[-0.15em]
-            {\footnotesize Mở rộng tổ hợp của GCS-Bézier.}
+            % {\footnotesize 10 mẫu ngẫu nhiên}\\[-0.15em]
+            {\footnotesize Chất lượng nghiệm \\ Mở rộng tổ hợp của GCS-Bézier.}
         \end{column}
 
         % ================= COL 3 =================
@@ -1291,8 +1291,8 @@
         \begin{column}{0.24\textwidth}
             \raggedright
             {\scriptsize\textbf{TN4 -- Unicycle}}\\[-0.15em]
-            {\footnotesize 2D + maze $15\!\times\!15$}\\[-0.15em]
-            {\footnotesize GCS-DMS với động lực học phi tuyến.}
+            % {\footnotesize 2D + maze $15\!\times\!15$}\\[-0.15em]
+            {\footnotesize GCS-DMS với động học phi tuyến.}
         \end{column}
 
     \end{columns}
@@ -1545,7 +1545,7 @@
         \begin{column}{0.55\textwidth}
             \footnotesize Setup: Mê cung $25\!\times\!25\!=\!625$ ô (vùng lồi).\\
             \begin{itemize}
-                \item \textbf{Linear GCS:} Bézier bậc $d=1$, $\dot{q}\in[-1,1]$.
+                \item \textbf{Linear GCS:} Bézier bậc $d=1$.
                 \item \textbf{Bézier GCS:} Bézier bậc $d=6$, $C^2$, $\dot{q}\in[-1,1]$.
             \end{itemize}
 
@@ -1564,12 +1564,54 @@
 
             \vspace{0.3em}
             \[
-                \delta_{\mathrm{opt}} := \frac{C_{\mathrm{round}} - C_{\mathrm{opt}}}{C_{\mathrm{opt}}}
+                \delta_{\text{opt}} = \frac{C_{\text{round}} - C_{\text{opt}}}{C_{\text{opt}}} \le \frac{C_{\text{round}} - C_{\text{relax}}}{C_{\text{relax}}} = \delta_{\text{relax}}
             \]
-            \textbf{Tối ưu toàn cục:} $y_e^*\!\in\!\{0,1\}$ tự động; $\delta_{\mathrm{opt}}=0\%$ nghĩa là cost trùng cận dưới, không cần rounding.
+            \textbf{Tối ưu toàn cục:} $y_e^*\!\in\!\{0,1\}$ tự động; $\delta_{\mathrm{opt}} \le 0\%$ nghĩa là cost trùng cận dưới.
         \end{column}
     \end{columns}
 \end{frame}
+
+\begin{frame}{TN2 - Linear GCS vs Visibility graph: đường đi}
+    \vspace{-0.45em}
+    \centering
+
+    \makebox[\textwidth][c]{%
+        \includegraphics[
+            width=0.92\paperwidth,
+            height=0.72\textheight,
+            keepaspectratio
+        ]{./imgs/GCS-VG/GCS-VG.png}%
+    }
+
+    \vspace{-0.2em}
+
+    {\scriptsize
+        \textbf{Quan sát:}
+        Visibility graph và Linear GCS tìm cùng độ dài đường đi $54.712$ trên mẫu này.
+    }
+\end{frame}
+
+\begin{frame}{TN2 - Linear GCS vs Visibility graph: tổng hợp}
+    \vspace{-0.35em}
+    \centering
+
+    \makebox[\textwidth][c]{%
+        \includegraphics[
+            width=0.96\paperwidth,
+            height=0.66\textheight,
+            keepaspectratio
+        ]{./imgs/GCS-VG/graph.png}%
+    }
+
+    \vspace{-0.1em}
+
+    {\scriptsize
+        \textbf{Nhận xét:}
+        hai phương pháp cho độ dài đường đi tương đương chứng tỏ độ tối ưu của Phương pháp GCS, nhưng Linear GCS nhanh hơn khoảng $3.2\times$
+        do khai thác trực tiếp cấu trúc ô lồi và đồ thị cạnh kề thưa hơn.
+    }
+\end{frame}
+
 
 % =====================================================================
 % TN2 - Combinatorial scalability insight slide
@@ -1750,7 +1792,7 @@
 % =====================================================================
 \begin{frame}{TN4 - Biểu đồ vận tốc: tự động giảm tốc tại nút giao và hành lang hẹp}
     \begin{columns}[T,onlytextwidth]
-        \begin{column}{0.6\textwidth}
+        \begin{column}{0.58\textwidth}
             \centering
             \begin{minipage}{0.48\linewidth}
                 \centering
@@ -1764,19 +1806,28 @@
             \end{minipage}\\[0.3em]
             {\footnotesize Vận tốc giảm rõ tại điểm chuyển hướng}
         \end{column}
-        \begin{column}{0.35\textwidth}
-            \footnotesize
-            Mô hình động học có thông số tốc độ dao động $0.6$-$0.75$ m/s, \textbf{tự động giảm tốc} tại:
-            \begin{itemize}\itemsep0pt
-                \item Nút giao (cần đổi hướng)
-                \item Hành lang hẹp
-                \item Đoạn chuyển nhiều vùng
-            \end{itemize}
-            \vspace{0.3em}
-            \textbf{Lý do:} $|\omega|\!\le\!\omega_{\max}$ buộc giảm $v$ để bán kính cua $\ge v/\omega_{\max}$.
+        \begin{column}{0.4\textwidth}
+            \scriptsize
+            \textbf{Giảm tốc tự động:}
+            tại nút giao, hành lang hẹp và đoạn chuyển nhiều vùng do
+            $|\omega|\!\le\!\omega_{\max}$ buộc giảm $v$ khi cua.
 
-            \vspace{0.4em}
-            \footnotesize \textit{GCS-Bézier tối ưu hình học thuần không phản ánh được hành vi này.}
+            \vspace{0.35em}
+            \textbf{Kiểm tra khả thi thực tế}
+            \begin{itemize}\itemsep0.1em
+                \item $v_{\max}\!\approx\!0.75$ m/s, $r=0.05$ m
+                      $\Rightarrow n_{\text{req}}\!\approx\!143$ rpm
+                \item Pololu 50:1 37D 24V: $n_0=200$ rpm, $\tau_{\text{stall}}=230$ kg.mm,
+                      $I_{\text{stall}}=3.1$ A
+                \item Robot: 2 motor dẫn động, $m\approx10$ kg
+                      $\Rightarrow$ yêu cầu tốc độ nằm trong khả năng motor
+                \item Tại $\sim143$ rpm, đường speed--torque vẫn còn biên mô-men
+            \end{itemize}
+
+            \vspace{0.25em}
+            \textbf{Khuyến nghị điều khiển:}
+            làm mượt các đoạn giảm tốc gấp với $|a|\le1.2$--$1.3$ m/s$^2$.
+            Với $\Delta v=0.6$ m/s, thời gian ramp nên $\ge0.45$--$0.5$ s.
         \end{column}
     \end{columns}
 \end{frame}
