@@ -545,42 +545,72 @@
     \footnotetext{\tiny Nguồn: Marcucci et al., ``Motion Planning around Obstacles with Convex Optimization''}
 \end{frame}
 
-\begin{frame}{Nới lỏng lồi, Branch-and-Bound và Làm tròn}
+\begin{frame}{Nới lỏng phối cảnh và cận tối ưu gián tiếp}
     \small
 
-    \textbf{Convex relaxation:}
-    \begin{itemize}
-        \item Nới $y_e\in\{0,1\}$ thành $y_e\in[0,1]$; dùng phối cảnh/RLT để giữ cấu trúc
-              lồi~\cite{marcucci2023motion,marcucci2024shortest}.
-        \item Giải bài toán tối ưu lồi $\Rightarrow$ nghiệm relaxation là cận dưới: $C_{\mathrm{relax}}\le C_{\mathrm{opt}}$.
-    \end{itemize}
+    %===== ZONE 1: bilinear + relaxation | sandwich bound =====
+    \begin{columns}[T,onlytextwidth]
+        \begin{column}{0.44\textwidth}
+            \textbf{Nguồn gốc phi lồi:}
+            \begin{itemize}
+                \item $y_e\cdot\ell_e(x_u,x_v)$: bilinear trong $(y_e,\,x_\bullet)$
+            \end{itemize}
 
-    \textbf{Xử lý nghiệm phân số:}
-    \begin{itemize}
-        \item \textbf{Branch-and-Bound:} tách nhánh trên biến $y_e$ phân số;
-              cập nhật nghiệm khả thi tốt nhất từ relaxation $\Rightarrow$ cận trên và cận dưới khép lại $\Rightarrow$ giá trị tối ưu
-              $C_{\mathrm{opt}}$ trong dung sai cho trước.
-              % \item \textbf{Branch-and-Bound:} tách nhánh trên biến $y_e$ phân số;
-              %       cập nhật nghiệm khả thi tốt nhất hiện tại và cận dưới từ relaxation.
-              %       Khi cận trên và cận dưới khép lại $\Rightarrow$ giá trị tối ưu
-              %       $C_{\mathrm{opt}}$ trong dung sai cho trước.
+            \vspace{0.3em}
+            \textbf{Nới lỏng phối cảnh $\Rightarrow$ SOCP:}
+            \begin{itemize}
+                \item $y_e\in\{0,1\}\;\longrightarrow\; y_e\in[0,1]$
+                \item Chọn một chiến lược làm tròn:
+                    \begin{itemize}
+                        \item[-] làm tròn ngẫu nhiên;
+                        \item[-] làm tròn greedy.
+                    \end{itemize}
+            \end{itemize}
+        \end{column}
 
-        \item \textbf{Randomized rounding:} xem $y_e^\star$ như trọng số xác suất,
-              tìm đường đi bằng backtracking $\Rightarrow$ cố định path và giải lại
-              bài toán lồi nhỏ.
-    \end{itemize}
+        \begin{column}{0.02\textwidth}
+            \centering\rule{0.4pt}{0.52\textheight}
+        \end{column}
 
+        \begin{column}{0.52\textwidth}
+            \textbf{Đánh giá mức độ tối ưu:}
+            \[
+                C_{\mathrm{relax}}
+                \;\leq\;
+                \textcolor{red}{C_{\mathrm{opt}}}
+                \;\leq\;
+                C_{\mathrm{round}}
+            \]
+            \[
+                \underbrace{
+                    \delta_{\mathrm{opt}}
+                    :=
+                    \dfrac{C_{\mathrm{round}}-\textcolor{red}{C_{\mathrm{opt}}}}{\textcolor{red}{C_{\mathrm{opt}}}}
+                }_{\scriptstyle\text{không tính được: }\textcolor{red}{C_{\mathrm{opt}}}\text{ ẩn}}
+                \;\leq\;
+                \underbrace{
+                \dfrac{C_{\mathrm{round}}-C_{\mathrm{relax}}}{C_{\mathrm{relax}}}
+                }_{=:\;\delta_{\mathrm{relax}},\;\scriptstyle\text{tính được}}
+            \]
+        \end{column}
+    \end{columns}
+
+    \vspace{0.2em}
+    \rule{\textwidth}{0.4pt}
+    \vspace{0.1em}
+
+    %===== ZONE 2: indirect proof =====
+    \textbf{Đánh giá cận tối ưu gián tiếp}\;(không cần B\&B để biết $\textcolor{red}{C_{\mathrm{opt}}}$):
     \[
-        C_{\mathrm{relax}}\le C_{\mathrm{opt}}\le C_{\mathrm{round}},
-        \qquad
-        \delta_{\mathrm{opt}}
-        \le
-        \delta_{\mathrm{relax}}
-        :=
-        \frac{C_{\mathrm{round}}-C_{\mathrm{relax}}}{C_{\mathrm{relax}}}.
+        \delta_{\mathrm{relax}}\approx 0
+        \;\;\Longleftrightarrow\;\;
+        C_{\mathrm{round}}\approx C_{\mathrm{relax}}
+        \;\;\overset{\scriptscriptstyle C_{\mathrm{relax}}\leq\textcolor{red}{C_{\mathrm{opt}}}\leq C_{\mathrm{round}}}{\Longrightarrow}\;\;
+        \textcolor{red}{C_{\mathrm{opt}}}\approx C_{\mathrm{round}}
+        \;\;\Longrightarrow\;\;
+        \delta_{\mathrm{opt}}\approx 0.
     \]
-    \vspace{-0.5em}
-    {\scriptsize $C_{\mathrm{opt}}$ chỉ biết chính xác khi BB bảo đảm tối ưu toàn cục hoặc khi $C_{\mathrm{relax}}=C_{\mathrm{round}}$.}
+
 \end{frame}
 
 % \begin{frame}{Sinh quỹ đạo liên tục}
@@ -2053,7 +2083,7 @@
     \begin{figure}
         \centering
         \includegraphics[width=0.6\linewidth]{./imgs/smoothness.png}
-        \caption{Minh họa các mức độ độ trơn $C^0$, $C^1$}
+        \caption{Minh họa các mức độ độ trơn $C^0$, $C^1$, $C^2$ và $C^3$.}
     \end{figure}
 \end{frame}
 
