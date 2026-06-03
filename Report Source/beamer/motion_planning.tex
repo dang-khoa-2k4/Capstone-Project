@@ -699,7 +699,7 @@
 \begin{frame}{Phương pháp 2: Kết hợp GCS với Direct Multiple Shooting (GCS-DMS)}
     \small
 
-    Hệ động lực học:\quad $\dot{x}(t)=f\bigl(x(t),u(t)\bigr)$,\quad $t\in[0,T]$
+    Hệ động học:\quad $\dot{x}(t)=f\bigl(x(t),u(t)\bigr)$,\quad $t\in[0,T]$
 
     \vspace{0.4em}
 
@@ -1551,7 +1551,7 @@
             \footnotesize
             \begin{itemize}
                 \setlength\itemsep{0.12em}
-                \item \textbf{Defect} $\sim 10^{-14}$: sai số động lực học trong mỗi đoạn shooting
+                \item \textbf{Defect} $\sim 10^{-14}$: sai số động học trong mỗi đoạn shooting
                 \item \textbf{Gap nối} $\sim 10^{-9}$: sai lệch trạng thái giữa hai vùng liên tiếp
                 \item \textbf{Vi phạm an toàn} $\sim 10^{-8}$: mức vượt ràng buộc tránh vật cản
                 \item \textbf{Chuỗi vùng kích hoạt} ảnh hưởng trực tiếp đến nghiệm DMS hơn tổng số vùng phân hoạch
@@ -1725,7 +1725,7 @@
         \renewcommand{\arraystretch}{1.05}
         \begin{tabular}{@{}lcccc@{}}
             \toprule
-                       & \textbf{Length} & \textbf{Runtime (ms)} & \textbf{Smooth} & \textbf{Std runtime} \\
+                       & \textbf{Length} & \textbf{Runtime (ms)} & \textbf{Acc. angle} & \textbf{Std runtime} \\
             \midrule
             GCS-Linear & \textbf{54.71}  & 2{,}847               & \textbf{22.64}  & $0$                  \\
             GCS-Bézier & 65.84           & 95{,}180              & 33.63           & $0$                  \\
@@ -1808,11 +1808,11 @@
             \vspace{0.4em}
             \footnotesize \textbf{10/10 seed} thành công với:
             \begin{itemize}\itemsep0pt
-                \item Sai số động lực học nội đoạn (Defect) $\sim 10^{-10}$
+                \item Sai số động học nội đoạn (Defect) $\sim 10^{-10}$
                 \item Sai lệch giữa hai đoạn liên tiếp (Gap nối) $\sim 10^{-9}$
                 \item Vi phạm an toàn (mức vượt ràng buộc tránh vật cản) $\sim 10^{-8}$
             \end{itemize}
-            $\Rightarrow$ \textbf{nghiệm khả thi động lực học} trên nhiều cấu trúc mê cung.
+            $\Rightarrow$ \textbf{nghiệm khả thi động học} trên nhiều cấu trúc mê cung.
         \end{column}
     \end{columns}
 \end{frame}
@@ -2006,7 +2006,7 @@
                 \item Hiểu rõ và tái thực hiện \textbf{cấu trúc GCS} vào bài toán hoạch định chuyển
                       động trong không gian 2D.
                 \item Đã đề xuất được một cách thiết lập bài toán điều khiển tối ưu sử dụng mô hình GCS
-                      để giải quyết bài toán hoạch định chuyển động với động lực phi tuyến.
+                      để giải quyết bài toán hoạch định chuyển động với động phi tuyến.
                 \item \textbf{Đối chiếu:} Các giải thuật phân hoạch và kiểm chứng độ tối ưu.
             \end{itemize}
         \end{column}
