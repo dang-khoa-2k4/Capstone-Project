@@ -1713,7 +1713,7 @@
                 \setlength\itemsep{0.5em}
                 \item \textbf{Độ dài:} Bézier $+20.3\%$, RRT* $+47.6\%$, RRT $+50.7\%$ so với GCS-Linear; \textit{rewiring} chỉ rút $\sim\!2\%$.
                 \item \textbf{Thời gian:} RRT nhanh nhất ($1.7$ s) nhưng gấp khúc; GCS-Linear $2.85$ s; GCS-Bézier $95$ s do thêm $C^2$, thời gian, $|v|\!\le\!1$.
-                \item \textbf{Độ trơn:} GCS-Linear $22.6 \ll$ RRT/RRT* $\sim\!60$ kể cả sau shortcut $\Rightarrow$ sampling vẫn gấp khúc.
+                \item \textbf{Tổng góc đổi hướng:} GCS-Linear $22.6 \ll$ RRT/RRT* $\sim\!60$ kể cả sau shortcut $\Rightarrow$ sampling vẫn gấp khúc.
             \end{itemize}
         \end{column}
     \end{columns}
@@ -1725,7 +1725,7 @@
         \renewcommand{\arraystretch}{1.05}
         \begin{tabular}{@{}lcccc@{}}
             \toprule
-                       & \textbf{Length} & \textbf{Runtime (ms)} & \textbf{Smooth} & \textbf{Std runtime} \\
+                       & \textbf{Length} & \textbf{Runtime (ms)} & \textbf{Accum. turn} & \textbf{Std runtime} \\
             \midrule
             GCS-Linear & \textbf{54.71}  & 2{,}847               & \textbf{22.64}  & $0$                  \\
             GCS-Bézier & 65.84           & 95{,}180              & 33.63           & $0$                  \\
@@ -1820,7 +1820,7 @@
 % =====================================================================
 % TN4 - Slide 3: Velocity profile insight
 % =====================================================================
-\begin{frame}{TN4 - Biểu đồ vận tốc: tự động giảm tốc tại nút giao và hành lang hẹp}
+\begin{frame}{TN4 - Biểu đồ vận tốc: tự độngStrong at researching and implementing ML/DL pipelines (especially Computer Vision) and mathematical foundations (especially Probability & Statistics) giảm tốc tại nút giao và hành lang hẹp}
     \begin{columns}[T,onlytextwidth]
         \begin{column}{0.58\textwidth}
             \centering
