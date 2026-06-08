@@ -1542,7 +1542,7 @@
                 \textbf{PP} & \textbf{Vùng} & \textbf{K.hoạt} & \textbf{Cost}  & \textbf{Solve} \\
                 \midrule
                 Manual      & 12            & 7               & \textbf{47.35} & \textbf{17.38} \\
-                ACD         & 15            & 9               & 51.55          & 34.23          \\
+                ACD         & 15            & 9               & 51.55          & 24.23          \\
                 VCC         & 33            & 7               & 76.26          & 26.36          \\
                 \bottomrule
             \end{tabular}
@@ -1713,7 +1713,8 @@
                 \setlength\itemsep{0.5em}
                 \item \textbf{Độ dài:} Bézier $+20.3\%$, RRT* $+47.6\%$, RRT $+50.7\%$ so với GCS-Linear; \textit{rewiring} chỉ rút $\sim\!2\%$.
                 \item \textbf{Thời gian:} RRT nhanh nhất ($1.7$ s) nhưng gấp khúc; GCS-Linear $2.85$ s; GCS-Bézier $95$ s do thêm $C^2$, thời gian, $|v|\!\le\!1$.
-                \item \textbf{Tổng góc đổi hướng:} GCS-Linear $22.6 \ll$ RRT/RRT* $\sim\!60$ kể cả sau shortcut $\Rightarrow$ sampling vẫn gấp khúc.
+                \item 
+\textbf{Tổng góc đổi hướng:} GCS-Linear $22.6 \ll$ RRT/RRT* $\sim\!60$ kể cả sau shortcut $\Rightarrow$ sampling vẫn gấp khúc.
             \end{itemize}
         \end{column}
     \end{columns}
@@ -1725,7 +1726,6 @@
         \renewcommand{\arraystretch}{1.05}
         \begin{tabular}{@{}lcccc@{}}
             \toprule
-<<<<<<< HEAD
                        & \textbf{Length} & \textbf{Runtime (ms)} & \textbf{Accum. turn} & \textbf{Std runtime} \\
             \midrule
             GCS-Linear & \textbf{54.71}  & 2{,}847               & \textbf{22.64}  & $0$                  \\
@@ -1821,7 +1821,7 @@
 % =====================================================================
 % TN4 - Slide 3: Velocity profile insight
 % =====================================================================
-\begin{frame}{TN4 - Biểu đồ vận tốc: tự độngStrong at researching and implementing ML/DL pipelines (especially Computer Vision) and mathematical foundations (especially Probability & Statistics) giảm tốc tại nút giao và hành lang hẹp}
+\begin{frame}{TN4 - Biểu đồ vận tốc: tự động giảm tốc tại nút giao và hành lang hẹp}
     \begin{columns}[T,onlytextwidth]
         \begin{column}{0.58\textwidth}
             \centering
@@ -2007,7 +2007,7 @@
                 \item Hiểu rõ và tái thực hiện \textbf{cấu trúc GCS} vào bài toán hoạch định chuyển
                       động trong không gian 2D.
                 \item Đã đề xuất được một cách thiết lập bài toán điều khiển tối ưu sử dụng mô hình GCS
-                      để giải quyết bài toán hoạch định chuyển động với động phi tuyến.
+                      để giải quyết bài toán hoạch định chuyển động với động học phi tuyến.
                 \item \textbf{Đối chiếu:} Các giải thuật phân hoạch và kiểm chứng độ tối ưu.
             \end{itemize}
         \end{column}
@@ -2219,6 +2219,417 @@
               ($C^1, C^2, \ldots$) \cite{marcucci2023motion}
     \end{itemize}
 \end{frame}
+
+
+\begin{frame}{Phân loại Phương pháp}
+    \begin{columns}[T]
+        \column{0.48\textwidth}
+        \textbf{Exact Convex Decomposition (ECD)}
+        \begin{itemize}
+            \item Thành phần hoàn toàn lồi
+            \item Tái tạo chính xác
+            \item NP-hard
+            \item Số lượng vùng lớn
+            \item Chủ yếu có trong lý thuyết
+        \end{itemize}
+
+        \column{0.48\textwidth}
+        \textbf{Approximate Convex Decomposition (ACD)}
+        \begin{itemize}
+            \item Cho phép gần lồi với dung sai $\tau$ hoặc độ bao phủ không gian mong muốn
+            \item Hiệu quả tính toán cao
+            \item Giảm số lượng vùng
+            \item Kiểm soát mức chi tiết
+            \item Ứng dụng thực tế
+        \end{itemize}
+    \end{columns}
+\end{frame}
+
+
+\begin{frame}{Thuật toán ACD - Các Khái niệm Cơ bản}
+
+    \begin{block}{Định nghĩa các thành phần}
+        \begin{itemize}
+            \item \textbf{Vỏ Lồi ($H_P$):} Tập lồi nhỏ nhất chứa $P$
+                  \[
+                      P \text{ lồi} \Leftrightarrow P = H_P
+                  \]
+
+            \item \textbf{Khía (Notches):} Đỉnh không trên $H_P$, góc trong $> 180^\circ$
+
+            \item \textbf{Cầu (Bridges):} Cạnh của $\partial H_P$ nối hai đỉnh không liền kề
+                  \[
+                      \text{BRIDGES}(P) = \partial H_P \setminus \partial P
+                  \]
+
+            \item \textbf{Túi (Pockets):} Chuỗi cạnh không thuộc $\partial H_P$
+                  \[
+                      \text{POCKETS}(P) = \partial P \setminus \partial H_P
+                  \]
+        \end{itemize}
+    \end{block}
+
+\end{frame}
+
+\begin{frame}{Minh họa Các Khái niệm}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth]{./imgs/ACD-5.png}
+        \caption{\small Vỏ lồi, khía, cầu và túi trong đa giác không lồi}
+    \end{figure}
+\end{frame}
+
+\section{Phân hoạch Lồi Xấp xỉ (ACD)}
+
+\begin{frame}{Thuật toán ACD - Ý tưởng}
+
+    \textbf{Chiến lược chia để trị đệ quy:}
+    \begin{enumerate}
+        \item \textbf{Đo độ lõm:} Xác định đỉnh lõm có độ lõm lớn nhất
+        \item \textbf{Kiểm tra dung sai:} Nếu độ lõm $< \tau$, kết thúc
+        \item \textbf{Giải quyết đỉnh lõm:} Thêm đường cắt, chia đa giác
+        \item \textbf{Đệ quy:} Áp dụng cho các thành phần mới
+    \end{enumerate}
+
+    \vspace{1em}
+    \textbf{Độ phức tạp:} $O(n r^2)$, với $n$ là số đỉnh, $r$ là số đỉnh lõm
+
+\end{frame}
+
+\begin{frame}{Minh họa thuật toán}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\linewidth]{./imgs/ACD-1.png}
+        \caption{Quá trình đệ quy tiếp tục cho đến khi đạt đến giới hạn độ lõm đầu vào của người dùng $\tau$.}
+    \end{figure}
+\end{frame}
+
+\begin{frame}{Ví dụ về Giải quyết Độ lõm}
+    \vspace{0.5em}
+    \textbf{Các trường hợp xử lý:}
+    
+    \textbf{(a)} Gộp biên vào đa giác
+
+    \textbf{(b)} Tách đa giác thành hai
+
+    \textbf{(c)} Độ lõm thay đổi sau phân rã
+
+    \vspace{0.2cm}
+    Quá trình tiếp tục đến khi độ lõm $\leq \tau$
+
+     \centering
+    \includegraphics[width=0.7\textwidth]{./imgs/ACD-3.png}
+\end{frame}
+
+
+
+
+\begin{frame}{Các Thước đo Độ lõm}
+    \centering
+    \includegraphics[width=0.8\linewidth]{./imgs/ACD-2.png}
+
+    \vspace{0.5em}
+    \textbf{SL-Concavity:} Khoảng cách Euclid đến cầu nối (bridge).
+    \begin{itemize}
+        \item[\textcolor{teal}{+}] Nhanh
+        \item[\textcolor{red}{--}] Không đảm bảo tính đơn điệu
+    \end{itemize}
+
+\end{frame}
+
+\begin{frame}{Các Thước đo Độ lõm}
+    \centering
+    \includegraphics[width=0.7\textwidth]{./imgs/SP-Concavity.png}
+
+    \vspace{0.5em}
+    \textbf{SP-Concavity:} Đường đi ngắn nhất trong túi (pocket) đến cầu nối tương ứng.
+    \begin{itemize}
+        \item[\textcolor{red}{--}] Chậm hơn
+        \item[\textcolor{teal}{+}] Đảm bảo tính đơn điệu
+        \item[\textcolor{teal}{+}] Xử lý tất cả đặc điểm lõm quan trọng
+    \end{itemize}
+
+\end{frame}
+
+\begin{frame}{Các Thước đo Độ lõm}
+    \centering
+    \includegraphics[width=0.7\linewidth]{./imgs/ACD-6.png}
+    
+    \vspace{0.5em}
+    \textbf{H-Concavity:} Lai ghép SL và SP - Mặc định dùng SL, chuyển sang SP khi phát hiện không đơn điệu (kiểm tra: $n_\beta \cdot n_i < 0$).
+
+\end{frame}
+
+\section{IRIS Algorithm}
+
+\begin{frame}{IRIS - Ý tưởng Chính}
+    \begin{columns}[c]
+        \column{0.5\textwidth}
+        \textbf{IRIS:} Iterative Regional Inflation by Semidefinite Programming \\
+        \textbf{Câu hỏi cốt lõi:} Với điểm mầm (seed), vùng lồi lớn nhất là gì?
+
+        \vspace{1em}
+        \textbf{Quy trình lặp 4 bước:}
+        \begin{enumerate}
+            \item Khởi tạo hình cầu \underline{rất nhỏ} tại seed
+            \item Tìm siêu phẳng phân cách (QP)
+            \item Tìm ellipsoid nội tiếp cực đại (SDP)
+            \item Lặp lại đến hội tụ
+        \end{enumerate}
+
+        \vspace{0.5em}
+        \textbf{Output:} Một vùng lồi lớn nhất có thể từ seed point
+
+        \column{0.45\textwidth}
+        \includegraphics[width=\textwidth]{./imgs/iris_algo_overview.png}
+
+    \end{columns}
+\end{frame}
+
+\begin{frame}{IRIS Bước 2: Tìm Siêu phẳng Phân cách}
+    
+    \textbf{Mục tiêu:} Tìm siêu phẳng phân tách ellipsoid với obstacles
+    
+    \begin{columns}[c]
+        \column{0.5\textwidth}
+        \includegraphics[width=\textwidth]{./imgs/iris_algo_1.png}
+        
+        \column{0.5\textwidth}
+        \vspace{0.5em}
+        \textbf{Giải pháp:}
+        \begin{enumerate}
+            \item Bắt đầu từ obstacle gần ellipsoid nhất
+            \item Tìm điểm trên obstacle gần nhất
+            \item Tính siêu phẳng $a_j^\top x \geq b_j$
+            \item Kiểm tra tất cả obstacles khác $o_k$:
+            
+            Nếu $a_j^\top v \geq b_j$ $\forall v \in o_k$
+            
+            $\Rightarrow$ Loại $o_k$ (đã bị phân tách)
+            \item Lặp lại cho obstacles còn lại
+        \end{enumerate}
+
+        \vspace{0.3em}
+        {\small
+        \textbf{Ký hiệu:}
+        $o_j$: obstacle j \\
+        $v$: đỉnh của obstacle\\
+        $a_j, b_j$: tham số siêu phẳng
+        }
+    \end{columns}
+
+\end{frame}
+
+\begin{frame}{IRIS - Tìm obstacle Gần nhất}
+
+        \textbf{Biến đổi không gian:}
+        
+        \vspace{0.5em}
+        $\Rightarrow$ Biến đổi về không gian quả cầu đơn vị:
+        
+        \begin{itemize}
+            \item Ellipsoid: $\mathcal{E} = \{C\tilde{x} + d : \|\tilde{x}\|_2 \leq 1\}$
+            \item Quả cầu: $\tilde{\mathcal{E}} = \{\tilde{x} : \|\tilde{x}\| \leq 1\}$
+            \item Obstacle: $\tilde{o}_j = \text{ConvexHull}(\tilde{v}_{j,1}, \ldots, \tilde{v}_{j,m})$
+            \item Với $\tilde{v}_{j,k} = C^{-1}(v_{j,k} - d)$
+        \end{itemize}
+
+        Khi này khoảng cách đến ellipsoid tương đương với khoảng cách đến gốc tọa độ trong không gian biến đổi.
+        
+        \vspace{0.3em}
+        {\small
+        \textbf{Ký hiệu:}
+        $C$: ma trận xác định hình dạng ellipsoid,
+        $d$: tâm ellipsoid,
+        $v_{j,k}$: đỉnh thứ $k$ của obstacle $j$ trong không gian gốc,
+        $\tilde{v}_{j,k}$: đỉnh sau biến đổi
+        }
+\end{frame}
+
+\begin{frame}{IRIS - Bài toán QP cho Điểm Gần nhất}
+    
+    \begin{block}{QP Problem}
+        \small
+        Tìm điểm gần nhất đến gốc tọa độ trong không gian biến đổi:
+        \[
+            \begin{aligned}
+                \min_{\tilde{x}, w} \quad & \|\tilde{x}\|^2                \\
+                \text{s.t.} \quad         & [\tilde{v}_{j,1}, \tilde{v}_{j,2}, \ldots, \tilde{v}_{j,m}]w = \tilde{x} \\
+                                          & \sum_{i=1}^{m} w_i = 1 \\
+                                          & w_i \geq 0
+            \end{aligned}
+        \]
+        
+        $\tilde{x}$ là tổ hợp lồi của các đỉnh $\tilde{v}_{j,k}$ gần gốc nhất
+    \end{block}
+
+    \vspace{0.5em}
+    \textbf{Biến đổi ngược:} $x^* = C\tilde{x}^* + d$ là điểm gần ellipsoid nhất trên obstacle $o_j$
+
+    \vspace{0.3em}
+    {\small
+    \textbf{Ký hiệu:}
+    $\tilde{x}$: điểm cần tìm trong không gian biến đổi,
+    $w = [w_1, \ldots, w_m]$: hệ số tổ hợp lồi,
+    $\tilde{v}_{j,k}$: đỉnh thứ $k$ của obstacle $j$ sau biến đổi,
+    $m$: số đỉnh của obstacle
+    }
+
+    
+    
+\end{frame}
+
+\begin{frame}{IRIS - Tính Siêu phẳng Tiếp tuyến}
+    \begin{columns}[c]
+        \column{0.5\textwidth}
+        
+        % \textbf{Biểu diễn ngược của Ellipsoid:}
+        % \[
+        %     \mathcal{E} = \{x : (x-d)^\top C^{-1}C^{-\top}(x-d) \leq 1\}
+        % \]
+
+        \vspace{0.5em}
+        \begin{block}{Tính pháp tuyến}
+            \small
+            Gradient của hàm siêu phẳng tại $x^*$:
+            \[
+                a_j = \nabla_x[(x-d)^\top C^{-1}C^{-\top}(x-d)]|_{x^*}
+            \]
+            \[
+                = 2C^{-1}C^{-\top}(x^* - d)
+            \]
+            
+            Hệ số tự do:
+            \[
+                b_j = a_j^\top x^*
+            \]
+        \end{block}
+
+        \column{0.45\textwidth}
+        % \includegraphics[width=\textwidth]{./imgs/iris_2.png}
+        
+        \vspace{0.5em}
+        \textbf{Kết quả:}
+        
+        Siêu phẳng $a_j^\top x = b_j$ phân tách $\mathcal{E}$ khỏi $o_j$
+        
+        \vspace{0.3em}
+        Chọn chiều: $a_j^\top x \geq b_j$ $\forall x \in o_j$
+    \end{columns}
+\end{frame}
+
+    
+\begin{frame}{IRIS Bước 3: Ellipsoid Nội tiếp Cực đại}
+    \begin{columns}[c]
+        \column{0.45\textwidth}
+        \includegraphics[width=\textwidth]{./imgs/iris_2.png}
+
+        \column{0.5\textwidth}
+        
+        \textbf{Đầu vào:} Tập siêu phẳng $\{a_i^\top x \geq b_i\}_{i=1}^m$
+
+        \begin{block}{SDP Problem}
+            \small
+            \[
+                \begin{aligned}
+                    \max_{C,d} \quad  & \log \det C                            \\
+                    \text{s.t.} \quad & \|a_i^\top C\|_2 + a_i^\top d \leq b_i \\
+                                      & C \succeq 0
+                \end{aligned}
+            \]
+
+            Tối đa hóa thể tích ellipsoid nội tiếp đa diện
+        \end{block}
+
+        \vspace{0.5em}
+        \textbf{Ràng buộc:}
+        
+        $\|a_i^\top C\|_2 + a_i^\top d \leq b_i$ đảm bảo ellipsoid nằm trong nửa không gian $a_i^\top x \leq b_i$
+    \end{columns}
+\end{frame}
+
+
+\begin{frame}{IRIS - Phân tích Độ phức tạp}
+
+    \textbf{Độ phức tạp mỗi vòng lặp:}
+    
+    \vspace{0.5em}
+    \begin{block}{SeparatingHyperplanes: $O(m \cdot n \cdot k)$}
+        \small
+        \begin{itemize}
+            \item $m$: số lượng obstacles
+            \item $n$: số đỉnh trung bình mỗi obstacle
+            \item $k$ (10-20): số vòng lặp QP nội bộ để tìm điểm gần nhất (CVXPY solver phương thức nội điểm)
+        \end{itemize}
+    \end{block}
+
+    \vspace{0.3em}
+    \begin{block}{InscribedEllipsoid: $O(h^3)$}
+        \small
+        \begin{itemize}
+            \item SDP với $h$ ràng buộc siêu phẳng
+            \item Interior point method: $O(h^3)$ mỗi vòng lặp
+        \end{itemize}
+    \end{block}
+
+\end{frame}
+
+\begin{frame}{IRIS - Độ phức tạp Tổng thể}
+
+    \begin{block}{Công thức tổng quát}
+        \[
+            O(T \cdot (m \cdot n \cdot k + h^3))
+        \]
+        
+        \small
+        Với $T$: số vòng lặp IRIS (thường 4-8 vòng)
+    \end{block}
+
+    \vspace{1em}
+    \textbf{Giải thích các thành phần:}
+    \begin{itemize}
+        \item \textbf{$T$:} Số vòng lặp IRIS - thường hội tụ nhanh (4 - 8)
+        \item \textbf{$m \cdot n \cdot k$:} Chi phí tìm siêu phẳng phân cách
+        \item \textbf{$h^3$:} Chi phí giải SDP cho ellipsoid nội tiếp cực đại
+    \end{itemize}
+
+    \vspace{0.5em}
+    \textbf{Nhận xét:}
+    \begin{itemize}
+        \item Độ phức tạp tăng tuyến tính theo số obstacles ($m$)
+        \item Phần SDP ($h^3$) thường là cố định do số lượng siêu phẳng không thay đổi nhiều
+        \item Hội tụ nhanh ($T$ nhỏ) làm thuật toán khả thi trong thực tế
+    \end{itemize}
+
+\end{frame}
+
+\begin{frame}{IRIS - Độ phức tạp Thực nghiệm}
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.5\textwidth]{./imgs/time-iris.png}
+        \caption{\small Thời gian thực thi IRIS tăng tuyến tính với số lượng obstacles.}
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}{IRIS - Đặc tính}
+
+    \textbf{Thuộc tính chính:}
+    \begin{itemize}
+        \item \textbf{Loại:} Phương pháp xấp xỉ
+        \item \textbf{Hội tụ:} 4-8 vòng lặp
+        % \item \textbf{Độ phức tạp:} Tuyến tính theo số obstacles
+    \end{itemize}
+
+    \vspace{1em}
+    \textbf{Xử lý obstacles không lồi:}
+    \begin{itemize}
+        \item \textbf{Work space:} Bao lồi hoặc phân hoạch trước
+        \item \textbf{Configuration space:} IRIS-NP, C-IRIS
+    \end{itemize}
+
+\end{frame}
+
 
 \begin{frame}{VCC - Giải quyết Vấn đề Seeding}
     \textbf{Quy trình 4 bước:}
@@ -2722,5 +3133,54 @@
     \end{columns}
 
 \end{frame}
+
+
+% \begin{frame}{GCS-Bézier: ý tưởng triển khai tổng quát}
+% \scriptsize
+% \begin{columns}[T,onlytextwidth]
+%   \begin{column}{0.49\textwidth}
+%     \textbf{1. Xây dựng đồ thị}
+%     \vspace{-0.35em}
+%     \begin{itemize}
+%       \setlength\itemsep{0.05em}
+%       \item Chia không gian an toàn thành các vùng lồi.
+%       \item Mỗi vùng là một nút; cạnh nối các vùng giao nhau hoặc tiếp giáp.
+%       \item Start/goal nối vào vùng chứa chúng; mỗi nút mang tham số Bézier và thời gian.
+%     \end{itemize}
+
+%     \vspace{0.1em}
+%     \textbf{2. Đặt ràng buộc}
+%     \vspace{-0.35em}
+%     \begin{itemize}
+%       \setlength\itemsep{0.05em}
+%       \item Control points của Bézier nằm trong vùng lồi tương ứng.
+%       \item Hai đoạn qua một cạnh phải nối liên tục tới bậc mong muốn.
+%       \item Thời gian tăng đơn điệu; vận tốc và điều kiện biên bị giới hạn.
+%     \end{itemize}
+%   \end{column}
+
+%   \begin{column}{0.49\textwidth}
+%     \textbf{3. Xây dựng bài toán}
+%     \vspace{-0.35em}
+%     \begin{itemize}
+%       \setlength\itemsep{0.05em}
+%       \item Tối ưu đồng thời chuỗi vùng cần đi qua và quỹ đạo trong từng vùng.
+%       \item Objective có thể là giảm thời gian, độ dài, năng lượng hoặc tăng độ mượt.
+%       \item GCS biến bài toán planning thành tối ưu trên graph của các tập lồi.
+%     \end{itemize}
+
+%     \vspace{0.1em}
+%     \textbf{4. Solver và hậu xử lý}
+%     \vspace{-0.35em}
+%     \begin{itemize}
+%       \setlength\itemsep{0.05em}
+%       \item Solver chọn path trên đồ thị cùng các biến quỹ đạo liên tục.
+%       \item Có thể giải trực tiếp hoặc giải relaxation rồi làm tròn để lấy path.
+%       \item Ghép các đoạn Bézier thành trajectory cuối và sample để visualize.
+%     \end{itemize}
+%   \end{column}
+% \end{columns}
+
+% \end{frame}
 
 \end{document}
